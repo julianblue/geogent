@@ -1,0 +1,90 @@
+# Docker Compose for local development of the full geogent stack.
+#
+# Usage:
+#   cp .env.example .env   # fill in LLM keys
+#   docker compose up --build
+
+name: geogent
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: geogent-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-geogent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geogent}
+      POSTGRES_DB: ${POSTGRES_DB:-geogent}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./scripts/db/init-postgis.sql:/docker-entrypoint-initdb.d/10-init-postgis.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-geogent} -d ${POSTGRES_DB:-geogent}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: geogent-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-geogent}:${POSTGRES_PASSWORD:-geogent}@db:5432/${POSTGRES_DB:-geogent}
+      DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER:-geogent}:${POSTGRES_PASSWORD:-geogent}@db:5432/${POSTGRES_DB:-geogent}
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/backend:/app
+    command: >
+      sh -c "uv run alembic upgrade head &&
+             uv run uvicorn geogent_backend.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  agent:
+    build:
+      context: ./apps/agent
+      dockerfile: Dockerfile
+    container_name: geogent-agent
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:8000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AGENT_MODEL: ${AGENT_MODEL:-claude-sonnet-4-6}
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
+      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-geogent}
+    ports:
+      - "2024:2024"
+    volumes:
+      - ./apps/agent:/app
+    command: uv run langgraph dev --host 0.0.0.0 --port 2024
+
+  ui:
+    build:
+      context: ./apps/ui
+      dockerfile: Dockerfile
+    container_name: geogent-ui
+    depends_on:
+      - backend
+      - agent
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      LANGGRAPH_URL: http://agent:2024
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/ui:/app
+      - /app/node_modules
+      - /app/.next
+    command: pnpm dev
+
+volumes:
+  db-data:
