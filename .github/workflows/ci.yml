@@ -52,15 +52,7 @@ jobs:
         continue-on-error: true
 
       - name: Pytest
-        run: uv run pytest --cov --cov-report=xml --cov-report=term
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.app }}
-          path: apps/${{ matrix.app }}/coverage.xml
-          if-no-files-found: ignore
+        run: uv run pytest
 
   migrations:
     name: migrations smoke (backend)
@@ -111,6 +103,8 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/ui/package.json
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
