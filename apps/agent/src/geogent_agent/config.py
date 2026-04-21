@@ -15,6 +15,18 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
 
+    # Selects the default architecture when code needs a single choice
+    # (e.g. a CLI smoke test). Graphs registered in langgraph.json are
+    # always available independently of this value.
+    agent_architecture: str = Field(default="langgraph_react")
+
+    # Amazon Bedrock. Credentials are resolved via the standard boto3
+    # chain (env vars, shared config, instance/task role) — not stored here.
+    bedrock_model_id: str = Field(
+        default="us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    )
+    aws_region: str = Field(default="us-east-1")
+
     backend_url: str = Field(default="http://localhost:8000")
 
     langsmith_api_key: str | None = None
