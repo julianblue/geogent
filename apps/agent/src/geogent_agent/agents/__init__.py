@@ -22,9 +22,7 @@ def build_agent_graph(name: str) -> Any:
         builder = _REGISTRY[name]
     except KeyError as exc:
         available = ", ".join(sorted(_REGISTRY)) or "(none)"
-        raise ValueError(
-            f"Unknown agent architecture {name!r}. Available: {available}"
-        ) from exc
+        raise ValueError(f"Unknown agent architecture {name!r}. Available: {available}") from exc
     return builder()
 
 

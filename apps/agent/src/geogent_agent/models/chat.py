@@ -18,8 +18,10 @@ def get_chat_model(model: str | None = None) -> BaseChatModel:
     settings = get_settings()
     name = model or settings.agent_model
 
-    if name.startswith("bedrock:") or name.startswith("anthropic.") or name.startswith(
-        "us.anthropic."
+    if (
+        name.startswith("bedrock:")
+        or name.startswith("anthropic.")
+        or name.startswith("us.anthropic.")
     ):
         from langchain_aws import ChatBedrockConverse
 
