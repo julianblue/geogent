@@ -1,7 +1,8 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "geogent": "./src/geogent_agent/graph.py:graph"
+    "geogent": "./src/geogent_agent/graph.py:graph",
+    "geogent-classic": "./src/geogent_agent/classic_graph.py:graph"
   },
   "env": ".env"
 }
