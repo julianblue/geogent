@@ -23,6 +23,5 @@
       "component": "geogent-ui",
       "changelog-path": "CHANGELOG.md"
     }
-  },
-  "plugins": ["sentence-case"]
+  }
 }
