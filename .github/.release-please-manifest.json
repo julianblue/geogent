@@ -1,0 +1,5 @@
+{
+  "apps/backend": "0.1.0",
+  "apps/agent": "0.1.0",
+  "apps/ui": "0.1.0"
+}
