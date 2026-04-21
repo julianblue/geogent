@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-component-in-tag": true,
+  "separate-pull-requests": false,
+  "pull-request-title-pattern": "chore: release ${component} ${version}",
+  "packages": {
+    "apps/backend": {
+      "release-type": "python",
+      "package-name": "geogent-backend",
+      "component": "geogent-backend",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "apps/agent": {
+      "release-type": "python",
+      "package-name": "geogent-agent",
+      "component": "geogent-agent",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "apps/ui": {
+      "release-type": "node",
+      "package-name": "geogent-ui",
+      "component": "geogent-ui",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
