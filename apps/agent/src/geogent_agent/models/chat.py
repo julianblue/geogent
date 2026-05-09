@@ -1,6 +1,21 @@
+import os
+
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from geogent_agent.config import get_settings
+
+
+def _resolve_model_name() -> str:
+    """Resolve the model name to use when none is passed explicitly.
+
+    Falls back to ``BEDROCK_MODEL_ID`` when the user has set it but not
+    ``AGENT_MODEL`` — this preserves the previous classic-agent behavior for
+    Bedrock-only setups, where ``BEDROCK_MODEL_ID`` was the only knob.
+    """
+    settings = get_settings()
+    if os.getenv("AGENT_MODEL") is None and os.getenv("BEDROCK_MODEL_ID") is not None:
+        return settings.bedrock_model_id
+    return settings.agent_model
 
 
 def get_chat_model(model: str | None = None) -> BaseChatModel:
@@ -16,7 +31,7 @@ def get_chat_model(model: str | None = None) -> BaseChatModel:
     standard boto3 credential chain.
     """
     settings = get_settings()
-    name = model or settings.agent_model
+    name = model or _resolve_model_name()
 
     if (
         name.startswith("bedrock:")

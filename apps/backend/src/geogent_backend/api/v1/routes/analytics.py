@@ -16,6 +16,7 @@ router = APIRouter()
 class BufferRequest(BaseModel):
     geometry_wkt: str = Field(
         ...,
+        min_length=1,
         description="Input geometry as WKT (e.g. 'POINT(-122.42 37.77)').",
     )
     distance_m: float = Field(..., gt=0, description="Buffer distance in meters.")
@@ -32,8 +33,8 @@ async def buffer(payload: BufferRequest, session: DbSession) -> BufferResponse:
 
 
 class DistanceRequest(BaseModel):
-    a_wkt: str = Field(..., description="First geometry as WKT (SRID 4326).")
-    b_wkt: str = Field(..., description="Second geometry as WKT (SRID 4326).")
+    a_wkt: str = Field(..., min_length=1, description="First geometry as WKT (SRID 4326).")
+    b_wkt: str = Field(..., min_length=1, description="Second geometry as WKT (SRID 4326).")
 
 
 class DistanceResponse(BaseModel):
@@ -49,6 +50,7 @@ async def distance(payload: DistanceRequest, session: DbSession) -> DistanceResp
 class AreaRequest(BaseModel):
     geometry_wkt: str = Field(
         ...,
+        min_length=1,
         description="Polygon or multipolygon as WKT (SRID 4326).",
     )
 
@@ -64,8 +66,8 @@ async def area(payload: AreaRequest, session: DbSession) -> AreaResponse:
 
 
 class IntersectsRequest(BaseModel):
-    a_wkt: str = Field(..., description="First geometry as WKT (SRID 4326).")
-    b_wkt: str = Field(..., description="Second geometry as WKT (SRID 4326).")
+    a_wkt: str = Field(..., min_length=1, description="First geometry as WKT (SRID 4326).")
+    b_wkt: str = Field(..., min_length=1, description="Second geometry as WKT (SRID 4326).")
 
 
 class IntersectsResponse(BaseModel):
@@ -81,6 +83,7 @@ async def intersects(payload: IntersectsRequest, session: DbSession) -> Intersec
 class FeaturesWithinRequest(BaseModel):
     geometry_wkt: str = Field(
         ...,
+        min_length=1,
         description="Search area as WKT (SRID 4326). Features fully inside are returned.",
     )
 

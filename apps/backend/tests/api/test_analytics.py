@@ -111,3 +111,47 @@ async def test_features_within_returns_refs(
     )
     assert r.status_code == 200
     assert r.json() == {"features": [{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]}
+
+
+# --- input validation ----------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_empty_wkt_rejected_at_schema_layer(client: AsyncClient) -> None:
+    """Empty WKT strings fail Pydantic min_length=1 → 422 before reaching the DB."""
+    r = await client.post(
+        "/api/v1/analytics/buffer",
+        json={"geometry_wkt": "", "distance_m": 100.0},
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_invalid_wkt_returns_400(client: AsyncClient) -> None:
+    """Malformed WKT raises GeometryValidationError → 400, not a 500 from PostGIS."""
+    r = await client.post(
+        "/api/v1/analytics/buffer",
+        json={"geometry_wkt": "NOT A WKT", "distance_m": 100.0},
+    )
+    assert r.status_code == 400
+    assert "Invalid WKT" in r.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_area_of_rejects_non_polygon(client: AsyncClient) -> None:
+    """A Point has no area; the API should refuse rather than silently returning 0.0."""
+    r = await client.post(
+        "/api/v1/analytics/area",
+        json={"geometry_wkt": "POINT(0 0)"},
+    )
+    assert r.status_code == 400
+    assert "Polygon" in r.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_distance_invalid_wkt_returns_400(client: AsyncClient) -> None:
+    r = await client.post(
+        "/api/v1/analytics/distance",
+        json={"a_wkt": "POINT(0 0)", "b_wkt": "garbage"},
+    )
+    assert r.status_code == 400

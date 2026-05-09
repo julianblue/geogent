@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from geogent_backend.api.v1.router import api_router
 from geogent_backend.config import get_settings
 from geogent_backend.core.logging import configure_logging
+from geogent_backend.geo.operations import GeometryValidationError
 
 
 @asynccontextmanager
@@ -31,6 +33,13 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router, prefix="/api/v1")
+
+    @app.exception_handler(GeometryValidationError)
+    async def _geometry_validation_handler(
+        _request: Request, exc: GeometryValidationError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=400, content={"detail": str(exc)})
+
     return app
 
 

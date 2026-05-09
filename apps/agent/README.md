@@ -82,3 +82,7 @@ come from the **standard boto3 chain** — `AWS_ACCESS_KEY_ID` /
 `AWS_SECRET_ACCESS_KEY` / `AWS_SESSION_TOKEN` env vars,
 `~/.aws/credentials`, or an instance/task IAM role. Region is controlled by
 `AWS_REGION` (default `us-east-1`).
+
+For backward compatibility, if `BEDROCK_MODEL_ID` is set but `AGENT_MODEL`
+is not, the model factory falls back to `BEDROCK_MODEL_ID` instead of the
+default Anthropic-API model. New configurations should set `AGENT_MODEL`.
