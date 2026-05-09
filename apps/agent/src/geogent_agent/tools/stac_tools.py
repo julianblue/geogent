@@ -6,6 +6,7 @@ dependency. The default endpoint is Earth Search v1 hosted by Element 84,
 which exposes Sentinel-1/-2, Landsat, NAIP, and global DEMs.
 """
 
+import json
 from typing import Any
 
 import httpx
@@ -13,6 +14,22 @@ from langchain_core.tools import tool
 
 DEFAULT_STAC_API = "https://earth-search.aws.element84.com/v1"
 USER_AGENT = "geogent-agent/0.1 (https://github.com/julianblue/geogent)"
+
+# Properties small enough to keep in trimmed search results so the agent can
+# reason about resolution, sensor, projection without an extra get_item call.
+_INTERESTING_PROPS = frozenset(
+    {
+        "datetime",
+        "start_datetime",
+        "end_datetime",
+        "eo:cloud_cover",
+        "platform",
+        "constellation",
+        "instruments",
+        "gsd",
+        "proj:epsg",
+    }
+)
 
 
 def _stac_client(api_url: str | None) -> httpx.AsyncClient:
@@ -44,19 +61,41 @@ def _trim_item(item: dict) -> dict:
     ``stac_get_item`` to retrieve them for a chosen item.
     """
     props = item.get("properties") or {}
-    interesting_props = {
-        k: v
-        for k, v in props.items()
-        if k in {"datetime", "start_datetime", "end_datetime", "eo:cloud_cover", "platform"}
-    }
+    interesting_props = {k: v for k, v in props.items() if k in _INTERESTING_PROPS}
     return {
         "id": item.get("id"),
         "collection": item.get("collection"),
-        "datetime": props.get("datetime"),
         "bbox": item.get("bbox"),
         "properties": interesting_props,
         "asset_keys": sorted((item.get("assets") or {}).keys()),
     }
+
+
+def _coerce_geojson(value: Any) -> dict | None:
+    """Tolerate string-encoded GeoJSON from LLM tool-call serializers.
+
+    Some providers (notably stricter Bedrock paths) occasionally emit a
+    JSON string instead of a nested object. Decode if that happens; pass
+    dicts through; reject anything else with a clear error.
+    """
+    if value is None or isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        return json.loads(value)
+    raise TypeError(
+        f"intersects must be a GeoJSON object or JSON string, got {type(value).__name__}"
+    )
+
+
+def _coerce_bbox(value: Any) -> list[float] | None:
+    """Tolerate string-encoded bbox arrays from LLM tool-call serializers."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = json.loads(value)
+    if not isinstance(value, list | tuple):
+        raise TypeError(f"bbox must be a list of floats or JSON string, got {type(value).__name__}")
+    return [float(x) for x in value]
 
 
 @tool
@@ -82,9 +121,9 @@ async def stac_list_collections(api_url: str | None = None) -> list[dict]:
 @tool
 async def stac_search(
     collections: list[str] | None = None,
-    bbox: list[float] | None = None,
+    bbox: list[float] | str | None = None,
     datetime: str | None = None,
-    intersects: dict | None = None,
+    intersects: dict | str | None = None,
     limit: int = 10,
     api_url: str | None = None,
 ) -> list[dict]:
@@ -94,20 +133,24 @@ async def stac_search(
         collections: STAC collection IDs to search (e.g. ``["sentinel-2-l2a"]``).
             Use ``stac_list_collections`` to discover available IDs.
         bbox: Bounding box ``[west, south, east, north]`` in WGS84 degrees.
-            Mutually exclusive with ``intersects``; if both are passed,
-            ``intersects`` wins and ``bbox`` is dropped.
+            A JSON-string-encoded array is also accepted (some tool-call
+            serializers stringify nested values). Mutually exclusive with
+            ``intersects``; if both are passed, ``intersects`` wins.
         datetime: ISO 8601 instant or interval. Examples: ``"2024-07-01"``,
             ``"2024-07-01/2024-07-31"``, ``"2024-07-01/.."`` for open-ended.
         intersects: GeoJSON geometry dict (Point, Polygon, etc.) the
-            returned items must intersect.
+            returned items must intersect. JSON-string form also accepted.
         limit: Max items to return from the first page (no pagination
             follow-through). Default 10.
         api_url: Root URL of the STAC API. Defaults to Earth Search v1.
 
     Returns:
-        Trimmed item dicts: ``{id, collection, datetime, bbox, properties, asset_keys}``.
+        Trimmed item dicts: ``{id, collection, bbox, properties, asset_keys}``.
         Use ``stac_get_item`` to fetch the full item with asset hrefs.
     """
+    intersects = _coerce_geojson(intersects)
+    bbox = _coerce_bbox(bbox)
+
     payload: dict[str, Any] = {"limit": limit}
     if collections:
         payload["collections"] = collections

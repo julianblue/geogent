@@ -136,6 +136,11 @@ async def test_search_trims_items(monkeypatch: pytest.MonkeyPatch) -> None:
                             "datetime": "2024-07-15T18:55:21Z",
                             "eo:cloud_cover": 12.3,
                             "platform": "sentinel-2a",
+                            "constellation": "sentinel-2",
+                            "instruments": ["msi"],
+                            "gsd": 10,
+                            "proj:epsg": 32610,
+                            "view:sun_elevation": 60.5,
                             "ignore_me": "noise",
                         },
                         "assets": {
@@ -155,16 +160,48 @@ async def test_search_trims_items(monkeypatch: pytest.MonkeyPatch) -> None:
         {
             "id": "S2A_T10SEG_20240715",
             "collection": "sentinel-2-l2a",
-            "datetime": "2024-07-15T18:55:21Z",
             "bbox": [-122.5, 37.7, -122.3, 37.85],
             "properties": {
                 "datetime": "2024-07-15T18:55:21Z",
                 "eo:cloud_cover": 12.3,
                 "platform": "sentinel-2a",
+                "constellation": "sentinel-2",
+                "instruments": ["msi"],
+                "gsd": 10,
+                "proj:epsg": 32610,
             },
             "asset_keys": ["green", "red", "thumbnail"],
         }
     ]
+
+
+@pytest.mark.asyncio
+async def test_search_accepts_string_encoded_intersects(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Some Bedrock tool-call serializers emit nested objects as JSON strings."""
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"features": []})
+
+    captured = _install_mock_stac(monkeypatch, handler)
+    geom = {"type": "Point", "coordinates": [-122.42, 37.77]}
+    await stac_search.ainvoke({"intersects": json.dumps(geom)})
+
+    assert captured["body"]["intersects"] == geom
+
+
+@pytest.mark.asyncio
+async def test_search_accepts_string_encoded_bbox(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"features": []})
+
+    captured = _install_mock_stac(monkeypatch, handler)
+    await stac_search.ainvoke({"bbox": "[-122.52, 37.70, -122.36, 37.83]"})
+
+    assert captured["body"]["bbox"] == [-122.52, 37.70, -122.36, 37.83]
 
 
 @pytest.mark.asyncio
