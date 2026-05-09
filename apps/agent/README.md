@@ -34,7 +34,7 @@ src/geogent_agent/
 │   ├── __init__.py     # registry: build_agent_graph(name)
 │   └── classic_langchain.py
 ├── nodes/              # graph nodes
-├── tools/              # @tool functions (backend_client, geo_tools, osm_tools)
+├── tools/              # @tool functions (backend_client, geo_tools, osm_tools, stac_tools)
 ├── prompts/            # system prompts
 ├── memory/             # checkpointer wiring
 ├── models/             # chat-model factory (Anthropic, OpenAI, Bedrock)
@@ -86,3 +86,18 @@ come from the **standard boto3 chain** — `AWS_ACCESS_KEY_ID` /
 For backward compatibility, if `BEDROCK_MODEL_ID` is set but `AGENT_MODEL`
 is not, the model factory falls back to `BEDROCK_MODEL_ID` instead of the
 default Anthropic-API model. New configurations should set `AGENT_MODEL`.
+
+## Tools
+
+The agent ships three groups of tools, all wired into both the
+`geogent` and `geogent-classic` graphs:
+
+- **Backend (`geo_tools`)** — `list_features`, `buffer_geometry`,
+  `distance_between`, `area_of`, `geometries_intersect`,
+  `features_within`. Each calls the FastAPI backend and runs in PostGIS.
+- **Geocoding (`osm_tools`)** — `geocode_place` against OpenStreetMap
+  Nominatim (no auth required).
+- **STAC (`stac_tools`)** — `stac_list_collections`, `stac_search`,
+  `stac_get_item`. All accept an optional `api_url` (default Earth Search
+  v1: `https://earth-search.aws.element84.com/v1`), so the agent can
+  point at any STAC-compliant endpoint per call.
