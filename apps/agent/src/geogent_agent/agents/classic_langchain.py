@@ -1,8 +1,8 @@
 """Classic LangChain agent (AgentExecutor + create_tool_calling_agent).
 
 This is the "non-graph" architecture: a stock LangChain AgentExecutor that runs
-its own tool-calling loop. It is backed by Amazon Bedrock by default so it can
-be compared side-by-side with the LangGraph ReAct agent under `graphs/`.
+its own tool-calling loop, served alongside the LangGraph ReAct agent under
+`graphs/`.
 
 To keep serving uniform with the rest of `apps/agent`, the AgentExecutor is
 wrapped in a single-node LangGraph so `langgraph dev` can expose it alongside
@@ -16,7 +16,6 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.graph import END, START, StateGraph
 
-from geogent_agent.config import get_settings
 from geogent_agent.models import get_chat_model
 from geogent_agent.prompts import SYSTEM_PROMPT
 from geogent_agent.state import GraphState
@@ -24,9 +23,7 @@ from geogent_agent.tools import TOOLS
 
 
 def _build_agent_executor() -> AgentExecutor:
-    settings = get_settings()
-    # Force the Bedrock model for this architecture regardless of AGENT_MODEL.
-    llm = get_chat_model(settings.bedrock_model_id)
+    llm = get_chat_model()
 
     prompt = ChatPromptTemplate.from_messages(
         [
