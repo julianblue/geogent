@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     bedrock_model_id: str = Field(default="us.anthropic.claude-sonnet-4-5-20250929-v1:0")
     aws_region: str = Field(default="us-east-1")
 
+    # OpenRouter (https://openrouter.ai) — OpenAI-compatible gateway that
+    # fronts many providers. Selected by AGENT_MODEL="openrouter:<vendor>/<model>",
+    # e.g. "openrouter:anthropic/claude-3.5-sonnet".
+    openrouter_api_key: str | None = None
+    openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
+
     backend_url: str = Field(default="http://localhost:8000")
 
     langsmith_api_key: str | None = None
