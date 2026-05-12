@@ -1,6 +1,6 @@
 [project]
 name = "geogent-backend"
-version = "0.1.0"
+version = "0.2.0"
 description = "FastAPI backend for geogent: geospatial data, analytics, and auth."
 readme = "README.md"
 requires-python = ">=3.12"
