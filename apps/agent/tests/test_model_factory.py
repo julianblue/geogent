@@ -1,15 +1,11 @@
-"""Tests for the model-name resolution in `geogent_agent.models.chat`.
-
-Specifically, verify the backward-compatibility fallback: if a user has set
-``BEDROCK_MODEL_ID`` but never ``AGENT_MODEL``, ``get_chat_model()`` (called
-with no arguments) should resolve to the Bedrock model rather than silently
-defaulting to Anthropic via ``AGENT_MODEL``'s default.
+"""Tests for the model-name resolution and provider routing in
+``geogent_agent.models.chat``.
 """
 
 import pytest
 
 from geogent_agent.config import get_settings
-from geogent_agent.models.chat import _resolve_model_name
+from geogent_agent.models.chat import _resolve_model_name, get_chat_model
 
 
 @pytest.fixture(autouse=True)
@@ -42,3 +38,34 @@ def test_uses_default_agent_model_when_neither_set(
     monkeypatch.delenv("BEDROCK_MODEL_ID", raising=False)
     settings = get_settings()
     assert _resolve_model_name() == settings.agent_model
+
+
+def test_openrouter_prefix_routes_through_openai_client_with_custom_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``openrouter:<slug>`` should produce a ChatOpenAI bound to the OpenRouter base URL."""
+    from langchain_openai import ChatOpenAI
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    model = get_chat_model("openrouter:anthropic/claude-3.5-sonnet")
+
+    assert isinstance(model, ChatOpenAI)
+    assert model.model_name == "anthropic/claude-3.5-sonnet"
+    assert str(model.openai_api_base).rstrip("/") == "https://openrouter.ai/api/v1"
+
+
+def test_openrouter_respects_custom_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    from langchain_openai import ChatOpenAI
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    monkeypatch.setenv("OPENROUTER_BASE_URL", "https://proxy.example.com/v1")
+    model = get_chat_model("openrouter:meta-llama/llama-3-70b-instruct")
+
+    assert isinstance(model, ChatOpenAI)
+    assert str(model.openai_api_base).rstrip("/") == "https://proxy.example.com/v1"
+
+
+def test_openrouter_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY is required"):
+        get_chat_model("openrouter:anthropic/claude-3.5-sonnet")

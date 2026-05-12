@@ -55,6 +55,7 @@ wrapped in a single-node LangGraph so they share the same serving surface.
 
 Both architectures pick their LLM from the same `AGENT_MODEL` env var via
 `get_chat_model()`. Provider is inferred from the model name prefix:
+`openrouter:<vendor>/<model>` → OpenRouter (OpenAI-compatible gateway);
 `bedrock:` / `anthropic.` / `us.anthropic.` → AWS Bedrock; `claude-*` →
 Anthropic API; `gpt-*` → OpenAI.
 
@@ -86,6 +87,23 @@ come from the **standard boto3 chain** — `AWS_ACCESS_KEY_ID` /
 For backward compatibility, if `BEDROCK_MODEL_ID` is set but `AGENT_MODEL`
 is not, the model factory falls back to `BEDROCK_MODEL_ID` instead of the
 default Anthropic-API model. New configurations should set `AGENT_MODEL`.
+
+## OpenRouter
+
+[OpenRouter](https://openrouter.ai) is an OpenAI-compatible gateway that
+fronts many providers behind a single key. Use it by setting
+`OPENROUTER_API_KEY` and an `AGENT_MODEL` with the `openrouter:` prefix:
+
+```bash
+OPENROUTER_API_KEY=sk-or-…
+AGENT_MODEL=openrouter:anthropic/claude-3.5-sonnet
+```
+
+The model name after the prefix is passed through verbatim as the
+OpenRouter model slug (see <https://openrouter.ai/models>). The base URL
+defaults to `https://openrouter.ai/api/v1` and can be overridden with
+`OPENROUTER_BASE_URL`. Routing goes through `ChatOpenAI` from
+`langchain-openai` with the OpenRouter `base_url` — no new dependency.
 
 ## Tools
 
