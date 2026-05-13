@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[FeatureRead])
-async def list_features(session: DbSession) -> list[FeatureRead]:
+async def list_features(session: DbSession, _user: CurrentUser) -> list[FeatureRead]:
     return await FeatureService(session).list_features()
 
 

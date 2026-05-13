@@ -1,7 +1,9 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEV_JWT_DEFAULT = "change-me-in-prod"  # nosec B105 - dev sentinel, not a real secret
 
 
 class Settings(BaseSettings):
@@ -29,11 +31,20 @@ class Settings(BaseSettings):
     )
 
     jwt_secret_key: str = Field(
-        default="change-me-in-prod",
+        default=_DEV_JWT_DEFAULT,
         description="HMAC key for HS256 JWTs. MUST be overridden in production.",
     )
     jwt_algorithm: str = Field(default="HS256")
     jwt_access_token_expire_minutes: int = Field(default=60 * 24)
+
+    @model_validator(mode="after")
+    def _reject_dev_jwt_secret_outside_development(self) -> "Settings":
+        if self.app_env != "development" and self.jwt_secret_key == _DEV_JWT_DEFAULT:
+            raise ValueError(
+                "JWT_SECRET_KEY must be set to a non-default value when APP_ENV != 'development'. "
+                "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(48))'"
+            )
+        return self
 
 
 @lru_cache(maxsize=1)

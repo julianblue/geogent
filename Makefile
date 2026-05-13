@@ -8,7 +8,7 @@
         fmt fmt-py fmt-ts \
         lint lint-py lint-ts \
         test test-backend test-agent test-ui \
-        migrate revision migration seed-user \
+        migrate revision seed-user \
         clean
 
 help:
@@ -25,7 +25,7 @@ help:
 	@echo "  make dev-ui          Run ui natively"
 	@echo ""
 	@echo "  make migrate                       Apply Alembic migrations"
-	@echo "  make migration MSG=msg             Create a new Alembic revision (autogenerate)"
+	@echo "  make revision m='message'          Create a new Alembic revision (autogenerate)"
 	@echo "  make seed-user EMAIL=.. PASS=..    Create a user account"
 	@echo ""
 	@echo "  make fmt             Format all code"
@@ -85,10 +85,6 @@ migrate:
 revision:
 	@if [ -z "$(m)" ]; then echo "usage: make revision m='message'"; exit 1; fi
 	cd apps/backend && uv run alembic revision --autogenerate -m "$(m)"
-
-migration:
-	@if [ -z "$(MSG)" ]; then echo "usage: make migration MSG='message'"; exit 1; fi
-	cd apps/backend && uv run alembic revision --autogenerate -m "$(MSG)"
 
 seed-user:
 	@if [ -z "$(EMAIL)" ] || [ -z "$(PASS)" ]; then \
