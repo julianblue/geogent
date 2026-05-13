@@ -24,9 +24,7 @@ def _fake_user(email: str = "demo@geogent.dev") -> User:
 
 
 @pytest.mark.asyncio
-async def test_login_returns_token(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
-) -> None:
+async def test_login_returns_token(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
     async def fake_authenticate(self, email: str, password: str) -> User:  # noqa: ARG001
         assert email == "demo@geogent.dev"
         assert password == "geogent12345"

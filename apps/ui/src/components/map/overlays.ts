@@ -6,11 +6,7 @@ import { wktPolygonToGeoJSON } from "@/lib/geo";
  * Add (or replace) a polygon overlay rendered as a fill+outline layer pair on the map.
  * The id is namespaced so we can have multiple overlays at once.
  */
-export function addBufferOverlay(
-  mapRef: MapRef | null,
-  layerId: string,
-  wkt: string,
-): boolean {
+export function addBufferOverlay(mapRef: MapRef | null, layerId: string, wkt: string): boolean {
   const map = mapRef?.getMap();
   if (!map) return false;
   const geojson = wktPolygonToGeoJSON(wkt);

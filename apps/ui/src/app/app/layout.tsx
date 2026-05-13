@@ -4,11 +4,7 @@ import "@copilotkit/react-ui/styles.css";
 import { AppHeader } from "@/components/chrome/AppHeader";
 import { requireSession } from "@/lib/auth";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
   return (
     <CopilotKit

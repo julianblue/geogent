@@ -59,12 +59,7 @@ export function ConfirmSaveCard({
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          disabled={done || submitting}
-        >
+        <Button variant="ghost" size="sm" onClick={onCancel} disabled={done || submitting}>
           <X className="h-4 w-4" />
           Cancel
         </Button>

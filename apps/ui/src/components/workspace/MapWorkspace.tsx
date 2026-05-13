@@ -9,7 +9,7 @@ function WorkspaceInner() {
   // Registers readables, actions, and suggestions. Must be inside MapStateProvider.
   useGeogentCopilot();
   return (
-    <div className="flex h-full w-full min-h-0">
+    <div className="flex h-full min-h-0 w-full">
       <div className="relative flex-1">
         <MapView />
       </div>

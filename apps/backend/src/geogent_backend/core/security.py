@@ -21,12 +21,12 @@ class TokenDecodeError(Exception):
     """Raised when a JWT fails signature, expiry, or payload validation."""
 
 
-def create_access_token(
-    subject: str | int, expires_minutes: int | None = None
-) -> tuple[str, int]:
+def create_access_token(subject: str | int, expires_minutes: int | None = None) -> tuple[str, int]:
     """Returns ``(jwt, ttl_seconds)``."""
     settings = get_settings()
-    minutes = expires_minutes if expires_minutes is not None else settings.jwt_access_token_expire_minutes
+    minutes = (
+        expires_minutes if expires_minutes is not None else settings.jwt_access_token_expire_minutes
+    )
     expire = datetime.now(UTC) + timedelta(minutes=minutes)
     payload: dict[str, Any] = {"sub": str(subject), "exp": expire}
     token = jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)

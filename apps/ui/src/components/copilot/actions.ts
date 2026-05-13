@@ -14,15 +14,8 @@ import { viewportToBboxWkt, wktPolygonToGeoJSON } from "@/lib/geo";
 type FeatureRef = { id: number | string; name: string };
 
 export function useGeogentCopilot() {
-  const {
-    mapRef,
-    viewport,
-    features,
-    selectedIds,
-    layers,
-    addFeature,
-    upsertLayer,
-  } = useMapState();
+  const { mapRef, viewport, features, selectedIds, layers, addFeature, upsertLayer } =
+    useMapState();
 
   useCopilotReadable({
     description:
@@ -89,8 +82,7 @@ export function useGeogentCopilot() {
       createElement(BufferPreviewCard, {
         status,
         distanceMeters: args.distanceMeters ?? 0,
-        resultWkt:
-          (result as { buffered_wkt?: string } | undefined)?.buffered_wkt ?? undefined,
+        resultWkt: (result as { buffered_wkt?: string } | undefined)?.buffered_wkt ?? undefined,
       }),
     handler: async ({ distanceMeters, geometryWkt }) => {
       const wkt = geometryWkt ?? viewportToBboxWkt(viewport);
@@ -114,8 +106,7 @@ export function useGeogentCopilot() {
 
   useCopilotAction({
     name: "listFeaturesInViewport",
-    description:
-      "Return features stored in the database that lie inside the current viewport.",
+    description: "Return features stored in the database that lie inside the current viewport.",
     parameters: [],
     render: ({ status, result }) =>
       createElement(FeatureListCard, {
@@ -184,9 +175,10 @@ export function useGeogentCopilot() {
   useCopilotChatSuggestions(
     useMemo(
       () => ({
-        instructions: hasFeatures
-          ? "Suggest 3 short prompts that operate on the features or layers currently in view, plus one slash-style prompt that starts with '/' (e.g. '/buffer 500 m')."
-          : "Suggest 3 short starter prompts for exploring places on the map (e.g. flying to a city), plus one slash-style prompt that starts with '/' (e.g. '/buffer 500 m').",
+        instructions:
+          hasFeatures || hasSelection
+            ? "Suggest 3 short prompts that operate on the features or layers currently in view, plus one slash-style prompt that starts with '/' (e.g. '/buffer 500 m')."
+            : "Suggest 3 short starter prompts for exploring places on the map (e.g. flying to a city), plus one slash-style prompt that starts with '/' (e.g. '/buffer 500 m').",
         minSuggestions: 2,
         maxSuggestions: 4,
       }),

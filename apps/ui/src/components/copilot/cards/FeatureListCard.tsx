@@ -8,13 +8,7 @@ import { useMapState } from "@/components/map/MapStateProvider";
 
 type FeatureRef = { id: number | string; name: string };
 
-export function FeatureListCard({
-  status,
-  features,
-}: {
-  status: string;
-  features?: FeatureRef[];
-}) {
+export function FeatureListCard({ status, features }: { status: string; features?: FeatureRef[] }) {
   const { mapRef, features: known } = useMapState();
   const list = features ?? [];
 
@@ -35,9 +29,7 @@ export function FeatureListCard({
         <CardTitle className="flex items-center gap-2 text-base">
           <MapPin className="h-4 w-4" />
           Features in view{" "}
-          <span className="text-xs font-normal text-muted-foreground">
-            ({list.length})
-          </span>
+          <span className="text-xs font-normal text-muted-foreground">({list.length})</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-1">

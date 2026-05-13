@@ -12,10 +12,15 @@ import geoalchemy2
 import sqlalchemy as sa
 from alembic import op
 
+# Alembic reads these module-level attributes via reflection; they're not
+# referenced anywhere else in this file. Listed in __all__ to keep static
+# analyzers (CodeQL py/unused-global-variable) from flagging them.
 revision: str = "0001_initial_schema"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
+
+__all__ = ["revision", "down_revision", "branch_labels", "depends_on", "upgrade", "downgrade"]
 
 
 def upgrade() -> None:

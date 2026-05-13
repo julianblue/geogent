@@ -17,7 +17,11 @@ class AuthService:
 
     async def authenticate(self, email: str, password: str) -> User:
         user = await self._users.get_by_email(email)
-        if user is None or not user.is_active or not verify_password(password, user.hashed_password):
+        if (
+            user is None
+            or not user.is_active
+            or not verify_password(password, user.hashed_password)
+        ):
             raise AuthError("Invalid credentials")
         return user
 
