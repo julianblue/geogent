@@ -1,7 +1,15 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEV_JWT_DEFAULTS = frozenset(
+    {
+        "change-me-in-prod",  # config.py field default
+        "dev-only-change-me",  # .env.example / docker-compose default
+        "",
+    }
+)
 
 
 class Settings(BaseSettings):
@@ -27,6 +35,22 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(
         default_factory=lambda: ["http://localhost:3000"],
     )
+
+    jwt_secret_key: str = Field(
+        default="change-me-in-prod",
+        description="HMAC key for HS256 JWTs. MUST be overridden in production.",
+    )
+    jwt_algorithm: str = Field(default="HS256")
+    jwt_access_token_expire_minutes: int = Field(default=60 * 24)
+
+    @model_validator(mode="after")
+    def _reject_weak_jwt_secret_outside_development(self) -> "Settings":
+        if self.app_env != "development" and self.jwt_secret_key in _DEV_JWT_DEFAULTS:
+            raise ValueError(
+                "JWT_SECRET_KEY must be a strong, explicit value when APP_ENV != 'development'. "
+                "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(48))'"
+            )
+        return self
 
 
 @lru_cache(maxsize=1)

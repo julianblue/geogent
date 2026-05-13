@@ -1,0 +1,5 @@
+# Test fixture for the JWT-secret validator. The string is not a real
+# credential — see apps/backend/tests/test_config.py and PR #7. Fixed
+# forward in a follow-up commit; this entry only suppresses the historical
+# scan from gitleaks (--fetch-depth=0).
+5cf4867ac6c3f068fc54ddf1be183d9068394db1:apps/backend/tests/test_config.py:generic-api-key:23

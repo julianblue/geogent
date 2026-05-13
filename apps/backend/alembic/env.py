@@ -18,6 +18,31 @@ config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 target_metadata = Base.metadata
 
 
+# PostGIS extension tables/schemas that autogen would otherwise try to drop or
+# re-create. Keep migrations focused on application tables only; extension
+# objects are owned by scripts/db/init-postgis.sql.
+_POSTGIS_SCHEMAS = frozenset({"tiger", "tiger_data", "topology"})
+_POSTGIS_TABLES = frozenset(
+    {
+        "spatial_ref_sys",
+        "geography_columns",
+        "geometry_columns",
+        "raster_columns",
+        "raster_overviews",
+    }
+)
+
+
+def include_object(obj, name, type_, reflected, compare_to):  # noqa: ANN001 - alembic signature
+    if type_ == "table":
+        if name in _POSTGIS_TABLES:
+            return False
+        schema = getattr(obj, "schema", None)
+        if schema in _POSTGIS_SCHEMAS:
+            return False
+    return True
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
@@ -26,6 +51,8 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         include_schemas=False,
+        include_object=include_object,
+        compare_type=True,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -42,6 +69,8 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            include_schemas=False,
+            include_object=include_object,
             compare_type=True,
         )
         with context.begin_transaction():

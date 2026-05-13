@@ -1,11 +1,5 @@
-import { MapView } from "@/components/map/MapView";
-import { CopilotSidebar } from "@/components/copilot/CopilotSidebar";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <main className="relative h-screen w-screen">
-      <MapView />
-      <CopilotSidebar />
-    </main>
-  );
+export default function RootRedirect() {
+  redirect("/app");
 }

@@ -38,6 +38,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-geogent}:${POSTGRES_PASSWORD:-geogent}@db:5432/${POSTGRES_DB:-geogent}
       DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER:-geogent}:${POSTGRES_PASSWORD:-geogent}@db:5432/${POSTGRES_DB:-geogent}
       LOG_LEVEL: INFO
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-change-me}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
     ports:
       - "8000:8000"
     volumes:
@@ -82,8 +85,9 @@ services:
       - backend
       - agent
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+      BACKEND_URL: http://backend:8000
       LANGGRAPH_URL: http://agent:2024
+      LANGGRAPH_GRAPH_ID: ${LANGGRAPH_GRAPH_ID:-geogent}
     ports:
       - "3000:3000"
     volumes:
