@@ -22,6 +22,11 @@ lib64/
 parts/
 sdist/
 var/
+
+# LangGraph dev server state (in-memory persistence + test logs).
+.langgraph_api/
+.pytest_langgraph_dev.log
+
 wheels/
 share/python-wheels/
 *.egg-info/

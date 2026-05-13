@@ -5,7 +5,7 @@ import { Loader2, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-type Status = "executing" | "inProgress" | "complete" | string;
+type Status = "running" | "complete" | string;
 
 export function BufferPreviewCard({
   status,
