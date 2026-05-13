@@ -17,6 +17,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.production"
 
 [deploy]
-startCommand = "sh -c 'pnpm next start -p ${PORT:-3000}'"
+# Railway runs the startCommand under `sh -c`, so $PORT is expanded by the
+# wrapping shell. Avoid extra quoting that would block the substitution.
+startCommand = "pnpm next start -p ${PORT:-3000}"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5

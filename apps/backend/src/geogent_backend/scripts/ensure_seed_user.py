@@ -1,12 +1,14 @@
-"""Idempotently create the default user account from environment variables.
+"""Idempotently create a login user on backend startup.
 
 Designed to run on every backend startup (Railway, Docker, etc.). Reads
-``SEED_USER_EMAIL`` and ``SEED_USER_PASSWORD``; if either is missing or the
-user already exists, exits 0 without raising. Database connection errors are
-logged but not fatal — the API process will surface them on first request.
+``SEED_USER_EMAIL`` and ``SEED_USER_PASSWORD`` from the environment, falling
+back to ``DEFAULT_EMAIL`` / ``DEFAULT_PASSWORD`` so a fresh deployment is
+usable out-of-the-box. **Override the env vars for any non-personal
+deployment** — the defaults are baked into a committed file.
 
-Defaults are provided so the deployment is usable out-of-the-box; override
-them in your hosting provider's environment variables for production use.
+The script is a no-op if the user already exists, and never raises:
+database / config errors are printed and swallowed so they don't block the
+API process from starting (the API will surface them on first request).
 """
 
 from __future__ import annotations
@@ -39,7 +41,9 @@ def main() -> int:
     email = os.environ.get("SEED_USER_EMAIL", DEFAULT_EMAIL).strip()
     password = os.environ.get("SEED_USER_PASSWORD", DEFAULT_PASSWORD)
     if not email or not password:
-        print("seed_user: SEED_USER_EMAIL/PASSWORD not set; nothing to do")
+        # Only reachable if someone explicitly sets the env var to an empty
+        # string. Defaults above are non-empty, so unset → use defaults.
+        print("seed_user: email or password is empty; nothing to do")
         return 0
     try:
         return asyncio.run(_run(email, password))

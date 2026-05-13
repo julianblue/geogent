@@ -26,16 +26,13 @@ and a Next.js UI. This guide walks through deploying all four to
 
 The backend auto-creates a user from `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`
 on every startup (idempotent — skipped if the user already exists). If those
-variables are not set, it falls back to the defaults baked into
-`apps/backend/src/geogent_backend/scripts/ensure_seed_user.py`:
+variables are not set, it falls back to the defaults defined at the top of
+`apps/backend/src/geogent_backend/scripts/ensure_seed_user.py`.
 
-- **Email:** `julian.blau@googlemail.com`
-- **Password:** `Lena2046`
-
-**Change these for any non-personal deployment.** Set `SEED_USER_EMAIL` and
-`SEED_USER_PASSWORD` on the backend service in Railway *before the first
-deploy* if you want different credentials seeded. Once the user is created,
-changing the env vars does nothing — manage the account through the API.
+> ⚠️ **Set `SEED_USER_EMAIL` and `SEED_USER_PASSWORD` in the Railway dashboard
+> *before* the first deploy for any non-personal use.** The committed defaults
+> are public knowledge to anyone with repo access, and re-deploys won't rotate
+> a user that already exists — manage the account through the API after that.
 
 ## Per-service environment variables
 
