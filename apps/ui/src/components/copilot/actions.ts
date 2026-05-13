@@ -88,7 +88,7 @@ export function useGeogentCopilot() {
     render: ({ status, args, result }) =>
       createElement(BufferPreviewCard, {
         status,
-        distanceMeters: args.distanceMeters,
+        distanceMeters: args.distanceMeters ?? 0,
         resultWkt:
           (result as { buffered_wkt?: string } | undefined)?.buffered_wkt ?? undefined,
       }),
@@ -145,10 +145,10 @@ export function useGeogentCopilot() {
     renderAndWaitForResponse: ({ args, respond, status }) =>
       createElement(ConfirmSaveCard, {
         status,
-        defaultName: args.name,
-        wkt: args.geometryWkt,
+        defaultName: args.name ?? "Unnamed feature",
+        wkt: args.geometryWkt ?? "",
         onSave: async (finalName: string) => {
-          const geometry = wktPolygonToGeoJSON(args.geometryWkt);
+          const geometry = wktPolygonToGeoJSON(args.geometryWkt ?? "");
           if (!geometry) {
             respond?.({
               ok: false,

@@ -1,6 +1,6 @@
 import { Globe2, LogOut } from "lucide-react";
 
-import { logoutAction } from "@/app/(app)/actions";
+import { logoutAction } from "@/app/app/actions";
 import { ModeToggle } from "@/components/chrome/ModeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

@@ -53,19 +53,11 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_features_name", "features", ["name"], unique=False)
-    # GeoAlchemy2 normally emits the spatial GiST index automatically; emit it
-    # explicitly so the migration is reversible and doesn't depend on side effects.
-    op.create_index(
-        "idx_features_geometry",
-        "features",
-        ["geometry"],
-        unique=False,
-        postgresql_using="gist",
-    )
+    # The GiST spatial index on `features.geometry` is auto-emitted by
+    # GeoAlchemy2 because the column was declared with `spatial_index=True`.
 
 
 def downgrade() -> None:
-    op.drop_index("idx_features_geometry", table_name="features")
     op.drop_index("ix_features_name", table_name="features")
     op.drop_table("features")
     op.drop_index("ix_users_email", table_name="users")

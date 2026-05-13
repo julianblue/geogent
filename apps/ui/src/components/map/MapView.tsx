@@ -5,8 +5,10 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import Map, {
   NavigationControl,
   ScaleControl,
+  type MapRef,
   type ViewStateChangeEvent,
 } from "react-map-gl/maplibre";
+import type { Ref } from "react";
 
 import { useMapState } from "@/components/map/MapStateProvider";
 
@@ -49,7 +51,7 @@ export function MapView() {
 
   return (
     <Map
-      ref={mapRef}
+      ref={mapRef as Ref<MapRef>}
       initialViewState={{
         longitude: viewport.longitude,
         latitude: viewport.latitude,
