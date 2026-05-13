@@ -18,6 +18,8 @@ RUN uv sync --frozen || uv sync
 
 COPY . .
 
+RUN chmod +x scripts/start.sh
+
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "geogent_backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./scripts/start.sh"]

@@ -97,6 +97,13 @@ make fmt       # run all formatters
 make test      # run all tests
 ```
 
+## Deploy to Railway
+
+The repo ships with a four-service [Railway](https://railway.app/) layout
+(`db`, `backend`, `agent`, `ui`) — see [`RAILWAY.md`](./RAILWAY.md) for the
+step-by-step setup. The backend seeds a login user on first boot so the
+deployment is usable as soon as it's green.
+
 ## Repository layout
 
 ```
@@ -105,9 +112,12 @@ geogent/
 │   ├── ui/          # Next.js + CopilotKit
 │   ├── backend/     # FastAPI + PostGIS
 │   └── agent/       # LangChain + LangGraph
+├── infra/
+│   └── railway/     # Railway deployment (PostGIS service)
 ├── scripts/         # db init, dev bootstrap
 ├── docker-compose.yml
 ├── Makefile
+├── RAILWAY.md
 └── .env.example
 ```
 
