@@ -10,7 +10,7 @@ const ASSISTANT_ID = process.env.NEXT_PUBLIC_LANGGRAPH_GRAPH_ID ?? "geogent";
 function createClient(): Client {
   const apiUrl =
     typeof window === "undefined"
-      ? process.env.LANGGRAPH_URL ?? "http://localhost:2024"
+      ? (process.env.LANGGRAPH_URL ?? "http://localhost:2024")
       : new URL("/api/lg", window.location.href).href;
   return new Client({ apiUrl });
 }

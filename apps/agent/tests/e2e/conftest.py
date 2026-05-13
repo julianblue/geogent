@@ -130,7 +130,9 @@ def langgraph_server(backend_stub: str) -> Iterator[str]:
     port = _free_port()
     env = os.environ.copy()
     env["BACKEND_URL"] = backend_stub
-    env.setdefault("AGENT_MODEL", os.getenv("TEST_AGENT_MODEL", "openrouter:anthropic/claude-3.5-sonnet"))
+    env.setdefault(
+        "AGENT_MODEL", os.getenv("TEST_AGENT_MODEL", "openrouter:anthropic/claude-3.5-sonnet")
+    )
     # Disable LangSmith hooks so the test doesn't try to call out.
     env.setdefault("LANGSMITH_TRACING", "false")
     env.pop("LANGCHAIN_TRACING_V2", None)

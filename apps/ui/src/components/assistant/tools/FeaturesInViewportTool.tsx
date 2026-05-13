@@ -29,10 +29,7 @@ export function FeaturesInViewportTool() {
       if (!res.ok) throw new Error(`features-within failed: ${res.status}`);
       return (await res.json()) as Result;
     },
-    render: function FeaturesRender({
-      result,
-      status,
-    }: ToolCallMessagePartProps<Args, Result>) {
+    render: function FeaturesRender({ result, status }: ToolCallMessagePartProps<Args, Result>) {
       return (
         <FeatureListCard
           status={status.type === "complete" ? "complete" : "running"}

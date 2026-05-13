@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ComposerPrimitive,
-  MessagePrimitive,
-  ThreadPrimitive,
-} from "@assistant-ui/react";
+import { ComposerPrimitive, MessagePrimitive, ThreadPrimitive } from "@assistant-ui/react";
 import { ArrowDown, SendHorizonal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,7 +35,7 @@ function UserMessage() {
 
 function AssistantMessage() {
   return (
-    <MessagePrimitive.Root className="self-start max-w-full whitespace-pre-wrap rounded-lg bg-muted px-3 py-2 text-sm text-foreground">
+    <MessagePrimitive.Root className="max-w-full self-start whitespace-pre-wrap rounded-lg bg-muted px-3 py-2 text-sm text-foreground">
       <MessagePrimitive.Parts />
     </MessagePrimitive.Root>
   );
@@ -55,7 +51,7 @@ function Composer() {
       <ComposerPrimitive.Input
         placeholder="Ask geogent…"
         rows={1}
-        className="min-h-[36px] max-h-32 flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        className="max-h-32 min-h-[36px] flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
       />
       <ComposerPrimitive.Send asChild>
         <Button size="icon" aria-label="Send">

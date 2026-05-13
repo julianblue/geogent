@@ -12,7 +12,6 @@ from typing import Any
 import pytest
 from langgraph_sdk import get_client
 
-
 pytestmark = [pytest.mark.e2e, pytest.mark.asyncio]
 
 
@@ -107,9 +106,9 @@ async def test_buffer_uses_viewport_from_map_state(langgraph_server: str) -> Non
     tools = _tool_names_from_state(state)
     # The model is allowed to call buffer_geometry (server-side) or
     # add_buffer_layer (UI stub) or both; require at least one.
-    assert (
-        "buffer_geometry" in tools or "add_buffer_layer" in tools
-    ), f"expected buffer_geometry or add_buffer_layer in {tools}"
+    assert "buffer_geometry" in tools or "add_buffer_layer" in tools, (
+        f"expected buffer_geometry or add_buffer_layer in {tools}"
+    )
 
     # And the buffer distance the model picked has to be 500.
     found_distance: float | None = None
@@ -141,9 +140,9 @@ async def test_features_within_uses_stub(langgraph_server: str) -> None:
         configurable={"map_state": {"viewport": paris_viewport}},
     )
     tools = _tool_names_from_state(state)
-    assert (
-        "features_within" in tools or "list_features_in_viewport" in tools
-    ), f"expected features_within or list_features_in_viewport in {tools}"
+    assert "features_within" in tools or "list_features_in_viewport" in tools, (
+        f"expected features_within or list_features_in_viewport in {tools}"
+    )
 
     final = _final_assistant_text(state).lower()
     # The stub returns "Eiffel Tower" and "Louvre Museum" — the model should

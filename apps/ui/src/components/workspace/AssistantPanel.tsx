@@ -31,11 +31,7 @@ export function AssistantPanel() {
           aria-label={open ? "Collapse assistant" : "Open assistant"}
           className="ml-auto"
         >
-          {open ? (
-            <PanelRightClose className="h-4 w-4" />
-          ) : (
-            <PanelRightOpen className="h-4 w-4" />
-          )}
+          {open ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
         </Button>
       </div>
 

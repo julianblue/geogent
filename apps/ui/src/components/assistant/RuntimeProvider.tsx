@@ -2,18 +2,10 @@
 
 import { useRef } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
-import {
-  useLangGraphRuntime,
-  type LangChainMessage,
-} from "@assistant-ui/react-langgraph";
+import { useLangGraphRuntime, type LangChainMessage } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import {
-  createThread,
-  getCheckpointId,
-  getThreadState,
-  sendMessage,
-} from "@/lib/chatApi";
+import { createThread, getCheckpointId, getThreadState, sendMessage } from "@/lib/chatApi";
 
 export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   const { viewport, features, selectedIds, layers } = useMapState();
@@ -51,8 +43,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     load: async (externalId) => {
       const state = await getThreadState(externalId);
       return {
-        messages:
-          (state.values as { messages?: LangChainMessage[] } | undefined)?.messages ?? [],
+        messages: (state.values as { messages?: LangChainMessage[] } | undefined)?.messages ?? [],
         interrupts: state.tasks[0]?.interrupts ?? [],
       };
     },
