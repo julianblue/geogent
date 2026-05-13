@@ -87,7 +87,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8000
       LANGGRAPH_URL: http://agent:2024
-      LANGGRAPH_GRAPH_ID: ${LANGGRAPH_GRAPH_ID:-geogent}
+      NEXT_PUBLIC_LANGGRAPH_GRAPH_ID: ${LANGGRAPH_GRAPH_ID:-geogent}
     ports:
       - "3000:3000"
     volumes:

@@ -12,15 +12,15 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith("/app") && !token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
-  // Defense-in-depth: the proxy + copilotkit routes only forward whatever
+  // Defense-in-depth: the proxy + langgraph routes only forward whatever
   // cookie is present, but reject unauthenticated callers at the edge so we
   // don't leak agent capabilities or proxy errors to anonymous traffic.
-  if ((pathname.startsWith("/api/proxy") || pathname === "/api/copilotkit") && !token) {
+  if ((pathname.startsWith("/api/proxy") || pathname.startsWith("/api/lg")) && !token) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/app/:path*", "/login", "/api/proxy/:path*", "/api/copilotkit"],
+  matcher: ["/", "/app/:path*", "/login", "/api/proxy/:path*", "/api/lg/:path*"],
 };
