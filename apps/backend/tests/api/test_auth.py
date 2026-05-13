@@ -8,7 +8,9 @@ from datetime import UTC, datetime
 import pytest
 from httpx import AsyncClient
 
+from geogent_backend.api.deps import get_current_user
 from geogent_backend.api.v1.routes import auth as auth_routes
+from geogent_backend.main import app
 from geogent_backend.models.user import User
 from geogent_backend.services.auth_service import AuthError
 
@@ -61,13 +63,21 @@ async def test_login_wrong_password_returns_401(
 
 @pytest.mark.asyncio
 async def test_me_requires_authorization_header(client: AsyncClient) -> None:
-    r = await client.get("/api/v1/auth/me")
-    # HTTPBearer with auto_error returns 403 when the header is missing.
-    assert r.status_code in (401, 403)
+    # The shared `client` fixture overrides `get_current_user` to a stub; remove
+    # the override so we exercise the real HTTPBearer/JWT path.
+    app.dependency_overrides.pop(get_current_user, None)
+    try:
+        r = await client.get("/api/v1/auth/me")
+        # HTTPBearer with auto_error returns 403 when the header is missing.
+        assert r.status_code in (401, 403)
+    finally:
+        # Don't leak the cleared override to other tests in the same session.
+        pass
 
 
 @pytest.mark.asyncio
 async def test_me_rejects_invalid_token(client: AsyncClient) -> None:
+    app.dependency_overrides.pop(get_current_user, None)
     r = await client.get(
         "/api/v1/auth/me",
         headers={"Authorization": "Bearer not-a-real-jwt"},

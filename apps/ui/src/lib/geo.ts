@@ -1,16 +1,14 @@
 import type { Viewport } from "@/components/map/MapStateProvider";
 
-export function viewportToBboxWkt(viewport: Viewport): string {
+/**
+ * Convert the current map viewport's bbox to a WKT polygon (SRID 4326).
+ * Returns `null` if bounds aren't available yet (map hasn't fired its first
+ * `onLoad`); callers should refuse to run viewport-scoped queries in that
+ * case rather than guess at a bbox.
+ */
+export function viewportToBboxWkt(viewport: Viewport): string | null {
   const b = viewport.bounds;
-  if (!b) {
-    const half = 360 / Math.pow(2, viewport.zoom);
-    return bboxToWkt(
-      viewport.longitude - half,
-      viewport.latitude - half / 2,
-      viewport.longitude + half,
-      viewport.latitude + half / 2,
-    );
-  }
+  if (!b) return null;
   return bboxToWkt(b.west, b.south, b.east, b.north);
 }
 

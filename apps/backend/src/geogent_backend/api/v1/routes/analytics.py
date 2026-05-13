@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from geogent_backend.api.deps import DbSession
+from geogent_backend.api.deps import DbSession, get_current_user
 from geogent_backend.geo.operations import (
     area_of,
     buffer_geometry,
@@ -10,7 +10,9 @@ from geogent_backend.geo.operations import (
     geometries_intersect,
 )
 
-router = APIRouter()
+# All analytics routes require authentication. PostGIS ops are not free; we
+# don't want unauthenticated callers driving arbitrary queries.
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class BufferRequest(BaseModel):

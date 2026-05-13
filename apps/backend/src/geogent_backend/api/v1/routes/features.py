@@ -7,8 +7,11 @@ from geogent_backend.services.feature_service import FeatureService
 router = APIRouter()
 
 
+# GET is intentionally unauthenticated: the LangGraph agent (`apps/agent`)
+# enumerates features through this endpoint without a user token. Switch to a
+# service-account JWT for the agent before gating GET.
 @router.get("", response_model=list[FeatureRead])
-async def list_features(session: DbSession, _user: CurrentUser) -> list[FeatureRead]:
+async def list_features(session: DbSession) -> list[FeatureRead]:
     return await FeatureService(session).list_features()
 
 

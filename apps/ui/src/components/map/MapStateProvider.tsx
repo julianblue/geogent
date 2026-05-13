@@ -61,7 +61,13 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const [layers, setLayers] = useState<MapLayer[]>([]);
 
   const addFeature = useCallback((feature: MapFeature) => {
-    setFeatures((prev) => [...prev.filter((f) => f.id !== feature.id), feature]);
+    setFeatures((prev) => {
+      const idx = prev.findIndex((f) => f.id === feature.id);
+      if (idx === -1) return [...prev, feature];
+      const next = prev.slice();
+      next[idx] = feature;
+      return next;
+    });
   }, []);
 
   const removeFeature = useCallback((id: string) => {
@@ -78,7 +84,13 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const clearSelected = useCallback(() => setSelectedIds([]), []);
 
   const upsertLayer = useCallback((layer: MapLayer) => {
-    setLayers((prev) => [...prev.filter((l) => l.id !== layer.id), layer]);
+    setLayers((prev) => {
+      const idx = prev.findIndex((l) => l.id === layer.id);
+      if (idx === -1) return [...prev, layer];
+      const next = prev.slice();
+      next[idx] = layer;
+      return next;
+    });
   }, []);
 
   const removeLayer = useCallback((id: string) => {

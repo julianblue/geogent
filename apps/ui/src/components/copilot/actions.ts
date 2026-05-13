@@ -86,6 +86,9 @@ export function useGeogentCopilot() {
       }),
     handler: async ({ distanceMeters, geometryWkt }) => {
       const wkt = geometryWkt ?? viewportToBboxWkt(viewport);
+      if (!wkt) {
+        throw new Error("Map viewport isn't ready yet — pan the map and retry.");
+      }
       const res = await fetch("/api/proxy/analytics/buffer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,6 +118,9 @@ export function useGeogentCopilot() {
       }),
     handler: async () => {
       const wkt = viewportToBboxWkt(viewport);
+      if (!wkt) {
+        throw new Error("Map viewport isn't ready yet — pan the map and retry.");
+      }
       const res = await fetch("/api/proxy/analytics/features-within", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
