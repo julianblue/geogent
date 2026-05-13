@@ -1,0 +1,28 @@
+# Railway configuration for the geogent backend (FastAPI + PostGIS).
+#
+# In Railway, create a service from this repo with:
+#   Root Directory  = apps/backend
+#   Config Path     = railway.toml   (auto-detected)
+#
+# Required environment variables (set in the Railway service):
+#   APP_ENV=production
+#   DATABASE_URL=postgresql+asyncpg://<user>:<pw>@<host>:<port>/<db>
+#   DATABASE_URL_SYNC=postgresql+psycopg://<user>:<pw>@<host>:<port>/<db>
+#   JWT_SECRET_KEY=<generate with: python -c 'import secrets; print(secrets.token_urlsafe(48))'>
+#   CORS_ORIGINS=["https://<your-ui-host>.up.railway.app"]
+#
+# Optional (seeds a login user on first boot — defaults to the credentials
+# baked into ensure_seed_user.py; override here for production):
+#   SEED_USER_EMAIL=...
+#   SEED_USER_PASSWORD=...
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "./scripts/start.sh"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

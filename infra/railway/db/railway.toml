@@ -1,0 +1,25 @@
+# Railway configuration for the geogent PostGIS database service.
+#
+# In Railway, create a service from this repo with:
+#   Root Directory  = infra/railway/db
+#   Config Path     = railway.toml   (auto-detected)
+#
+# Required environment variables (set in the Railway service):
+#   POSTGRES_USER=geogent
+#   POSTGRES_PASSWORD=<generate a strong password>
+#   POSTGRES_DB=geogent
+#   PGDATA=/var/lib/postgresql/data/pgdata   # required when mounting a volume
+#
+# Attach a Railway Volume to /var/lib/postgresql/data so data persists across
+# redeploys. Without a volume, every deploy wipes the database.
+#
+# Railway gives the service a private hostname (e.g. `postgis.railway.internal`).
+# Use it to build DATABASE_URL / DATABASE_URL_SYNC on the backend service.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
