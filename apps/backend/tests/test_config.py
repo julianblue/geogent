@@ -20,5 +20,7 @@ def test_weak_jwt_secret_allowed_in_development() -> None:
 
 
 def test_strong_secret_passes_in_production() -> None:
-    s = Settings(app_env="production", jwt_secret_key="this-is-a-strong-secret-1234567890")
+    # Any value outside _DEV_JWT_DEFAULTS satisfies the validator. The string
+    # is intentionally short / low-entropy so secret scanners don't flag it.
+    s = Settings(app_env="production", jwt_secret_key="not-a-default-value")
     assert s.app_env == "production"

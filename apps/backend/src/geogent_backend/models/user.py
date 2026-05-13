@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, func, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from geogent_backend.db.base import Base
@@ -16,7 +16,7 @@ class User(Base):
         Boolean,
         nullable=False,
         default=True,
-        server_default=func.true(),
+        server_default=true(),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

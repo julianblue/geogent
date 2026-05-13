@@ -33,7 +33,7 @@ def upgrade() -> None:
             "is_active",
             sa.Boolean(),
             nullable=False,
-            server_default=sa.func.true(),
+            server_default=sa.true(),
         ),
         sa.Column(
             "created_at",
