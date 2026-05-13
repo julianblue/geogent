@@ -1,8 +1,14 @@
 "use client";
 
-import { useRef } from "react";
-import Map, { type MapRef, NavigationControl } from "react-map-gl/maplibre";
-import { useMapActions } from "@/components/copilot/actions";
+import { useCallback } from "react";
+import type { Map as MapLibreMap } from "maplibre-gl";
+import Map, {
+  NavigationControl,
+  ScaleControl,
+  type ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
+
+import { useMapState } from "@/components/map/MapStateProvider";
 
 const OSM_STYLE = {
   version: 8 as const,
@@ -18,17 +24,44 @@ const OSM_STYLE = {
 };
 
 export function MapView() {
-  const mapRef = useRef<MapRef | null>(null);
-  useMapActions(mapRef);
+  const { mapRef, viewport, setViewport } = useMapState();
+
+  const syncFromMap = useCallback(
+    (map: MapLibreMap | undefined | null) => {
+      if (!map) return;
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      const b = map.getBounds();
+      setViewport({
+        longitude: center.lng,
+        latitude: center.lat,
+        zoom,
+        bounds: {
+          west: b.getWest(),
+          south: b.getSouth(),
+          east: b.getEast(),
+          north: b.getNorth(),
+        },
+      });
+    },
+    [setViewport],
+  );
 
   return (
     <Map
       ref={mapRef}
-      initialViewState={{ longitude: -122.42, latitude: 37.77, zoom: 11 }}
+      initialViewState={{
+        longitude: viewport.longitude,
+        latitude: viewport.latitude,
+        zoom: viewport.zoom,
+      }}
       mapStyle={OSM_STYLE}
       style={{ width: "100%", height: "100%" }}
+      onLoad={() => syncFromMap(mapRef.current?.getMap())}
+      onMoveEnd={(e: ViewStateChangeEvent) => syncFromMap(e.target as MapLibreMap)}
     >
       <NavigationControl position="top-left" />
+      <ScaleControl position="bottom-left" />
     </Map>
   );
 }

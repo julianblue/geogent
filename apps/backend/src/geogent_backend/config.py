@@ -28,6 +28,13 @@ class Settings(BaseSettings):
         default_factory=lambda: ["http://localhost:3000"],
     )
 
+    jwt_secret_key: str = Field(
+        default="change-me-in-prod",
+        description="HMAC key for HS256 JWTs. MUST be overridden in production.",
+    )
+    jwt_algorithm: str = Field(default="HS256")
+    jwt_access_token_expire_minutes: int = Field(default=60 * 24)
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

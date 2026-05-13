@@ -8,7 +8,7 @@
         fmt fmt-py fmt-ts \
         lint lint-py lint-ts \
         test test-backend test-agent test-ui \
-        migrate revision \
+        migrate revision migration seed-user \
         clean
 
 help:
@@ -24,8 +24,9 @@ help:
 	@echo "  make dev-agent       Run agent natively"
 	@echo "  make dev-ui          Run ui natively"
 	@echo ""
-	@echo "  make migrate         Apply Alembic migrations"
-	@echo "  make revision m=msg  Create a new Alembic revision"
+	@echo "  make migrate                       Apply Alembic migrations"
+	@echo "  make migration MSG=msg             Create a new Alembic revision (autogenerate)"
+	@echo "  make seed-user EMAIL=.. PASS=..    Create a user account"
 	@echo ""
 	@echo "  make fmt             Format all code"
 	@echo "  make lint            Lint all code"
@@ -84,6 +85,17 @@ migrate:
 revision:
 	@if [ -z "$(m)" ]; then echo "usage: make revision m='message'"; exit 1; fi
 	cd apps/backend && uv run alembic revision --autogenerate -m "$(m)"
+
+migration:
+	@if [ -z "$(MSG)" ]; then echo "usage: make migration MSG='message'"; exit 1; fi
+	cd apps/backend && uv run alembic revision --autogenerate -m "$(MSG)"
+
+seed-user:
+	@if [ -z "$(EMAIL)" ] || [ -z "$(PASS)" ]; then \
+	  echo "usage: make seed-user EMAIL=a@b.com PASS=secret123"; exit 1; \
+	fi
+	cd apps/backend && uv run python -m geogent_backend.scripts.seed_user \
+	  --email "$(EMAIL)" --password "$(PASS)"
 
 # ---------------------------------------------------------------------------
 # Format / Lint / Test
