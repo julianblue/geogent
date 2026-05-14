@@ -19,17 +19,11 @@ from __future__ import annotations
 
 import logging
 import os
+from functools import cache
 
 from geogent_agent.config import get_settings
 
 _logger = logging.getLogger("geogent_agent.observability")
-
-# Module-level on purpose: a `langgraph dev` hot-reload re-imports this
-# module and resets the flag, so the operator sees one fresh status line
-# per reload. Within a single process, both `graph.py` and `classic_graph.py`
-# call `configure_langsmith()` at import — the flag dedupes that pair into
-# a single log line.
-_LOGGED = False
 
 
 def _is_tracing_enabled() -> bool:
@@ -40,16 +34,16 @@ def _is_tracing_enabled() -> bool:
     return str(raw).lower() in {"1", "true", "yes", "on"}
 
 
+@cache
 def configure_langsmith() -> None:
     """Validate LangSmith environment and log a single status line.
 
-    Safe to call repeatedly; only the first call emits output.
+    Cached so repeat calls in the same process are no-ops; both `graph.py`
+    and `classic_graph.py` import this module so the cache dedupes that
+    pair. A `langgraph dev` hot-reload re-imports the module and resets
+    the cache, so the operator sees one fresh status line per reload —
+    not silence forever. Tests reset via `configure_langsmith.cache_clear()`.
     """
-    global _LOGGED
-    if _LOGGED:
-        return
-    _LOGGED = True
-
     settings = get_settings()
 
     enabled = _is_tracing_enabled()

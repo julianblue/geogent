@@ -11,10 +11,10 @@ from geogent_agent.config import get_settings
 @pytest.fixture(autouse=True)
 def _reset_state() -> None:
     """The observability log is one-shot per process; reset it between tests."""
-    observability._LOGGED = False
+    observability.configure_langsmith.cache_clear()
     get_settings.cache_clear()
     yield
-    observability._LOGGED = False
+    observability.configure_langsmith.cache_clear()
     get_settings.cache_clear()
 
 
