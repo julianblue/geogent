@@ -5,7 +5,7 @@
 import pytest
 
 from geogent_agent.config import get_settings
-from geogent_agent.models.chat import _resolve_model_name, get_chat_model
+from geogent_agent.models.chat import _resolve_model_name, get_chat_model, infer_provider
 
 
 @pytest.fixture(autouse=True)
@@ -69,3 +69,19 @@ def test_openrouter_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     with pytest.raises(ValueError, match="OPENROUTER_API_KEY is required"):
         get_chat_model("openrouter:anthropic/claude-3.5-sonnet")
+
+
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("openrouter:anthropic/claude-3.5-sonnet", "openrouter"),
+        ("bedrock:anthropic.claude-3", "bedrock"),
+        ("anthropic.claude-3", "bedrock"),
+        ("us.anthropic.claude-3", "bedrock"),
+        ("claude-sonnet-4-6", "anthropic"),
+        ("gpt-4o", "openai"),
+        ("mystery-model-9000", "unknown"),
+    ],
+)
+def test_infer_provider_routes_match_dispatch(model_name: str, expected: str) -> None:
+    assert infer_provider(model_name) == expected

@@ -14,12 +14,14 @@ from typing import Any
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 
 from geogent_agent.models import get_chat_model
 from geogent_agent.prompts import SYSTEM_PROMPT
 from geogent_agent.state import GraphState
 from geogent_agent.tools import TOOLS
+from geogent_agent.utils.tracing import build_tracing_config
 
 
 def _build_agent_executor() -> AgentExecutor:
@@ -38,7 +40,7 @@ def _build_agent_executor() -> AgentExecutor:
     return AgentExecutor(agent=agent, tools=TOOLS, verbose=False)
 
 
-async def classic_agent_node(state: GraphState) -> dict:
+async def classic_agent_node(state: GraphState, config: RunnableConfig | None = None) -> dict:
     """Invoke the AgentExecutor with the latest human turn as `input`.
 
     Everything before the final human message becomes `chat_history`.
@@ -55,7 +57,10 @@ async def classic_agent_node(state: GraphState) -> dict:
     user_input = messages[last_human_idx].content
     chat_history = list(messages[:last_human_idx])
 
-    executor = _build_agent_executor()
+    configurable = (config or {}).get("configurable") or {}
+    executor = _build_agent_executor().with_config(
+        **build_tracing_config(configurable, architecture="classic_langchain")
+    )
     result = await executor.ainvoke({"input": user_input, "chat_history": chat_history})
 
     return {"messages": [AIMessage(content=result["output"])]}

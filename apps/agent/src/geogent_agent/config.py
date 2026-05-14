@@ -33,9 +33,16 @@ class Settings(BaseSettings):
 
     backend_url: str = Field(default="http://localhost:8000")
 
+    # LangSmith observability. These fields are reference-only: the LangChain
+    # tracer reads `LANGSMITH_*` directly from `os.environ` at import time,
+    # so operators must set them in the deployment environment. The fields
+    # exist so `observability.py` can validate the setup at startup and so
+    # the values appear in a single, typed surface for tooling.
     langsmith_api_key: str | None = None
     langsmith_tracing: bool = False
     langsmith_project: str = "geogent"
+    langsmith_endpoint: str | None = None
+    langsmith_sampling_rate: float | None = None
 
 
 @lru_cache(maxsize=1)

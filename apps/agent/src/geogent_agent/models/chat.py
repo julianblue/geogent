@@ -5,6 +5,28 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from geogent_agent.config import get_settings
 
 
+def infer_provider(name: str) -> str:
+    """Return a stable provider label for the given model name.
+
+    Used as a LangSmith tag/metadata field so traces are filterable by
+    backend regardless of which model slug they used. Mirrors the dispatch
+    in ``get_chat_model``.
+    """
+    if name.startswith("openrouter:"):
+        return "openrouter"
+    if (
+        name.startswith("bedrock:")
+        or name.startswith("anthropic.")
+        or name.startswith("us.anthropic.")
+    ):
+        return "bedrock"
+    if name.startswith("claude"):
+        return "anthropic"
+    if name.startswith("gpt"):
+        return "openai"
+    return "unknown"
+
+
 def _resolve_model_name() -> str:
     """Resolve the model name to use when none is passed explicitly.
 

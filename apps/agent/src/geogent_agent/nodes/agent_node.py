@@ -8,6 +8,7 @@ from geogent_agent.models import get_chat_model
 from geogent_agent.prompts import SYSTEM_PROMPT
 from geogent_agent.state import GraphState
 from geogent_agent.tools import TOOLS
+from geogent_agent.utils.tracing import build_tracing_config
 
 
 def _format_map_state(map_state: Any) -> str:
@@ -21,10 +22,14 @@ def _format_map_state(map_state: Any) -> str:
 
 async def agent_node(state: GraphState, config: RunnableConfig | None = None) -> dict:
     """Invoke the chat model with tools, the system prompt, and any UI map context."""
-    model = get_chat_model().bind_tools(TOOLS)
+    configurable = (config or {}).get("configurable") or {}
+    model = (
+        get_chat_model()
+        .bind_tools(TOOLS)
+        .with_config(**build_tracing_config(configurable, architecture="langgraph_react"))
+    )
 
     system_content = SYSTEM_PROMPT
-    configurable = (config or {}).get("configurable") or {}
     map_state = configurable.get("map_state")
     if map_state:
         system_content += _format_map_state(map_state)

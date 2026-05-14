@@ -105,6 +105,52 @@ defaults to `https://openrouter.ai/api/v1` and can be overridden with
 `OPENROUTER_BASE_URL`. Routing goes through `ChatOpenAI` from
 `langchain-openai` with the OpenRouter `base_url` — no new dependency.
 
+## Observability (LangSmith)
+
+The agent traces runs to [LangSmith](https://smith.langchain.com) when
+`LANGSMITH_TRACING=true` and `LANGSMITH_API_KEY` are set on the process.
+Configuration lives in the environment (compose, Railway, shell) — the
+LangChain tracer reads `LANGSMITH_*` directly, so `.env` files work too.
+`Settings.langsmith_*` mirrors the env vars for diagnostics but never
+mutates `os.environ` (mutating it after `langchain_core` imports is too late
+to matter, so the project avoids the footgun).
+
+On startup the agent logs one line:
+
+```
+LangSmith tracing enabled project=geogent-dev
+LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable)
+```
+
+It also warns when `LANGSMITH_TRACING=true` but the API key is missing —
+the tracer silently drops spans in that case, which is easy to miss.
+
+### Run-name and tag conventions
+
+Each LLM invocation is wrapped in `.with_config(...)` with these fields:
+
+| Field      | Value                                           |
+| ---------- | ----------------------------------------------- |
+| `run_name` | `geogent.<architecture>.agent`                  |
+| tags       | `architecture:…`, `provider:…`, `model:…`       |
+| metadata   | same fields as tags, plus `thread_id`,          |
+|            | `assistant_id`, `user_id` when present in the   |
+|            | `configurable` config passed by LangGraph.      |
+
+`architecture` is `langgraph_react` or `classic_langchain`. `provider` is
+inferred from the model-name prefix (`anthropic`, `openai`, `bedrock`,
+`openrouter`). Filter the LangSmith UI on these tags to compare runs across
+architectures or providers without hunting through run names.
+
+### Useful env knobs
+
+| Variable                                   | Purpose                                  |
+| ------------------------------------------ | ---------------------------------------- |
+| `LANGSMITH_PROJECT`                        | Per-environment project name             |
+| `LANGSMITH_ENDPOINT`                       | EU or self-hosted LangSmith URL          |
+| `LANGSMITH_SAMPLING_RATE`                  | Sample a fraction (0.0–1.0) of runs      |
+| `LANGSMITH_HIDE_INPUTS` / `..._OUTPUTS`    | Redact request/response bodies in traces |
+
 ## Tools
 
 The agent ships three groups of tools, all wired into both the
