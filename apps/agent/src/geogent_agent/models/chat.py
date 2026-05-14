@@ -27,7 +27,7 @@ def infer_provider(name: str) -> str:
     return "unknown"
 
 
-def _resolve_model_name() -> str:
+def resolve_model_name() -> str:
     """Resolve the model name to use when none is passed explicitly.
 
     Falls back to ``BEDROCK_MODEL_ID`` when the user has set it but not
@@ -43,25 +43,28 @@ def _resolve_model_name() -> str:
 def get_chat_model(model: str | None = None) -> BaseChatModel:
     """Return a configured chat model based on the agent settings.
 
-    Dispatches by model-name prefix:
+    Dispatch keys on ``infer_provider`` so the prefix table is the single
+    source of truth for both routing and tracing tags:
+
       - "openrouter:<vendor>/<model>"                  → ChatOpenAI via OpenRouter
       - "claude-*"                                     → ChatAnthropic (Anthropic API)
       - "gpt-*"                                        → ChatOpenAI (OpenAI API)
       - "bedrock:*" | "anthropic.*" | "us.anthropic.*" → ChatBedrockConverse (AWS Bedrock)
 
-    For Bedrock, strip an optional "bedrock:" prefix; the remainder is passed
-    through as the Bedrock model ID. AWS credentials are resolved via the
-    standard boto3 credential chain.
+    For Bedrock, an optional "bedrock:" prefix is stripped; the remainder
+    is the Bedrock model ID. AWS credentials are resolved via the standard
+    boto3 credential chain.
 
-    For OpenRouter, strip the "openrouter:" prefix; the remainder is the
-    OpenRouter model slug (e.g. "anthropic/claude-3.5-sonnet"). Requires
+    For OpenRouter, the "openrouter:" prefix is stripped; the remainder is
+    the OpenRouter model slug (e.g. "anthropic/claude-3.5-sonnet"). Requires
     OPENROUTER_API_KEY. Base URL defaults to https://openrouter.ai/api/v1
     and can be overridden via OPENROUTER_BASE_URL.
     """
     settings = get_settings()
-    name = model or _resolve_model_name()
+    name = model or resolve_model_name()
+    provider = infer_provider(name)
 
-    if name.startswith("openrouter:"):
+    if provider == "openrouter":
         from langchain_openai import ChatOpenAI
 
         if not settings.openrouter_api_key:
@@ -75,11 +78,7 @@ def get_chat_model(model: str | None = None) -> BaseChatModel:
             temperature=0,
         )
 
-    if (
-        name.startswith("bedrock:")
-        or name.startswith("anthropic.")
-        or name.startswith("us.anthropic.")
-    ):
+    if provider == "bedrock":
         from langchain_aws import ChatBedrockConverse
 
         model_id = name.removeprefix("bedrock:") if name.startswith("bedrock:") else name
@@ -89,12 +88,12 @@ def get_chat_model(model: str | None = None) -> BaseChatModel:
             temperature=0,
         )
 
-    if name.startswith("claude"):
+    if provider == "anthropic":
         from langchain_anthropic import ChatAnthropic
 
         return ChatAnthropic(model=name, temperature=0)
 
-    if name.startswith("gpt"):
+    if provider == "openai":
         from langchain_openai import ChatOpenAI
 
         return ChatOpenAI(model=name, temperature=0)

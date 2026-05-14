@@ -129,13 +129,11 @@ the tracer silently drops spans in that case, which is easy to miss.
 
 Each LLM invocation is wrapped in `.with_config(...)` with these fields:
 
-| Field      | Value                                           |
-| ---------- | ----------------------------------------------- |
-| `run_name` | `geogent.<architecture>.agent`                  |
-| tags       | `architecture:…`, `provider:…`, `model:…`       |
-| metadata   | same fields as tags, plus `thread_id`,          |
-|            | `assistant_id`, `user_id` when present in the   |
-|            | `configurable` config passed by LangGraph.      |
+| Field      | Value                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `run_name` | `geogent.<architecture>.agent`                                                        |
+| tags       | `architecture:…`, `provider:…`, `model:…`                                             |
+| metadata   | same keys as tags, plus `thread_id` / `assistant_id` / `user_id` when LangGraph passes them in `configurable`. |
 
 `architecture` is `langgraph_react` or `classic_langchain`. `provider` is
 inferred from the model-name prefix (`anthropic`, `openai`, `bedrock`,
@@ -148,8 +146,8 @@ architectures or providers without hunting through run names.
 | ------------------------------------------ | ---------------------------------------- |
 | `LANGSMITH_PROJECT`                        | Per-environment project name             |
 | `LANGSMITH_ENDPOINT`                       | EU or self-hosted LangSmith URL          |
-| `LANGSMITH_SAMPLING_RATE`                  | Sample a fraction (0.0–1.0) of runs      |
-| `LANGSMITH_HIDE_INPUTS` / `..._OUTPUTS`    | Redact request/response bodies in traces |
+| `LANGSMITH_SAMPLING_RATE`                  | Sample a fraction (0.0–1.0) of runs. Read by the `langsmith` client directly — the agent surfaces it as a knob but does not interpret the value itself. |
+| `LANGSMITH_HIDE_INPUTS` / `..._OUTPUTS`    | Redact request/response bodies in traces. Also enforced client-side by `langsmith`. |
 
 ## Tools
 

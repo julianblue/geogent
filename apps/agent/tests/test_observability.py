@@ -56,6 +56,18 @@ def test_logs_enabled_with_project_and_endpoint(
     )
 
 
+def test_legacy_langchain_tracing_v2_is_honored(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """LangChain's legacy `LANGCHAIN_TRACING_V2` enables tracing equivalently."""
+    monkeypatch.delenv("LANGSMITH_TRACING", raising=False)
+    monkeypatch.setenv("LANGCHAIN_TRACING_V2", "true")
+    monkeypatch.setenv("LANGSMITH_API_KEY", "ls-test")
+    with caplog.at_level(logging.INFO, logger="geogent_agent.observability"):
+        observability.configure_langsmith()
+    assert any("enabled" in r.message for r in caplog.records)
+
+
 def test_idempotent_under_repeated_calls(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:

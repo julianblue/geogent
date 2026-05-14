@@ -11,8 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from geogent_agent.models import infer_provider
-from geogent_agent.models.chat import _resolve_model_name
+from geogent_agent.models import infer_provider, resolve_model_name
 
 _PASSTHROUGH_IDS = ("thread_id", "assistant_id", "user_id")
 
@@ -28,7 +27,7 @@ def build_tracing_config(configurable: dict[str, Any], architecture: str) -> dic
     Metadata mirrors the tags as keyed fields (so dashboards can group by
     them) and adds any thread/assistant/user IDs LangGraph injected.
     """
-    model_name = _resolve_model_name()
+    model_name = resolve_model_name()
     provider = infer_provider(model_name)
 
     tags = [

@@ -24,6 +24,11 @@ from geogent_agent.config import get_settings
 
 _logger = logging.getLogger("geogent_agent.observability")
 
+# Module-level on purpose: a `langgraph dev` hot-reload re-imports this
+# module and resets the flag, so the operator sees one fresh status line
+# per reload. Within a single process, both `graph.py` and `classic_graph.py`
+# call `configure_langsmith()` at import — the flag dedupes that pair into
+# a single log line.
 _LOGGED = False
 
 
