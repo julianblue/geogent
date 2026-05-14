@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     # the asyncpg driver (postgresql+asyncpg://...). When unset the
     # checkpointer factory raises — `langgraph dev` and unit tests rely on
     # the runtime's default in-memory saver instead.
-    agent_database_url: str | None = Field(default=None, alias="AGENT_DATABASE_URL")
+    agent_database_url: str | None = Field(default=None)
     agent_db_schema: str = Field(default="langgraph")
     agent_db_pool_min: int = Field(default=1)
     agent_db_pool_max: int = Field(default=5)

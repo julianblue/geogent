@@ -29,25 +29,28 @@ def test_build_pool_raises_when_dsn_missing(monkeypatch: pytest.MonkeyPatch) -> 
         build_pool()
 
 
-def test_build_pool_configures_psycopg_kwargs(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_build_pool_configures_psycopg_kwargs(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENT_DATABASE_URL", "postgresql://geogent:geogent@localhost:5432/geogent")
     monkeypatch.setenv("AGENT_DB_POOL_MIN", "2")
     monkeypatch.setenv("AGENT_DB_POOL_MAX", "8")
 
     pool = build_pool()
+    try:
+        # AsyncPostgresSaver requires autocommit + dict_row to function
+        # correctly; prepare_threshold=0 disables server-side prepared
+        # statements which the saver cannot use across pooled connections.
+        assert pool.kwargs["autocommit"] is True
+        assert pool.kwargs["prepare_threshold"] == 0
+        from psycopg.rows import dict_row
 
-    # AsyncPostgresSaver requires autocommit + dict_row to function
-    # correctly; prepare_threshold=0 disables server-side prepared
-    # statements which the saver cannot use across pooled connections.
-    assert pool.kwargs["autocommit"] is True
-    assert pool.kwargs["prepare_threshold"] == 0
-    from psycopg.rows import dict_row
-
-    assert pool.kwargs["row_factory"] is dict_row
-    assert pool.min_size == 2
-    assert pool.max_size == 8
-    # Pool must not be opened by the factory — opener owns the lifecycle.
-    assert not pool._opened  # type: ignore[attr-defined]
+        assert pool.kwargs["row_factory"] is dict_row
+        assert pool.min_size == 2
+        assert pool.max_size == 8
+        # Factory must not open the pool — opener owns the lifecycle.
+        # `closed` is the public flag (True until `open()` is awaited).
+        assert pool.closed is True
+    finally:
+        await pool.close()
 
 
 async def test_configure_pins_search_path_to_schema(
@@ -68,6 +71,9 @@ async def test_configure_pins_search_path_to_schema(
 
     conn.set_autocommit.assert_awaited_once_with(True)
     cursor.execute.assert_awaited_once()
-    sql = cursor.execute.await_args.args[0]
-    assert 'SET search_path TO "langgraph_test"' in sql
-    assert "public" in sql
+    # `_configure` passes a psycopg.sql.Composed; rendering it verifies that
+    # the schema name is safely quoted via Identifier (defeats injection
+    # via a `"` or backslash in AGENT_DB_SCHEMA).
+    stmt = cursor.execute.await_args.args[0]
+    rendered = stmt.as_string(None)
+    assert rendered == 'SET search_path TO "langgraph_test", public'

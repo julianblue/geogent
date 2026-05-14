@@ -1,21 +1,19 @@
-"""Checkpointer and store wiring.
+"""Checkpointer wiring.
 
 The production LangGraph runtime (`langgraph build`-produced image) reads
 `POSTGRES_URI` and applies its own Postgres saver — the graphs in
 `graph.py` / `classic_graph.py` therefore compile with no checkpointer
-arg. The helpers in this module are for scripts and tests that compile
-the graph directly (e.g. `setup_checkpointer.py` running migrations on a
-Railway release step).
+arg. `run_setup()` here is invoked once per Railway deploy via
+`scripts/setup_checkpointer.py` to create the dedicated schema and apply
+idempotent checkpoint-table migrations.
 
 `langgraph dev` overrides any compiled-in checkpointer with its own
 in-memory saver (see langchain-ai/langgraph#5790), so do not try to
 attach one there.
 """
 
-from contextlib import asynccontextmanager
-
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from psycopg import AsyncConnection
+from psycopg import AsyncConnection, sql
 from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 
@@ -24,11 +22,13 @@ from geogent_agent.config import get_settings
 
 async def _configure(conn: AsyncConnection) -> None:
     # Pin search_path so AsyncPostgresSaver's unschema-qualified SQL lands
-    # in our dedicated schema instead of `public`.
+    # in our dedicated schema instead of `public`. psycopg.sql.Identifier
+    # handles quoting so an exotic schema name can't escape the literal.
     await conn.set_autocommit(True)
     schema = get_settings().agent_db_schema
+    stmt = sql.SQL("SET search_path TO {}, public").format(sql.Identifier(schema))
     async with conn.cursor() as cur:
-        await cur.execute(f'SET search_path TO "{schema}", public')
+        await cur.execute(stmt)
 
 
 def build_pool() -> AsyncConnectionPool:
@@ -49,23 +49,16 @@ def build_pool() -> AsyncConnectionPool:
     )
 
 
-@asynccontextmanager
-async def checkpointer_ctx():
-    pool = build_pool()
-    await pool.open()
-    try:
-        yield AsyncPostgresSaver(conn=pool)
-    finally:
-        await pool.close()
-
-
 async def run_setup() -> None:
     s = get_settings()
     pool = build_pool()
     await pool.open()
     try:
+        create_schema = sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
+            sql.Identifier(s.agent_db_schema)
+        )
         async with pool.connection() as conn, conn.cursor() as cur:
-            await cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{s.agent_db_schema}"')
+            await cur.execute(create_schema)
         await AsyncPostgresSaver(conn=pool).setup()
     finally:
         await pool.close()
