@@ -56,20 +56,31 @@ services:
     container_name: geogent-agent
     depends_on:
       - backend
+    # Env-var forms used here:
+    #   KEY=value                — fixed default baked into the service
+    #   KEY=${KEY:-fallback}     — substitute from host, fallback default
+    #   - KEY                    — passthrough: only set when the host has
+    #                              it; avoids injecting an empty string,
+    #                              which the langsmith SDK treats
+    #                              differently from "unset" for ENDPOINT.
     environment:
-      BACKEND_URL: http://backend:8000
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      AGENT_MODEL: ${AGENT_MODEL:-claude-sonnet-4-6}
-      AGENT_ARCHITECTURE: ${AGENT_ARCHITECTURE:-langgraph_react}
-      AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
-      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-5-20250929-v1:0}
-      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
-      LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
-      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-geogent}
+      - BACKEND_URL=http://backend:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - AGENT_MODEL=${AGENT_MODEL:-claude-sonnet-4-6}
+      - AGENT_ARCHITECTURE=${AGENT_ARCHITECTURE:-langgraph_react}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-5-20250929-v1:0}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-false}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-geogent-dev}
+      - LANGSMITH_ENDPOINT
+      - LANGSMITH_SAMPLING_RATE
+      - LANGSMITH_HIDE_INPUTS
+      - LANGSMITH_HIDE_OUTPUTS
     ports:
       - "2024:2024"
     volumes:

@@ -5,7 +5,7 @@
 import pytest
 
 from geogent_agent.config import get_settings
-from geogent_agent.models.chat import _resolve_model_name, get_chat_model
+from geogent_agent.models.chat import get_chat_model, infer_provider, resolve_model_name
 
 
 @pytest.fixture(autouse=True)
@@ -20,7 +20,7 @@ def test_falls_back_to_bedrock_when_only_bedrock_model_id_set(
 ) -> None:
     monkeypatch.delenv("AGENT_MODEL", raising=False)
     monkeypatch.setenv("BEDROCK_MODEL_ID", "us.anthropic.claude-test-v1:0")
-    assert _resolve_model_name() == "us.anthropic.claude-test-v1:0"
+    assert resolve_model_name() == "us.anthropic.claude-test-v1:0"
 
 
 def test_agent_model_takes_precedence_when_both_set(
@@ -28,7 +28,7 @@ def test_agent_model_takes_precedence_when_both_set(
 ) -> None:
     monkeypatch.setenv("AGENT_MODEL", "claude-sonnet-4-6")
     monkeypatch.setenv("BEDROCK_MODEL_ID", "us.anthropic.claude-test-v1:0")
-    assert _resolve_model_name() == "claude-sonnet-4-6"
+    assert resolve_model_name() == "claude-sonnet-4-6"
 
 
 def test_uses_default_agent_model_when_neither_set(
@@ -37,7 +37,7 @@ def test_uses_default_agent_model_when_neither_set(
     monkeypatch.delenv("AGENT_MODEL", raising=False)
     monkeypatch.delenv("BEDROCK_MODEL_ID", raising=False)
     settings = get_settings()
-    assert _resolve_model_name() == settings.agent_model
+    assert resolve_model_name() == settings.agent_model
 
 
 def test_openrouter_prefix_routes_through_openai_client_with_custom_base(
@@ -69,3 +69,19 @@ def test_openrouter_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     with pytest.raises(ValueError, match="OPENROUTER_API_KEY is required"):
         get_chat_model("openrouter:anthropic/claude-3.5-sonnet")
+
+
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("openrouter:anthropic/claude-3.5-sonnet", "openrouter"),
+        ("bedrock:anthropic.claude-3", "bedrock"),
+        ("anthropic.claude-3", "bedrock"),
+        ("us.anthropic.claude-3", "bedrock"),
+        ("claude-sonnet-4-6", "anthropic"),
+        ("gpt-4o", "openai"),
+        ("mystery-model-9000", "unknown"),
+    ],
+)
+def test_infer_provider_routes_match_dispatch(model_name: str, expected: str) -> None:
+    assert infer_provider(model_name) == expected

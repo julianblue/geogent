@@ -19,9 +19,17 @@
 #
 # Optional:
 #   AGENT_MODEL=claude-sonnet-4-6
+#
+# LangSmith observability (all optional). The agent logs on boot whether
+# tracing is enabled. Use a per-environment project so prod traces stay
+# clean. Runs are auto-tagged with architecture / provider / model.
 #   LANGSMITH_API_KEY=...
 #   LANGSMITH_TRACING=true
-#   LANGSMITH_PROJECT=geogent
+#   LANGSMITH_PROJECT=geogent-prod
+#   LANGSMITH_ENDPOINT=https://api.smith.langchain.com   # EU / self-hosted
+#   LANGSMITH_SAMPLING_RATE=1.0
+#   LANGSMITH_HIDE_INPUTS=false
+#   LANGSMITH_HIDE_OUTPUTS=false
 
 [build]
 builder = "DOCKERFILE"
