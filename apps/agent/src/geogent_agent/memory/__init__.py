@@ -34,9 +34,7 @@ async def _configure(conn: AsyncConnection) -> None:
 def build_pool() -> AsyncConnectionPool:
     s = get_settings()
     if not s.agent_database_url:
-        raise RuntimeError(
-            "AGENT_DATABASE_URL is required for the Postgres checkpointer"
-        )
+        raise RuntimeError("AGENT_DATABASE_URL is required for the Postgres checkpointer")
     return AsyncConnectionPool(
         conninfo=s.agent_database_url,
         min_size=s.agent_db_pool_min,

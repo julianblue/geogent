@@ -30,9 +30,7 @@ def test_build_pool_raises_when_dsn_missing(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_build_pool_configures_psycopg_kwargs(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "AGENT_DATABASE_URL", "postgresql://geogent:geogent@localhost:5432/geogent"
-    )
+    monkeypatch.setenv("AGENT_DATABASE_URL", "postgresql://geogent:geogent@localhost:5432/geogent")
     monkeypatch.setenv("AGENT_DB_POOL_MIN", "2")
     monkeypatch.setenv("AGENT_DB_POOL_MAX", "8")
 
@@ -55,9 +53,7 @@ def test_build_pool_configures_psycopg_kwargs(monkeypatch: pytest.MonkeyPatch) -
 async def test_configure_pins_search_path_to_schema(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv(
-        "AGENT_DATABASE_URL", "postgresql://geogent:geogent@localhost:5432/geogent"
-    )
+    monkeypatch.setenv("AGENT_DATABASE_URL", "postgresql://geogent:geogent@localhost:5432/geogent")
     monkeypatch.setenv("AGENT_DB_SCHEMA", "langgraph_test")
 
     conn = MagicMock()
