@@ -63,8 +63,7 @@ def configure_langsmith() -> None:
 
     if not api_key:
         _logger.warning(
-            "LANGSMITH_TRACING=true but LANGSMITH_API_KEY is unset; "
-            "traces will be dropped silently"
+            "LANGSMITH_TRACING=true but LANGSMITH_API_KEY is unset; traces will be dropped silently"
         )
         return
 
