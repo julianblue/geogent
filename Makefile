@@ -8,7 +8,7 @@
         fmt fmt-py fmt-ts \
         lint lint-py lint-ts \
         test test-backend test-agent test-ui \
-        migrate revision seed-user \
+        migrate revision agent-migrate seed-user \
         clean
 
 help:
@@ -26,6 +26,7 @@ help:
 	@echo ""
 	@echo "  make migrate                       Apply Alembic migrations"
 	@echo "  make revision m='message'          Create a new Alembic revision (autogenerate)"
+	@echo "  make agent-migrate                 Apply LangGraph checkpointer schema migrations"
 	@echo "  make seed-user EMAIL=.. PASS=..    Create a user account"
 	@echo ""
 	@echo "  make fmt             Format all code"
@@ -81,6 +82,9 @@ dev-ui:
 # ---------------------------------------------------------------------------
 migrate:
 	cd apps/backend && uv run alembic upgrade head
+
+agent-migrate:
+	cd apps/agent && uv run python -m geogent_agent.scripts.setup_checkpointer
 
 revision:
 	@if [ -z "$(m)" ]; then echo "usage: make revision m='message'"; exit 1; fi
