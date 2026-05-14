@@ -31,7 +31,7 @@ def _is_tracing_enabled() -> bool:
     `LANGCHAIN_TRACING_V2` as equivalent — LangChain accepts either.
     """
     raw = os.environ.get("LANGSMITH_TRACING") or os.environ.get("LANGCHAIN_TRACING_V2")
-    return str(raw).lower() in {"1", "true", "yes", "on"}
+    return raw is not None and raw.lower() in {"1", "true", "yes", "on"}
 
 
 @cache
@@ -50,6 +50,11 @@ def configure_langsmith() -> None:
     api_key = os.environ.get("LANGSMITH_API_KEY") or os.environ.get("LANGCHAIN_API_KEY")
     project = os.environ.get("LANGSMITH_PROJECT") or settings.langsmith_project
     endpoint = os.environ.get("LANGSMITH_ENDPOINT") or settings.langsmith_endpoint
+    sampling_rate = os.environ.get("LANGSMITH_SAMPLING_RATE") or (
+        str(settings.langsmith_sampling_rate)
+        if settings.langsmith_sampling_rate is not None
+        else None
+    )
 
     if not enabled:
         _logger.info("LangSmith tracing disabled (set LANGSMITH_TRACING=true to enable)")
@@ -61,5 +66,9 @@ def configure_langsmith() -> None:
         )
         return
 
-    endpoint_suffix = f" endpoint={endpoint}" if endpoint else ""
-    _logger.info("LangSmith tracing enabled project=%s%s", project, endpoint_suffix)
+    suffix = ""
+    if endpoint:
+        suffix += f" endpoint={endpoint}"
+    if sampling_rate:
+        suffix += f" sampling_rate={sampling_rate}"
+    _logger.info("LangSmith tracing enabled project=%s%s", project, suffix)

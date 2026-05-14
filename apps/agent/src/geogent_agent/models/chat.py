@@ -6,11 +6,21 @@ from geogent_agent.config import get_settings
 
 
 def infer_provider(name: str) -> str:
-    """Return a stable provider label for the given model name.
+    """Return a best-effort provider label for the given model name.
 
     Used as a LangSmith tag/metadata field so traces are filterable by
-    backend regardless of which model slug they used. Mirrors the dispatch
-    in ``get_chat_model``.
+    backend, and as the dispatch key inside ``get_chat_model`` — keeping
+    routing and tracing in lockstep.
+
+    The mapping is prefix-based and **order-dependent**: the bedrock
+    branch matches ``anthropic.``/``us.anthropic.`` and MUST run before
+    the bare ``claude`` check, otherwise a Bedrock-served Claude alias
+    would mis-tag as `anthropic`. By the same token, the labels are
+    best-effort — a future model named ``gpt-oss-…`` from a non-OpenAI
+    vendor, or a ``claude-*`` slug exposed through a different gateway,
+    would be tagged by surface prefix rather than the true backend.
+    Returns ``unknown`` when no prefix matches; treat the tag as a useful
+    grouping signal, not a guaranteed identity.
     """
     if name.startswith("openrouter:"):
         return "openrouter"

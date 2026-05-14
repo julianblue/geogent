@@ -24,6 +24,15 @@ def build_tracing_config(configurable: dict[str, Any], architecture: str) -> dic
       - ``provider:<openai|anthropic|bedrock|openrouter|unknown>``
       - ``model:<resolved-model-name>``
 
+    The ``model:`` tag and metadata field hold the **raw user-configured
+    name** (the value of ``AGENT_MODEL`` as resolved by
+    ``resolve_model_name``). For Bedrock and OpenRouter that includes the
+    routing prefix — ``bedrock:anthropic.claude-3`` or
+    ``openrouter:anthropic/claude-3.5-sonnet`` — even though the underlying
+    SDK is invoked with the prefix stripped. This is deliberate: the raw
+    name is what an operator recognizes from config, and is the stable
+    identifier across the dispatch in ``get_chat_model``.
+
     Metadata mirrors the tags as keyed fields (so dashboards can group by
     them) and adds any thread/assistant/user IDs LangGraph injected.
     """

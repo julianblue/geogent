@@ -7,10 +7,22 @@ import pytest
 import geogent_agent.observability as observability
 from geogent_agent.config import get_settings
 
+_LANGSMITH_ENV_VARS = (
+    "LANGSMITH_TRACING",
+    "LANGCHAIN_TRACING_V2",
+    "LANGSMITH_API_KEY",
+    "LANGCHAIN_API_KEY",
+    "LANGSMITH_PROJECT",
+    "LANGSMITH_ENDPOINT",
+    "LANGSMITH_SAMPLING_RATE",
+)
+
 
 @pytest.fixture(autouse=True)
-def _reset_state() -> None:
-    """The observability log is one-shot per process; reset it between tests."""
+def _reset_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Clear cached state + any host LANGSMITH_* leaking in from the dev's shell."""
+    for var in _LANGSMITH_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
     observability.configure_langsmith.cache_clear()
     get_settings.cache_clear()
     yield

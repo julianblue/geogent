@@ -137,8 +137,13 @@ Each LLM invocation is wrapped in `.with_config(...)` with these fields:
 
 `architecture` is `langgraph_react` or `classic_langchain`. `provider` is
 inferred from the model-name prefix (`anthropic`, `openai`, `bedrock`,
-`openrouter`). Filter the LangSmith UI on these tags to compare runs across
-architectures or providers without hunting through run names.
+`openrouter`, or `unknown` if no prefix matches — `infer_provider` is
+best-effort, see its docstring). The `model:` tag and metadata field
+carry the **raw** value of `AGENT_MODEL`, including any
+`bedrock:`/`openrouter:` routing prefix, so a trace lines up with what
+an operator typed in config rather than the post-strip ID the SDK sees.
+Filter the LangSmith UI on these tags to compare runs across architectures
+or providers without hunting through run names.
 
 ### Useful env knobs
 
