@@ -20,8 +20,10 @@ target_metadata = Base.metadata
 
 # PostGIS extension tables/schemas that autogen would otherwise try to drop or
 # re-create. Keep migrations focused on application tables only; extension
-# objects are owned by scripts/db/init-postgis.sql.
-_POSTGIS_SCHEMAS = frozenset({"tiger", "tiger_data", "topology"})
+# objects are owned by scripts/db/init-postgis.sql. The `langgraph` schema
+# holds LangGraph checkpointer tables managed by apps/agent's
+# AsyncPostgresSaver.setup() — backend Alembic must never touch them.
+_EXTERNAL_SCHEMAS = frozenset({"tiger", "tiger_data", "topology", "langgraph"})
 _POSTGIS_TABLES = frozenset(
     {
         "spatial_ref_sys",
@@ -38,7 +40,7 @@ def include_object(obj, name, type_, reflected, compare_to):  # noqa: ANN001 - a
         if name in _POSTGIS_TABLES:
             return False
         schema = getattr(obj, "schema", None)
-        if schema in _POSTGIS_SCHEMAS:
+        if schema in _EXTERNAL_SCHEMAS:
             return False
     return True
 
