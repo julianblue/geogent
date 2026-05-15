@@ -26,7 +26,7 @@ const OSM_STYLE = {
 };
 
 export function MapView() {
-  const { mapRef, viewport, setViewport } = useMapState();
+  const { mapRef, viewport, setViewport, setMapReady } = useMapState();
 
   const syncFromMap = useCallback(
     (map: MapLibreMap | undefined | null) => {
@@ -59,7 +59,10 @@ export function MapView() {
       }}
       mapStyle={OSM_STYLE}
       style={{ width: "100%", height: "100%" }}
-      onLoad={() => syncFromMap(mapRef.current?.getMap())}
+      onLoad={() => {
+        syncFromMap(mapRef.current?.getMap());
+        setMapReady(true);
+      }}
       onMoveEnd={(e: ViewStateChangeEvent) => syncFromMap(e.target as MapLibreMap)}
     >
       <NavigationControl position="top-left" />

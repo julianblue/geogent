@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 from typing import Any
 
 from langchain_core.messages import SystemMessage
@@ -20,6 +21,17 @@ def _format_map_state(map_state: Any) -> str:
     return f"\n\nCurrent map_state (from config.configurable):\n{rendered}"
 
 
+def _today_block() -> str:
+    """Inject the current UTC date so the model doesn't dismiss STAC results
+    whose datetime is past its training cutoff as 'synthetic test data'.
+
+    Sentinel-2 catalog returns scenes acquired up to ~3 days ago; without this
+    anchor the LLM has been observed constraining searches back to its
+    training horizon and reporting 'no recent imagery'.
+    """
+    return f"\n\nToday's date is {datetime.now(UTC):%Y-%m-%d} (UTC). Trust STAC datetimes."
+
+
 async def agent_node(state: GraphState, config: RunnableConfig | None = None) -> dict:
     """Invoke the chat model with tools, the system prompt, and any UI map context."""
     configurable = (config or {}).get("configurable") or {}
@@ -29,7 +41,7 @@ async def agent_node(state: GraphState, config: RunnableConfig | None = None) ->
         .with_config(**build_tracing_config(configurable, architecture="langgraph_react"))
     )
 
-    system_content = SYSTEM_PROMPT
+    system_content = SYSTEM_PROMPT + _today_block()
     map_state = configurable.get("map_state")
     if map_state:
         system_content += _format_map_state(map_state)

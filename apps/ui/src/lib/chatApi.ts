@@ -72,7 +72,11 @@ export function sendMessage(
     input: command ? undefined : { messages: params.messages },
     command,
     config: { ...runConfig, configurable },
-    streamMode: ["messages-tuple", "values", "custom"],
+    // "updates" is required — @assistant-ui/react-langgraph only routes
+    // `__interrupt__` into useLangGraphInterruptState from Updates events.
+    // Drop it and our Sentinel2RenderTool (and any other interrupt handler)
+    // never fires.
+    streamMode: ["messages-tuple", "values", "updates", "custom"],
     ...(checkpointId ? { checkpointId } : {}),
   }) as AsyncGenerator<LangGraphMessagesEvent<LangChainMessage>>;
 }

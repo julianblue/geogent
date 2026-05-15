@@ -60,6 +60,56 @@ def list_features_in_viewport() -> dict:
 
 
 @tool
+def show_sentinel2_scene(
+    item_id: str | None = None,
+    bbox: list[float] | None = None,
+    composite: str = "true-color",
+) -> Any:
+    """Render a Sentinel-2 L2A scene on the user's map.
+
+    The browser handles the actual COG fetch + GPU compositing via deck.gl —
+    this tool emits a LangGraph interrupt that the UI executes, then resumes
+    the graph with `{ok, item_id, datetime, cloud_cover}` so the agent knows
+    what got rendered.
+
+    Pass either ``item_id`` (preferred — from a prior ``stac_search`` you ran
+    with the right sortby + cloud filter) or a ``bbox`` (the UI will pick the
+    latest cloud-free scene intersecting it automatically). If both are passed,
+    ``item_id`` wins.
+
+    Args:
+        item_id: A Sentinel-2 L2A item id (e.g. ``"S2B_31UGS_20260501_0_L2A"``).
+        bbox: ``[west, south, east, north]`` in WGS84 degrees. Used when the
+            caller hasn't already resolved an item id.
+        composite: Visualization preset. Defaults to ``"true-color"``.
+
+            RGB composites (natural / false-color blends of three bands):
+              - ``"true-color"``        red/green/blue, what the eye sees.
+              - ``"false-color-ir"``    nir/red/green, vegetation = bright red.
+              - ``"agriculture"``       swir16/nir/blue, crop vigour & soil.
+              - ``"burned-area"``       swir22/swir16/nir, recent fire scars.
+
+            Indices (GPU-computed band math with an inline colormap):
+              - ``"ndvi"``  vegetation health/density — brown→yellow→green.
+              - ``"ndwi"``  surface water / wetlands — tan→light→deep blue.
+              - ``"nbr"``   burn severity — dark→orange→green.
+              - ``"evi"``   dense-canopy biomass — pale→lime→dark green.
+
+            Pick by user intent: "vegetation/crops/health" → ndvi, "water/lakes/
+            rivers/floods" → ndwi, "fire/burn/wildfire" → nbr or burned-area,
+            "biomass/forest density" → evi. Default to true-color when unsure.
+    """
+    return interrupt(
+        {
+            "type": "show_sentinel2_scene",
+            "item_id": item_id,
+            "bbox": bbox,
+            "composite": composite,
+        }
+    )
+
+
+@tool
 def confirm_feature_save(name: str, geometry_wkt: str) -> Any:
     """Ask the user to confirm saving a feature to the database.
 

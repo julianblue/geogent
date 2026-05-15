@@ -3,6 +3,7 @@ from geogent_agent.tools.frontend_actions import (
     confirm_feature_save,
     fly_to,
     list_features_in_viewport,
+    show_sentinel2_scene,
 )
 from geogent_agent.tools.geo_tools import (
     area_of,
@@ -34,6 +35,7 @@ TOOLS = [
     add_buffer_layer,
     list_features_in_viewport,
     confirm_feature_save,
+    show_sentinel2_scene,
 ]
 
 __all__ = [
@@ -49,6 +51,7 @@ __all__ = [
     "geometries_intersect",
     "list_features",
     "list_features_in_viewport",
+    "show_sentinel2_scene",
     "stac_get_item",
     "stac_list_collections",
     "stac_search",

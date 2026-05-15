@@ -205,6 +205,49 @@ async def test_search_accepts_string_encoded_bbox(monkeypatch: pytest.MonkeyPatc
 
 
 @pytest.mark.asyncio
+async def test_search_forwards_sortby_and_query(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`sortby` + `query` are the difference between getting latest cloud-free
+    Sentinel-2 vs an arbitrary slice of the archive — verify they reach the
+    wire."""
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"features": []})
+
+    captured = _install_mock_stac(monkeypatch, handler)
+    await stac_search.ainvoke(
+        {
+            "collections": ["sentinel-2-l2a"],
+            "sortby": [{"field": "properties.datetime", "direction": "desc"}],
+            "query": {"eo:cloud_cover": {"lt": 20}},
+        }
+    )
+
+    assert captured["body"]["sortby"] == [{"field": "properties.datetime", "direction": "desc"}]
+    assert captured["body"]["query"] == {"eo:cloud_cover": {"lt": 20}}
+
+
+@pytest.mark.asyncio
+async def test_search_accepts_string_encoded_sortby_and_query(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"features": []})
+
+    captured = _install_mock_stac(monkeypatch, handler)
+    await stac_search.ainvoke(
+        {
+            "sortby": '[{"field": "properties.datetime", "direction": "desc"}]',
+            "query": '{"eo:cloud_cover": {"lt": 20}}',
+        }
+    )
+
+    assert captured["body"]["sortby"] == [{"field": "properties.datetime", "direction": "desc"}]
+    assert captured["body"]["query"] == {"eo:cloud_cover": {"lt": 20}}
+
+
+@pytest.mark.asyncio
 async def test_get_item_hits_correct_path(monkeypatch: pytest.MonkeyPatch) -> None:
     full_item = {
         "id": "S2A_T10SEG_20240715",
@@ -227,11 +270,27 @@ async def test_get_item_hits_correct_path(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 @pytest.mark.asyncio
-async def test_search_raises_on_backend_error(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_search_surfaces_backend_error_with_detail(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A 4xx/5xx from the STAC API should propagate as a ValueError that
+    includes the API's own error body, so the calling LLM can retry with a
+    fixed payload rather than just seeing 'HTTPStatusError'."""
+
     def handler(_request: httpx.Request, _captured: dict) -> httpx.Response:
-        return httpx.Response(500, json={"detail": "boom"})
+        return httpx.Response(400, json={"detail": "sortby field unknown"})
 
     _install_mock_stac(monkeypatch, handler)
 
-    with pytest.raises(httpx.HTTPStatusError):
-        await stac_search.ainvoke({"collections": ["sentinel-2-l2a"]})
+    with pytest.raises(ValueError) as exc:
+        await stac_search.ainvoke(
+            {
+                "collections": ["sentinel-2-l2a"],
+                "sortby": [{"field": "bogus", "direction": "desc"}],
+            }
+        )
+
+    msg = str(exc.value)
+    assert "HTTP 400" in msg
+    assert "sortby field unknown" in msg
+    assert "bogus" in msg  # the offending payload is included for context

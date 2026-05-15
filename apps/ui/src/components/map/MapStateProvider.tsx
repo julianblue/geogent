@@ -4,6 +4,9 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode, RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 
+import type { Sentinel2Item } from "@/lib/sentinel2";
+import type { CompositeId } from "@/lib/sentinel2-presets";
+
 export type Viewport = {
   longitude: number;
   latitude: number;
@@ -29,8 +32,22 @@ export type MapLayer = {
   visible: boolean;
 };
 
+/**
+ * Currently-rendered Sentinel-2 scene + chosen band composite.
+ *
+ * Lives in MapStateProvider so the agent can drive it through a headless
+ * tool while the in-map metadata badge still has a single source of truth.
+ * Set to `null` to clear the overlay.
+ */
+export type Sentinel2Scene = {
+  item: Sentinel2Item;
+  compositeId: CompositeId;
+};
+
 type MapStateContextValue = {
   mapRef: RefObject<MapRef | null>;
+  mapReady: boolean;
+  setMapReady: (ready: boolean) => void;
   viewport: Viewport;
   setViewport: (next: Viewport) => void;
   features: MapFeature[];
@@ -42,6 +59,8 @@ type MapStateContextValue = {
   layers: MapLayer[];
   upsertLayer: (layer: MapLayer) => void;
   removeLayer: (id: string) => void;
+  sentinel2Scene: Sentinel2Scene | null;
+  setSentinel2Scene: (scene: Sentinel2Scene | null) => void;
 };
 
 const DEFAULT_VIEWPORT: Viewport = {
@@ -55,10 +74,15 @@ const MapStateContext = createContext<MapStateContextValue | null>(null);
 
 export function MapStateProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null);
+  // Consumers that need the underlying MapLibre instance (overlays, controls)
+  // subscribe to mapReady instead of polling mapRef — refs don't trigger
+  // re-renders when their .current is populated.
+  const [mapReady, setMapReady] = useState(false);
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT);
   const [features, setFeatures] = useState<MapFeature[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [layers, setLayers] = useState<MapLayer[]>([]);
+  const [sentinel2Scene, setSentinel2Scene] = useState<Sentinel2Scene | null>(null);
 
   const addFeature = useCallback((feature: MapFeature) => {
     setFeatures((prev) => {
@@ -100,6 +124,8 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const value = useMemo<MapStateContextValue>(
     () => ({
       mapRef,
+      mapReady,
+      setMapReady,
       viewport,
       setViewport,
       features,
@@ -111,8 +137,11 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      sentinel2Scene,
+      setSentinel2Scene,
     }),
     [
+      mapReady,
       viewport,
       features,
       addFeature,
@@ -123,6 +152,7 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      sentinel2Scene,
     ],
   );
 

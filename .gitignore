@@ -254,3 +254,8 @@ Thumbs.db
 
 # Docker
 .docker/
+
+# Agent harness state (Claude Code, npx skills, etc.)
+.agents/
+.claude/
+skills-lock.json
