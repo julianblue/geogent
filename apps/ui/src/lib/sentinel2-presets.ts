@@ -20,12 +20,11 @@ import {
   type RasterModule,
 } from "@developmentseed/deck.gl-raster/gpu-modules";
 
-import {
-  EVI_MODULE,
-  NBR_MODULE,
-  NDVI_MODULE,
-  NDWI_MODULE,
-} from "@/lib/raster-modules";
+import type { Sentinel2BandHrefs } from "@/lib/sentinel2";
+import { EVI_MODULE, NBR_MODULE, NDVI_MODULE, NDWI_MODULE } from "@/lib/raster-modules";
+
+/** A band slot loaded onto the GPU — keys of {@link Sentinel2BandHrefs}. */
+export type BandKey = keyof Sentinel2BandHrefs;
 
 /** Closed set of valid `composite` ids — kept in sync with `SENTINEL2_PRESETS`. */
 export const COMPOSITE_IDS = [
@@ -43,8 +42,12 @@ export type CompositeId = (typeof COMPOSITE_IDS)[number];
 export type CompositePreset = {
   id: CompositeId;
   label: string;
-  /** Which loaded bands feed which channel slots of `CompositeBands`. */
-  composite: { r: string; g?: string; b?: string };
+  /**
+   * Which loaded bands feed which channel slots of `CompositeBands`. Typed as
+   * `BandKey` so a typo in a preset is a compile error, not a runtime
+   * `item.bands[key]` returning undefined.
+   */
+  composite: { r: BandKey; g?: BandKey; b?: BandKey };
   /** GLSL pipeline applied after `CompositeBands` populates `color`. */
   pipeline: RasterModule[];
 };

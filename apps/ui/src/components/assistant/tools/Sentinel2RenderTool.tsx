@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  useLangGraphInterruptState,
-  useLangGraphSendCommand,
-} from "@assistant-ui/react-langgraph";
+import { useLangGraphInterruptState, useLangGraphSendCommand } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import {
-  COMPOSITE_IDS,
-  isCompositeId,
-  type CompositeId,
-} from "@/lib/sentinel2-presets";
+import { COMPOSITE_IDS, isCompositeId, type CompositeId } from "@/lib/sentinel2-presets";
 import {
   fetchSentinel2ById,
   findLatestSentinel2,

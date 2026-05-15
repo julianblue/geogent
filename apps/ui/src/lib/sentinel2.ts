@@ -52,11 +52,15 @@ const REQUIRED_BAND_KEYS: (keyof Sentinel2BandHrefs)[] = [
   "swir22",
 ];
 
-// The COG variants of each band on Earth Search v1 are served as Cloud-Optimized
-// GeoTIFFs. JP2000 (the older `*-jp2` siblings) is NOT supported by
-// @developmentseed/geotiff and would fail at decode — we reject it explicitly
-// here so the failure mode is a clear error rather than a silent black tile.
-const COG_MIME_TYPE = "image/tiff; application=geotiff; profile=cloud-optimized";
+// We accept any GeoTIFF MIME (`image/tiff` with or without parameters) and
+// reject only JPEG2000. Earth Search advertises the COG variant either as
+// the long form `image/tiff; application=geotiff; profile=cloud-optimized`
+// or as bare `image/tiff` depending on how the catalog was indexed; the
+// JP2 siblings are always `image/jp2` and would crash @developmentseed/geotiff.
+function isUnsupportedAssetType(type: string | undefined): boolean {
+  if (!type) return false;
+  return type.startsWith("image/jp2");
+}
 
 function featureToItem(feature: StacFeature): Sentinel2Item {
   const bands = {} as Sentinel2BandHrefs;
@@ -65,12 +69,9 @@ function featureToItem(feature: StacFeature): Sentinel2Item {
     if (!asset?.href) {
       throw new Error(`Earth Search item ${feature.id} is missing band ${key}`);
     }
-    // Guard against the JP2 sibling assets sneaking in — they're served on the
-    // same collection under `${band}-jp2` keys, and the GeoTIFF reader can't
-    // decode them.
-    if (asset.type && asset.type !== COG_MIME_TYPE) {
+    if (isUnsupportedAssetType(asset.type)) {
       throw new Error(
-        `Earth Search item ${feature.id} band ${key} is not a COG (got ${asset.type})`,
+        `Earth Search item ${feature.id} band ${key} is not a GeoTIFF (got ${asset.type})`,
       );
     }
     bands[key] = asset.href;
@@ -86,8 +87,9 @@ function featureToItem(feature: StacFeature): Sentinel2Item {
 
 /**
  * Find the most recent low-cloud Sentinel-2 L2A scene intersecting `bbox`.
- * Returns null when no scene matches the cloud filter or when the matched
- * scene is missing the bands we need to render composites.
+ * Returns null when no scene matches the cloud filter. Throws if the
+ * matched scene is missing one of the required bands or carries an
+ * unsupported asset MIME type.
  */
 export async function findLatestSentinel2(bbox: Bbox): Promise<Sentinel2Item | null> {
   const res = await fetch(EARTH_SEARCH, {
@@ -113,6 +115,9 @@ export async function findLatestSentinel2(bbox: Bbox): Promise<Sentinel2Item | n
  * Resolve a Sentinel-2 L2A scene by its STAC item id. Used by the agent's
  * `show_sentinel2_scene` tool when it already discovered an item via
  * stac_search and wants to render it directly without re-querying by bbox.
+ *
+ * Returns null when the item id is unknown to Earth Search (404). Throws
+ * if the item exists but is missing a required band.
  */
 export async function fetchSentinel2ById(itemId: string): Promise<Sentinel2Item | null> {
   const url = `${EARTH_SEARCH_ROOT}/collections/${SENTINEL2_COLLECTION}/items/${encodeURIComponent(itemId)}`;

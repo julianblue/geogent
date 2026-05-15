@@ -223,9 +223,7 @@ async def test_search_forwards_sortby_and_query(monkeypatch: pytest.MonkeyPatch)
         }
     )
 
-    assert captured["body"]["sortby"] == [
-        {"field": "properties.datetime", "direction": "desc"}
-    ]
+    assert captured["body"]["sortby"] == [{"field": "properties.datetime", "direction": "desc"}]
     assert captured["body"]["query"] == {"eo:cloud_cover": {"lt": 20}}
 
 
@@ -245,9 +243,7 @@ async def test_search_accepts_string_encoded_sortby_and_query(
         }
     )
 
-    assert captured["body"]["sortby"] == [
-        {"field": "properties.datetime", "direction": "desc"}
-    ]
+    assert captured["body"]["sortby"] == [{"field": "properties.datetime", "direction": "desc"}]
     assert captured["body"]["query"] == {"eo:cloud_cover": {"lt": 20}}
 
 

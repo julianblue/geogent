@@ -91,7 +91,7 @@ def _coerce_geojson(value: Any) -> dict | None:
     if coerced is None or isinstance(coerced, dict):
         return coerced
     raise TypeError(
-        f"intersects must be a GeoJSON object or JSON string, got {type(value).__name__}"
+        f"intersects must be a GeoJSON object or JSON string, got {type(coerced).__name__}"
     )
 
 
@@ -101,7 +101,9 @@ def _coerce_bbox(value: Any) -> list[float] | None:
     if coerced is None:
         return None
     if not isinstance(coerced, list | tuple):
-        raise TypeError(f"bbox must be a list of floats or JSON string, got {type(value).__name__}")
+        raise TypeError(
+            f"bbox must be a list of floats or JSON string, got {type(coerced).__name__}"
+        )
     return [float(x) for x in coerced]
 
 
@@ -121,9 +123,7 @@ def _raise_for_stac(r: httpx.Response, *, endpoint: str, payload: Any = None) ->
     except ValueError:
         detail = r.text
     suffix = f". Sent payload: {payload}" if payload is not None else ""
-    raise ValueError(
-        f"STAC API rejected {endpoint} (HTTP {r.status_code}): {detail}{suffix}"
-    )
+    raise ValueError(f"STAC API rejected {endpoint} (HTTP {r.status_code}): {detail}{suffix}")
 
 
 @tool

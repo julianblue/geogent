@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { IControl } from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { MultiCOGLayer } from "@developmentseed/deck.gl-geotiff";
@@ -29,11 +29,14 @@ type BandKey = keyof Sentinel2BandHrefs;
  */
 export function Sentinel2Overlay() {
   const { mapRef, mapReady, sentinel2Scene, setSentinel2Scene } = useMapState();
-  const overlayRef = useRef<MapboxOverlay | null>(null);
+  // Held in state (not ref) so the layer-driving effect below reruns when the
+  // overlay finishes attaching. With a ref, a `sentinel2Scene` set before the
+  // map fires `load` would race: the effect would run once with `null` and
+  // never again, leaving the agent's render request silently dropped.
+  const [overlay, setOverlay] = useState<MapboxOverlay | null>(null);
 
   const preset =
-    SENTINEL2_PRESETS.find((p) => p.id === sentinel2Scene?.compositeId) ??
-    SENTINEL2_PRESETS[0];
+    SENTINEL2_PRESETS.find((p) => p.id === sentinel2Scene?.compositeId) ?? SENTINEL2_PRESETS[0];
 
   // Lazy-construct the decoder worker pool once per mount. defaultDecoderPool
   // caches the instance internally, but useMemo keeps this side-effect-free
@@ -49,25 +52,24 @@ export function Sentinel2Overlay() {
   useEffect(() => {
     if (!mapReady) return;
     const map = mapRef.current?.getMap();
-    if (!map || overlayRef.current) return;
+    if (!map) return;
 
-    const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
-    map.addControl(overlay as unknown as IControl);
-    overlayRef.current = overlay;
+    const next = new MapboxOverlay({ interleaved: false, layers: [] });
+    map.addControl(next as unknown as IControl);
+    setOverlay(next);
 
     return () => {
       try {
-        map.removeControl(overlay as unknown as IControl);
+        map.removeControl(next as unknown as IControl);
       } catch {
         // Map may already be torn down; ignore.
       }
-      overlayRef.current = null;
+      setOverlay(null);
     };
   }, [mapRef, mapReady]);
 
   // Drive the deck.gl layer set from MapState.
   useEffect(() => {
-    const overlay = overlayRef.current;
     if (!overlay) return;
     if (!sentinel2Scene) {
       overlay.setProps({ layers: [] });
@@ -79,11 +81,9 @@ export function Sentinel2Overlay() {
     // unconditionally is wasteful (NDVI needs just 2). Trade-off: switching
     // to a preset that needs different bands triggers a fresh fetch instead
     // of being instant; switching within the same band set stays instant.
-    const requiredBandKeys = [
-      preset.composite.r,
-      preset.composite.g,
-      preset.composite.b,
-    ].filter((b): b is BandKey => Boolean(b));
+    const requiredBandKeys = [preset.composite.r, preset.composite.g, preset.composite.b].filter(
+      (b): b is BandKey => Boolean(b),
+    );
     const sources: Record<string, { url: string }> = {};
     for (const key of new Set(requiredBandKeys)) {
       sources[key] = { url: item.bands[key] };
@@ -116,7 +116,7 @@ export function Sentinel2Overlay() {
       },
     });
     overlay.setProps({ layers: [layer] });
-  }, [sentinel2Scene, preset, mapRef, decoderPool]);
+  }, [overlay, sentinel2Scene, preset, mapRef, decoderPool]);
 
   if (!sentinel2Scene) return null;
 
