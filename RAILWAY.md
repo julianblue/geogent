@@ -80,10 +80,17 @@ ANTHROPIC_API_KEY=<your key>        # for claude-* models
 # Or use one of:
 # OPENAI_API_KEY=...                # for gpt-* models
 # OPENROUTER_API_KEY=...            # with AGENT_MODEL=openrouter:<vendor>/<model>
-# Optional tracing:
+# Optional LangSmith tracing. Use a per-environment project name so prod
+# traces stay separate from local experimentation. The agent logs whether
+# tracing is enabled on boot; runs are auto-tagged with architecture,
+# provider, and model so they're filterable in the LangSmith UI.
 # LANGSMITH_API_KEY=...
 # LANGSMITH_TRACING=true
-# LANGSMITH_PROJECT=geogent
+# LANGSMITH_PROJECT=geogent-prod
+# LANGSMITH_ENDPOINT=https://api.smith.langchain.com   # EU / self-hosted
+# LANGSMITH_SAMPLING_RATE=1.0
+# LANGSMITH_HIDE_INPUTS=false
+# LANGSMITH_HIDE_OUTPUTS=false
 ```
 
 ### `ui` service

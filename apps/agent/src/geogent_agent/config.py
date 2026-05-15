@@ -33,9 +33,26 @@ class Settings(BaseSettings):
 
     backend_url: str = Field(default="http://localhost:8000")
 
+    # Postgres checkpointer (langgraph-checkpoint-postgres). Plain libpq DSN
+    # (postgresql://...), distinct from backend's SQLAlchemy URL which embeds
+    # the asyncpg driver (postgresql+asyncpg://...). When unset the
+    # checkpointer factory raises — `langgraph dev` and unit tests rely on
+    # the runtime's default in-memory saver instead.
+    agent_database_url: str | None = Field(default=None)
+    agent_db_schema: str = Field(default="langgraph")
+    agent_db_pool_min: int = Field(default=1)
+    agent_db_pool_max: int = Field(default=5)
+
+    # LangSmith observability. These fields are reference-only: the LangChain
+    # tracer reads `LANGSMITH_*` directly from `os.environ` at import time,
+    # so operators must set them in the deployment environment. The fields
+    # exist so `observability.py` can validate the setup at startup and so
+    # the values appear in a single, typed surface for tooling.
     langsmith_api_key: str | None = None
     langsmith_tracing: bool = False
     langsmith_project: str = "geogent"
+    langsmith_endpoint: str | None = None
+    langsmith_sampling_rate: float | None = None
 
 
 @lru_cache(maxsize=1)
