@@ -1,0 +1,155 @@
+/**
+ * Custom GPU shader modules for Sentinel-2 band math.
+ *
+ * The dev-seed deck.gl-raster package ships compositing + linear-rescale +
+ * library colormap primitives, but no built-in vegetation/water/burn
+ * indices. These modules fill that gap.
+ *
+ * Each module assumes `CompositeBands` has already populated `color` with
+ * the relevant band values per the preset's `composite` mapping:
+ *
+ *   - `color.r` ← first band listed in composite
+ *   - `color.g` ← second band
+ *   - `color.b` ← third band
+ *
+ * After the module runs, `color.rgb` is the final RGB pixel ready for the
+ * fragment shader's output (no downstream Colormap module needed — each
+ * index module includes its own inline colormap).
+ *
+ * To swap to library colormaps later, drop the inline `mix(...)` block at
+ * the end of each module and append `{module: Colormap, props: {...}}` to
+ * the preset's pipeline.
+ */
+import type { RasterModule } from "@developmentseed/deck.gl-raster/gpu-modules";
+
+/**
+ * Map a scalar in [0, 1] to a 3-stop gradient `(low → mid → high)`. Used
+ * by every index module below. Pulled out into a GLSL helper so the
+ * three-color ramp logic is in one place.
+ */
+const RAMP_HELPER = /* glsl */ `
+vec3 ramp3(float t, vec3 low, vec3 mid, vec3 high) {
+  t = clamp(t, 0.0, 1.0);
+  return t < 0.5 ? mix(low, mid, t * 2.0) : mix(mid, high, (t - 0.5) * 2.0);
+}
+`;
+
+/**
+ * NDVI = (NIR - RED) / (NIR + RED). Range [-1, 1]; typical land values
+ * 0.1 (bare soil) to 0.8 (dense forest). Composite: `{r: "red", g: "nir"}`.
+ *
+ * Colormap: brown (bare/water) → yellow (sparse) → green (dense vegetation).
+ * Mirrors the RdYlGn matplotlib palette common in agronomic tooling.
+ */
+export const NDVI_MODULE: RasterModule = {
+  module: {
+    name: "ndvi",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float red = color.r;
+        float nir = color.g;
+        float ndvi = (nir - red) / (nir + red + 1e-6);
+        // remap [-1, 1] → [0, 1] for the color ramp
+        float t = clamp(ndvi * 0.5 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.65, 0.16, 0.16),  // brown    — bare / water
+          vec3(0.99, 0.91, 0.51),  // straw    — sparse vegetation
+          vec3(0.10, 0.55, 0.20)   // forest g — dense vegetation
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * NDWI = (GREEN - NIR) / (GREEN + NIR). McFeeters 1996; high positive
+ * values = water. Composite: `{r: "green", g: "nir"}`.
+ *
+ * Colormap: tan (land) → light blue → deep blue (water).
+ */
+export const NDWI_MODULE: RasterModule = {
+  module: {
+    name: "ndwi",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float green = color.r;
+        float nir = color.g;
+        float ndwi = (green - nir) / (green + nir + 1e-6);
+        float t = clamp(ndwi * 0.5 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.85, 0.75, 0.60),  // tan    — dry land
+          vec3(0.55, 0.78, 0.92),  // sky b  — wet / shallow
+          vec3(0.06, 0.30, 0.65)   // deep b — open water
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * NBR = (NIR - SWIR2) / (NIR + SWIR2). Key et al.; high values = healthy
+ * vegetation, low/negative = burned. Composite: `{r: "nir", g: "swir22"}`.
+ *
+ * Colormap: inferno-style, dark (severely burned) → orange (recent burn)
+ * → green (unburned vegetation).
+ */
+export const NBR_MODULE: RasterModule = {
+  module: {
+    name: "nbr",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float nir = color.r;
+        float swir2 = color.g;
+        float nbr = (nir - swir2) / (nir + swir2 + 1e-6);
+        float t = clamp(nbr * 0.5 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.13, 0.00, 0.10),  // near-black — severe burn
+          vec3(0.95, 0.55, 0.10),  // orange     — recent / partial burn
+          vec3(0.18, 0.52, 0.20)   // green      — unburned vegetation
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * EVI = 2.5 * (NIR - RED) / (NIR + 6*RED - 7.5*BLUE + 1). Huete et al.;
+ * resistant to atmospheric / soil noise compared to NDVI, better dynamic
+ * range over dense canopies. Composite: `{r: "red", g: "nir", b: "blue"}`.
+ *
+ * Colormap: yellow-green sequential (low → high biomass).
+ */
+export const EVI_MODULE: RasterModule = {
+  module: {
+    name: "evi",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float red = color.r;
+        float nir = color.g;
+        float blue = color.b;
+        // Standard EVI coefficients (L=1, C1=6, C2=7.5, G=2.5)
+        float denom = nir + 6.0 * red - 7.5 * blue + 1.0;
+        float evi = denom == 0.0 ? 0.0 : (2.5 * (nir - red)) / denom;
+        // EVI typical land range is roughly [0, 0.6]; stretch to [0, 1]
+        float t = clamp(evi / 0.6, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.99, 0.99, 0.85),  // pale yellow — low biomass
+          vec3(0.65, 0.85, 0.40),  // lime green  — moderate
+          vec3(0.10, 0.45, 0.15)   // dark green  — dense biomass
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};

@@ -71,17 +71,25 @@ def _trim_item(item: dict) -> dict:
     }
 
 
-def _coerce_geojson(value: Any) -> dict | None:
-    """Tolerate string-encoded GeoJSON from LLM tool-call serializers.
+def _coerce_optional_json(value: Any) -> Any:
+    """Pass JSON-shaped values through; decode JSON strings; preserve None.
 
-    Some providers (notably stricter Bedrock paths) occasionally emit a
-    JSON string instead of a nested object. Decode if that happens; pass
-    dicts through; reject anything else with a clear error.
+    Some LLM tool-call serializers (notably stricter Bedrock paths) emit a
+    JSON string in place of a nested object/array. This helper lets every
+    nested-shape parameter accept either form transparently.
     """
-    if value is None or isinstance(value, dict):
-        return value
+    if value is None:
+        return None
     if isinstance(value, str):
         return json.loads(value)
+    return value
+
+
+def _coerce_geojson(value: Any) -> dict | None:
+    """``_coerce_optional_json`` + assert the result is a GeoJSON-shaped dict."""
+    coerced = _coerce_optional_json(value)
+    if coerced is None or isinstance(coerced, dict):
+        return coerced
     raise TypeError(
         f"intersects must be a GeoJSON object or JSON string, got {type(value).__name__}"
     )
@@ -89,13 +97,33 @@ def _coerce_geojson(value: Any) -> dict | None:
 
 def _coerce_bbox(value: Any) -> list[float] | None:
     """Tolerate string-encoded bbox arrays from LLM tool-call serializers."""
-    if value is None:
+    coerced = _coerce_optional_json(value)
+    if coerced is None:
         return None
-    if isinstance(value, str):
-        value = json.loads(value)
-    if not isinstance(value, list | tuple):
+    if not isinstance(coerced, list | tuple):
         raise TypeError(f"bbox must be a list of floats or JSON string, got {type(value).__name__}")
-    return [float(x) for x in value]
+    return [float(x) for x in coerced]
+
+
+def _raise_for_stac(r: httpx.Response, *, endpoint: str, payload: Any = None) -> None:
+    """Convert a 4xx/5xx STAC response into a ValueError that includes the
+    API's own complaint plus the request payload.
+
+    We raise ValueError (not HTTPStatusError) so that langgraph's tool error
+    handler hands the message to the LLM as a tool result — the agent can
+    then self-correct on a malformed payload instead of just seeing
+    'HTTPStatusError'.
+    """
+    if r.status_code < 400:
+        return
+    try:
+        detail = r.json()
+    except ValueError:
+        detail = r.text
+    suffix = f". Sent payload: {payload}" if payload is not None else ""
+    raise ValueError(
+        f"STAC API rejected {endpoint} (HTTP {r.status_code}): {detail}{suffix}"
+    )
 
 
 @tool
@@ -112,7 +140,7 @@ async def stac_list_collections(api_url: str | None = None) -> list[dict]:
     """
     async with _stac_client(api_url) as client:
         r = await client.get("/collections")
-        r.raise_for_status()
+        _raise_for_stac(r, endpoint="/collections")
         body = r.json()
     collections = body.get("collections") or []
     return [_trim_collection(c) for c in collections]
@@ -125,9 +153,21 @@ async def stac_search(
     datetime: str | None = None,
     intersects: dict | str | None = None,
     limit: int = 10,
+    sortby: list[dict] | str | None = None,
+    query: dict | str | None = None,
     api_url: str | None = None,
 ) -> list[dict]:
     """Search items across one or more STAC collections.
+
+    For "latest" / "most recent" queries you MUST pass
+    ``sortby=[{"field": "properties.datetime", "direction": "desc"}]`` —
+    Earth Search's default ordering is not by date and will return
+    arbitrary items otherwise.
+
+    For optical imagery (Sentinel-2, Landsat, NAIP) you almost always
+    want to filter by cloud cover via
+    ``query={"eo:cloud_cover": {"lt": 20}}``; without it you'll get
+    100%-cloudy scenes that are useless for visual interpretation.
 
     Args:
         collections: STAC collection IDs to search (e.g. ``["sentinel-2-l2a"]``).
@@ -142,28 +182,42 @@ async def stac_search(
             returned items must intersect. JSON-string form also accepted.
         limit: Max items to return from the first page (no pagination
             follow-through). Default 10.
+        sortby: STAC-API sort specifier. List of ``{"field": "...", "direction": "asc"|"desc"}``
+            dicts. Example for newest first:
+            ``[{"field": "properties.datetime", "direction": "desc"}]``.
+            JSON-string form accepted.
+        query: STAC-API ``query`` extension predicate. Maps property name to
+            an operator dict. Examples:
+            ``{"eo:cloud_cover": {"lt": 20}}`` —
+            ``{"platform": {"eq": "sentinel-2b"}}``.
+            JSON-string form accepted.
         api_url: Root URL of the STAC API. Defaults to Earth Search v1.
 
     Returns:
         Trimmed item dicts: ``{id, collection, bbox, properties, asset_keys}``.
         Use ``stac_get_item`` to fetch the full item with asset hrefs.
     """
-    intersects = _coerce_geojson(intersects)
-    bbox = _coerce_bbox(bbox)
-
     payload: dict[str, Any] = {"limit": limit}
     if collections:
         payload["collections"] = collections
-    if intersects is not None:
-        payload["intersects"] = intersects
-    elif bbox is not None:
-        payload["bbox"] = bbox
+    intersects_parsed = _coerce_geojson(intersects)
+    bbox_parsed = _coerce_bbox(bbox)
+    if intersects_parsed is not None:
+        payload["intersects"] = intersects_parsed
+    elif bbox_parsed is not None:
+        payload["bbox"] = bbox_parsed
     if datetime is not None:
         payload["datetime"] = datetime
+    sortby_parsed = _coerce_optional_json(sortby)
+    if sortby_parsed is not None:
+        payload["sortby"] = sortby_parsed
+    query_parsed = _coerce_optional_json(query)
+    if query_parsed is not None:
+        payload["query"] = query_parsed
 
     async with _stac_client(api_url) as client:
         r = await client.post("/search", json=payload)
-        r.raise_for_status()
+        _raise_for_stac(r, endpoint="/search", payload=payload)
         body = r.json()
 
     features = body.get("features") or []
@@ -187,6 +241,7 @@ async def stac_get_item(
         api_url: Root URL of the STAC API. Defaults to Earth Search v1.
     """
     async with _stac_client(api_url) as client:
-        r = await client.get(f"/collections/{collection}/items/{item_id}")
-        r.raise_for_status()
+        endpoint = f"/collections/{collection}/items/{item_id}"
+        r = await client.get(endpoint)
+        _raise_for_stac(r, endpoint=endpoint)
         return r.json()
