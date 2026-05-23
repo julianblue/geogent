@@ -81,4 +81,13 @@ async def run_case(base_url: str, case: EvalCase) -> dict[str, Any]:
         state = await client.threads.get_state(thread_id)
         resumes += 1
 
+    if remaining := _pending_interrupts(state):
+        kinds = [
+            i.get("value", {}).get("type") if isinstance(i.get("value"), dict) else None
+            for i in remaining
+        ]
+        raise RuntimeError(
+            f"{case.id!r} still interrupted after {MAX_RESUMES} resumes; pending types={kinds}"
+        )
+
     return state

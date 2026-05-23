@@ -98,20 +98,28 @@ def maybe_push_to_langsmith(reports: list[CaseReport], *, project: str | None = 
     if not os.getenv("LANGSMITH_API_KEY"):
         return False
     try:
+        from datetime import UTC, datetime
+        from uuid import uuid4
+
         from langsmith import Client
 
         client = Client()
         proj = project or os.getenv("LANGSMITH_PROJECT", "geogent-evals")
         for r in reports:
-            run = client.create_run(
+            # create_run() returns None, so we mint the id ourselves and reuse
+            # it for feedback; otherwise the scores would never be attached.
+            run_id = uuid4()
+            now = datetime.now(UTC)
+            client.create_run(
+                id=run_id,
                 name=f"eval:{r.case_id}",
                 run_type="chain",
                 inputs={"case_id": r.case_id},
+                outputs={n: s.score for n, s in r.scores.items()},
+                start_time=now,
+                end_time=now,
                 project_name=proj,
             )
-            run_id = getattr(run, "id", None)
-            if run_id is None:
-                continue
             for name, result in r.scores.items():
                 client.create_feedback(run_id, key=name, score=result.score, comment=result.reason)
     except Exception as exc:  # noqa: BLE001 - never fail the eval on telemetry

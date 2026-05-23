@@ -46,9 +46,14 @@ class ArgConstraint:
         raise ValueError(f"unknown arg constraint {kind!r} for {arg!r} (want between|equals)")
 
 
+# A tool requirement is either a tool name (must be invoked) or a list of tool
+# names (an any-of group: at least one must be invoked).
+ToolRequirement = str | list[str]
+
+
 @dataclass(frozen=True)
 class Expectation:
-    tools_required: list[str] = field(default_factory=list)
+    tools_required: list[ToolRequirement] = field(default_factory=list)
     # tool name -> list of per-arg constraints
     args: dict[str, list[ArgConstraint]] = field(default_factory=dict)
     max_steps: int | None = None
@@ -62,8 +67,20 @@ class Expectation:
             if not isinstance(arg_specs, dict):
                 raise ValueError(f"args.{tool} must be a mapping of arg -> constraint")
             args[tool] = [ArgConstraint.from_spec(a, s) for a, s in arg_specs.items()]
+
+        tools_required: list[ToolRequirement] = []
+        for req in raw.get("tools_required") or []:
+            if isinstance(req, str):
+                tools_required.append(req)
+            elif isinstance(req, list) and all(isinstance(t, str) for t in req):
+                tools_required.append(list(req))
+            else:
+                raise ValueError(
+                    f"tools_required entries must be a tool name or a list of names, got {req!r}"
+                )
+
         return cls(
-            tools_required=list(raw.get("tools_required") or []),
+            tools_required=tools_required,
             args=args,
             max_steps=raw.get("max_steps"),
             final_contains_any=list(raw.get("final_contains_any") or []),
