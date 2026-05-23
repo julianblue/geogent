@@ -44,6 +44,7 @@ def _traj(messages: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 PARIS_CASE = next(c for c in load_cases() if c.id == "geocode_then_fly_to_paris")
+SAVE_CASE = next(c for c in load_cases() if c.id == "buffer_then_save_eiffel")
 
 
 # --- full-pipeline pass/fail over recorded fixtures --------------------------
@@ -51,6 +52,13 @@ PARIS_CASE = next(c for c in load_cases() if c.id == "geocode_then_fly_to_paris"
 
 def test_recorded_good_trajectory_passes_every_scorer() -> None:
     report = score_case(PARIS_CASE, _load("paris_fly_to.json"))
+    assert report.passed, {k: v.reason for k, v in report.scores.items()}
+
+
+def test_recorded_interrupt_resumed_trajectory_passes() -> None:
+    # Real geocode -> buffer -> confirm_feature_save run whose interrupt the
+    # runner resumed with {ok, id}; the agent then produced a final answer.
+    report = score_case(SAVE_CASE, _load("buffer_then_save_eiffel.json"))
     assert report.passed, {k: v.reason for k, v in report.scores.items()}
 
 

@@ -76,6 +76,10 @@ class EvalCase:
     input: str
     configurable: dict[str, Any]
     expect: Expectation
+    # When set, the case is a known weakness for the default model: the live
+    # eval runs it but tolerates failure (xfail) instead of gating CI red. A
+    # stronger model that passes it shows up as an xpass.
+    xfail: str | None = None
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> EvalCase:
@@ -87,6 +91,7 @@ class EvalCase:
             input=str(raw["input"]),
             configurable=dict(raw.get("configurable") or {}),
             expect=Expectation.from_dict(raw.get("expect") or {}),
+            xfail=raw.get("xfail"),
         )
 
 

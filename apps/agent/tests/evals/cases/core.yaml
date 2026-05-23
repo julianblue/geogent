@@ -111,3 +111,57 @@
     tools_required: [geometries_intersect]
     max_steps: 5
     final_contains_any: ["intersect", "yes", "overlap"]
+
+# --- interrupt workflows: the runner stands in for the UI and resumes them ---
+# show_sentinel2_scene and confirm_feature_save call LangGraph interrupt();
+# tests/evals/runner.py feeds back a canned success so the agent finishes.
+
+- id: show_sentinel2_vegetation
+  input: >-
+    Show me the most recent low-cloud Sentinel-2 scene over the bounding box
+    [2.25, 48.80, 2.42, 48.90] and highlight vegetation.
+  configurable: {}
+  expect:
+    tools_required: [show_sentinel2_scene]
+    args:
+      show_sentinel2_scene:
+        composite: {equals: ndvi}
+    max_steps: 12
+    final_contains_any: ["vegetation", "ndvi", "scene", "displayed", "map"]
+
+- id: save_viewport_feature
+  input: "Save the current map view as a feature named 'Study Area'."
+  configurable:
+    map_state:
+      viewport:
+        longitude: 2.349
+        latitude: 48.864
+        zoom: 12
+        bounds: {west: 2.2, south: 48.8, east: 2.5, north: 48.93}
+  expect:
+    tools_required: [confirm_feature_save]
+    args:
+      confirm_feature_save:
+        name: {equals: "Study Area"}
+    max_steps: 8
+    final_contains_any: ["study area", "saved", "save"]
+
+- id: buffer_then_save_eiffel
+  # Hardest chain (geocode -> buffer -> confirm_feature_save, with an interrupt).
+  # gemini-2.5-flash is flaky here: it often buffers then drops the save step,
+  # ending with an empty message. Tracked as a known weakness rather than a
+  # red CI gate; stronger models complete it (it then xpasses).
+  xfail: "gemini-2.5-flash flaky on the 3-tool save chain"
+  input: >-
+    Save a 500-meter buffer around the Eiffel Tower as a new feature named
+    'Eiffel buffer'.
+  configurable: {}
+  expect:
+    tools_required: [geocode_place, buffer_geometry, confirm_feature_save]
+    args:
+      buffer_geometry:
+        distance_m: {equals: 500}
+      confirm_feature_save:
+        name: {equals: "Eiffel buffer"}
+    max_steps: 14
+    final_contains_any: ["saved", "eiffel buffer", "buffer"]

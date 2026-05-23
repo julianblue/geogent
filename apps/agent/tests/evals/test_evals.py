@@ -61,10 +61,12 @@ def reports(trajectories: dict[str, dict[str, Any]]) -> dict[str, Any]:
 def test_case(case: Any, trajectories: dict[str, dict[str, Any]]) -> None:
     report = score_case(case, trajectories[case.id])
     failures = [f"{name}: {res.reason}" for name, res in report.scores.items() if not res]
+    if case.xfail and failures:
+        pytest.xfail(f"{case.xfail}: {failures}")
     assert not failures, f"{case.id} failed scorers:\n  " + "\n  ".join(failures)
 
 
 def test_overall(reports: dict[str, Any]) -> None:
-    """Print the table (via the reports fixture) and require every case to pass."""
-    failed = [cid for cid, r in reports.items() if not r.passed]
+    """Print the table (via the reports fixture) and require every non-xfail case to pass."""
+    failed = [cid for cid, r in reports.items() if not r.gating_ok]
     assert not failed, f"cases failed: {failed}"

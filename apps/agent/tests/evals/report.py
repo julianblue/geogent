@@ -28,10 +28,23 @@ SCORER_NAMES = ("tool_selection", "args", "length", "final")
 class CaseReport:
     case_id: str
     scores: dict[str, ScoreResult]
+    xfail: str | None = None  # known-weakness reason, if any
 
     @property
     def passed(self) -> bool:
         return all(s.score == 1 for s in self.scores.values())
+
+    @property
+    def gating_ok(self) -> bool:
+        """Whether this case should keep CI green (a passing case, or a failing
+        but expected-to-fail one)."""
+        return self.passed or self.xfail is not None
+
+    @property
+    def result(self) -> str:
+        if self.xfail is not None:
+            return "XPASS" if self.passed else "XFAIL"
+        return "PASS" if self.passed else "FAIL"
 
     @property
     def total(self) -> int:
@@ -46,7 +59,7 @@ def score_case(case: EvalCase, trajectory: dict[str, Any]) -> CaseReport:
         "length": score_trajectory_length(trajectory, e.max_steps),
         "final": score_final_answer(trajectory, e.final_contains_any),
     }
-    return CaseReport(case_id=case.id, scores=scores)
+    return CaseReport(case_id=case.id, scores=scores, xfail=case.xfail)
 
 
 def build_report(pairs: list[tuple[EvalCase, dict[str, Any]]]) -> list[CaseReport]:
@@ -60,14 +73,17 @@ def render_table(reports: list[CaseReport]) -> str:
     lines = [header, "-" * len(header)]
     for r in reports:
         cells = "  ".join(f"{('PASS' if r.scores[n].score else 'FAIL'):>14}" for n in SCORER_NAMES)
-        lines.append(f"{r.case_id:<{id_w}}  {cells}  {'PASS' if r.passed else 'FAIL'}")
+        lines.append(f"{r.case_id:<{id_w}}  {cells}  {r.result}")
 
     passed = sum(1 for r in reports if r.passed)
+    xfailed = sum(1 for r in reports if r.xfail is not None and not r.passed)
     total_checks = sum(len(r.scores) for r in reports)
     passed_checks = sum(r.total for r in reports)
     lines.append("-" * len(header))
+    suffix = f"   ({xfailed} xfail)" if xfailed else ""
     lines.append(
-        f"cases: {passed}/{len(reports)} passed   checks: {passed_checks}/{total_checks} passed"
+        f"cases: {passed}/{len(reports)} passed   "
+        f"checks: {passed_checks}/{total_checks} passed{suffix}"
     )
     return "\n".join(lines)
 
