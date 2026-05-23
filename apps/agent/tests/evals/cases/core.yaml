@@ -1,0 +1,76 @@
+# Golden trajectories for the geogent agent.
+#
+# Each case is one chat turn. `expect` is graded by the four deterministic
+# scorers in scorers.py:
+#   tools_required     — tool names that must be invoked. A nested list is an
+#                        any-of group (at least one of those tools must run).
+#   args               — per-tool argument constraints; {between: [lo, hi]} is
+#                        an inclusive numeric range, {equals: x} an exact match.
+#   max_steps          — max number of agent (AI) turns in the trajectory.
+#   final_contains_any — case-insensitive substrings; any one is enough.
+#
+# Keyword expectations are only asserted where the backend stub or the geocoder
+# makes the token deterministic; free-form numeric formatting is left unchecked.
+
+- id: geocode_then_fly_to_paris
+  input: "Fly me to Paris, France."
+  configurable: {}
+  expect:
+    tools_required: [geocode_place]
+    args:
+      fly_to:
+        longitude: {between: [1.5, 3.5]}
+        latitude: {between: [48.0, 49.5]}
+    max_steps: 6
+    final_contains_any: ["paris"]
+
+- id: buffer_viewport_overlay
+  input: "Buffer the current view by 500 meters and add it as an overlay."
+  configurable:
+    map_state:
+      viewport:
+        longitude: 2.349
+        latitude: 48.864
+        zoom: 12
+        bounds: {west: 2.2, south: 48.8, east: 2.5, north: 48.93}
+  expect:
+    tools_required: [[buffer_geometry, add_buffer_layer]]
+    max_steps: 8
+
+- id: features_within_viewport
+  input: "What features are in the current map view? List them by name."
+  configurable:
+    map_state:
+      viewport:
+        longitude: 2.349
+        latitude: 48.864
+        zoom: 12
+        bounds: {west: 2.2, south: 48.8, east: 2.5, north: 48.93}
+  expect:
+    tools_required: [[features_within, list_features_in_viewport]]
+    max_steps: 8
+    final_contains_any: ["eiffel", "louvre"]
+
+- id: buffer_explicit_point
+  input: "Buffer POINT(-122.42 37.77) by 1000 meters and show me the resulting geometry."
+  configurable: {}
+  expect:
+    tools_required: [buffer_geometry]
+    args:
+      buffer_geometry:
+        distance_m: {equals: 1000}
+    max_steps: 6
+
+- id: distance_paris_to_newyork
+  input: "How far is it from Paris, France to New York City? Give me the distance."
+  configurable: {}
+  expect:
+    tools_required: [geocode_place, distance_between]
+    max_steps: 10
+
+- id: list_saved_features
+  input: "List all the geospatial features saved in the database."
+  configurable: {}
+  expect:
+    tools_required: [list_features]
+    max_steps: 5

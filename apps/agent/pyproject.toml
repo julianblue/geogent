@@ -58,4 +58,5 @@ asyncio_mode = "auto"
 pythonpath = ["src"]
 markers = [
   "e2e: hits a real LLM (OpenRouter) and starts the LangGraph dev server",
+  "eval: live graded eval; hits a real LLM (OpenRouter) and starts the LangGraph dev server",
 ]

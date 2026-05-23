@@ -1,0 +1,50 @@
+{
+  "values": {
+    "messages": [
+      {
+        "type": "human",
+        "content": "Fly me to Paris, France."
+      },
+      {
+        "type": "ai",
+        "content": "",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": { "query": "Paris, France" },
+            "id": "call_geocode_1",
+            "type": "tool_call"
+          }
+        ]
+      },
+      {
+        "type": "tool",
+        "name": "geocode_place",
+        "tool_call_id": "call_geocode_1",
+        "content": "{\"lat\": 48.8566, \"lon\": 2.3522, \"display_name\": \"Paris, Ile-de-France, France\"}"
+      },
+      {
+        "type": "ai",
+        "content": "",
+        "tool_calls": [
+          {
+            "name": "fly_to",
+            "args": { "longitude": 2.3522, "latitude": 48.8566, "zoom": 12 },
+            "id": "call_flyto_1",
+            "type": "tool_call"
+          }
+        ]
+      },
+      {
+        "type": "tool",
+        "name": "fly_to",
+        "tool_call_id": "call_flyto_1",
+        "content": "{\"flown_to\": [2.3522, 48.8566], \"zoom\": 12}"
+      },
+      {
+        "type": "ai",
+        "content": "I've centered the map on Paris, France (48.86°N, 2.35°E) at zoom 12."
+      }
+    ]
+  }
+}
