@@ -21,7 +21,7 @@ from tests.evals.report import build_report, maybe_push_to_langsmith, render_tab
 from tests.evals.runner import run_case
 from tests.harness import can_reach
 
-pytestmark = [pytest.mark.eval, pytest.mark.asyncio]
+pytestmark = pytest.mark.eval
 
 CASES = load_cases()
 

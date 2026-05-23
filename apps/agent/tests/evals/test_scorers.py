@@ -1,10 +1,11 @@
 """Offline unit tests for the four scorers.
 
 These run with NO API key: every scorer consumes a canned trajectory dict (the
-shape ``threads.get_state`` returns). ``paris_fly_to.json`` is a passing run and
-``paris_fly_to_bad.json`` a failing one, giving one pass + one fail per scorer
-against the ``geocode_then_fly_to_paris`` golden case; inline trajectories cover
-the any-of, equals, and empty-constraint branches.
+shape ``threads.get_state`` returns). ``paris_fly_to.json`` is a real trajectory
+captured from a live OpenRouter run (it passes) and ``paris_fly_to_bad.json`` a
+hand-authored failing one, giving one pass + one fail per scorer against the
+``geocode_then_fly_to_paris`` golden case; inline trajectories cover the any-of,
+equals, and empty-constraint branches.
 """
 
 from __future__ import annotations
