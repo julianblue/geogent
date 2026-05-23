@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     # OpenRouter (https://openrouter.ai) — OpenAI-compatible gateway that
     # fronts many providers. Selected by AGENT_MODEL="openrouter:<vendor>/<model>",
-    # e.g. "openrouter:anthropic/claude-3.5-sonnet".
+    # e.g. "openrouter:google/gemini-2.5-flash".
     openrouter_api_key: str | None = None
     openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
 

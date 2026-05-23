@@ -1,0 +1,261 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Fly me to Paris, France.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "89988496-a01f-4713-8f68-151c77075d00"
+      },
+      {
+        "content": "I'll geocode Paris, France and fly you there.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 69,
+            "prompt_tokens": 5005,
+            "total_tokens": 5074,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.01605,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.01605,
+              "upstream_inference_prompt_cost": 0.015015,
+              "upstream_inference_completions_cost": 0.001035
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "anthropic/claude-4.5-sonnet-20250929",
+          "system_fingerprint": null,
+          "id": "gen-1779560793-3YapEamS1DxFQP8MB29K",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019e5616-c590-7250-801e-e95eff9ad633-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "Paris, France"
+            },
+            "id": "toolu_bdrk_016aZjqByTqj1j9otFoaL1kH",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5005,
+          "output_tokens": 69,
+          "total_tokens": 5074,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 48.8588897, \"lon\": 2.320041, \"display_name\": \"Paris, \u00cele-de-France, France m\u00e9tropolitaine, France\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "26788ab0-cb82-4508-a2e8-480e7dd03145",
+        "tool_call_id": "toolu_bdrk_016aZjqByTqj1j9otFoaL1kH",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 77,
+            "prompt_tokens": 5127,
+            "total_tokens": 5204,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.016536,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.016536,
+              "upstream_inference_prompt_cost": 0.015381,
+              "upstream_inference_completions_cost": 0.001155
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "anthropic/claude-4.5-sonnet-20250929",
+          "system_fingerprint": null,
+          "id": "gen-1779560795-DXffRAGzy6U79z9m0qkD",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019e5616-ce98-7e50-b3d5-df248b387f5a-0",
+        "tool_calls": [
+          {
+            "name": "fly_to",
+            "args": {
+              "longitude": 2.320041,
+              "latitude": 48.8588897
+            },
+            "id": "toolu_bdrk_011RPeGrwX4SjS5cWhcRvKE1",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5127,
+          "output_tokens": 77,
+          "total_tokens": 5204,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"flown_to\": [2.320041, 48.8588897], \"zoom\": 12}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "fly_to",
+        "id": "13afc206-4e8f-4458-891d-fd3c83772530",
+        "tool_call_id": "toolu_bdrk_011RPeGrwX4SjS5cWhcRvKE1",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "Done! Your map is now centered on **Paris, \u00cele-de-France, France** at coordinates (48.86\u00b0N, 2.32\u00b0E) with a zoom level of 12.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 47,
+            "prompt_tokens": 5240,
+            "total_tokens": 5287,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.016425,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.016425,
+              "upstream_inference_prompt_cost": 0.01572,
+              "upstream_inference_completions_cost": 0.000705
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "anthropic/claude-4.5-sonnet-20250929",
+          "system_fingerprint": null,
+          "id": "gen-1779560797-qfCJbMPzrrwiF0Q4ubzZ",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019e5616-d525-7071-b317-bb6340f0c913-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5240,
+          "output_tokens": 47,
+          "total_tokens": 5287,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:35579",
+    "thread_id": "f7fcb6a5-d6f5-4ee5-afa5-b2b0bb6dfe50",
+    "run_id": "019e5616-bfa3-7720-ac07-6d36612f2806",
+    "source": "loop",
+    "step": 5,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "ab551ac9-16f0-4656-adbe-48959c7b4d22"
+  },
+  "created_at": "2026-05-23T18:26:39.580711+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f156d4f-0a83-6612-8005-1b9a9ff4f56a",
+    "thread_id": "f7fcb6a5-d6f5-4ee5-afa5-b2b0bb6dfe50",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f156d4e-f60d-650f-8004-0ca5d37c5da0",
+    "thread_id": "f7fcb6a5-d6f5-4ee5-afa5-b2b0bb6dfe50",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f156d4f-0a83-6612-8005-1b9a9ff4f56a",
+  "parent_checkpoint_id": "1f156d4e-f60d-650f-8004-0ca5d37c5da0"
+}

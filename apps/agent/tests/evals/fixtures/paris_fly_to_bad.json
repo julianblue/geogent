@@ -1,0 +1,34 @@
+{
+  "values": {
+    "messages": [
+      {
+        "type": "human",
+        "content": "Fly me to Paris, France."
+      },
+      {
+        "type": "ai",
+        "content": "",
+        "tool_calls": [
+          {
+            "name": "fly_to",
+            "args": { "longitude": -0.1276, "latitude": 51.5072, "zoom": 12 },
+            "id": "call_flyto_bad",
+            "type": "tool_call"
+          }
+        ]
+      },
+      { "type": "tool", "name": "fly_to", "tool_call_id": "call_flyto_bad", "content": "{\"flown_to\": [-0.1276, 51.5072], \"zoom\": 12}" },
+      { "type": "ai", "content": "", "tool_calls": [ { "name": "list_features", "args": {}, "id": "c2", "type": "tool_call" } ] },
+      { "type": "tool", "name": "list_features", "tool_call_id": "c2", "content": "[]" },
+      { "type": "ai", "content": "", "tool_calls": [ { "name": "list_features", "args": {}, "id": "c3", "type": "tool_call" } ] },
+      { "type": "tool", "name": "list_features", "tool_call_id": "c3", "content": "[]" },
+      { "type": "ai", "content": "", "tool_calls": [ { "name": "list_features", "args": {}, "id": "c4", "type": "tool_call" } ] },
+      { "type": "tool", "name": "list_features", "tool_call_id": "c4", "content": "[]" },
+      { "type": "ai", "content": "", "tool_calls": [ { "name": "list_features", "args": {}, "id": "c5", "type": "tool_call" } ] },
+      { "type": "tool", "name": "list_features", "tool_call_id": "c5", "content": "[]" },
+      { "type": "ai", "content": "", "tool_calls": [ { "name": "list_features", "args": {}, "id": "c6", "type": "tool_call" } ] },
+      { "type": "tool", "name": "list_features", "tool_call_id": "c6", "content": "[]" },
+      { "type": "ai", "content": "Done." }
+    ]
+  }
+}
