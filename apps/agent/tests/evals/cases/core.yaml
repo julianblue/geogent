@@ -74,3 +74,40 @@
   expect:
     tools_required: [list_features]
     max_steps: 5
+
+# --- STAC (live Earth Search API, like geocode_place hits live Nominatim) ----
+
+- id: stac_list_collections
+  input: "What satellite imagery collections can I search? List a few."
+  configurable: {}
+  expect:
+    tools_required: [stac_list_collections]
+    max_steps: 5
+    final_contains_any: ["sentinel"]
+
+- id: stac_search_sentinel2_paris
+  input: >-
+    Find the most recent low-cloud Sentinel-2 scene within the bounding box
+    [2.25, 48.80, 2.42, 48.90] (Paris). Tell me its item id.
+  configurable: {}
+  expect:
+    tools_required: [stac_search]
+    max_steps: 10
+    final_contains_any: ["s2", "sentinel", "l2a"]
+
+# --- remaining analytics tools -----------------------------------------------
+
+- id: area_of_polygon
+  input: "What is the area in square meters of POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))?"
+  configurable: {}
+  expect:
+    tools_required: [area_of]
+    max_steps: 5
+
+- id: geometries_intersect_check
+  input: "Do POLYGON((0 0,0 2,2 2,2 0,0 0)) and POLYGON((1 1,1 3,3 3,3 1,1 1)) intersect?"
+  configurable: {}
+  expect:
+    tools_required: [geometries_intersect]
+    max_steps: 5
+    final_contains_any: ["intersect", "yes", "overlap"]
