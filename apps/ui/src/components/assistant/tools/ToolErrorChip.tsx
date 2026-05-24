@@ -6,7 +6,11 @@ function messageFrom(error: unknown): string {
   if (!error) return "Tool failed.";
   if (typeof error === "string") return error;
   if (error instanceof Error) return error.message;
-  return JSON.stringify(error);
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
 }
 
 export function ToolErrorChip({ label, error }: { label: string; error: unknown }) {

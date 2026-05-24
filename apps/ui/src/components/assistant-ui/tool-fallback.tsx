@@ -12,6 +12,21 @@ import { cn } from "@/lib/utils";
 
 const ANIMATION_DURATION = 200;
 
+function safeStringify(value: unknown, indent?: number): string {
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value, (_k, v) => (typeof v === "bigint" ? v.toString() : v), indent);
+  } catch {
+    return String(value);
+  }
+}
+
+function errorText(error: unknown): string | null {
+  if (!error) return null;
+  if (error instanceof Error) return error.message;
+  return safeStringify(error);
+}
+
 export type ToolFallbackRootProps = Omit<
   React.ComponentProps<typeof Collapsible>,
   "open" | "onOpenChange"
@@ -209,7 +224,7 @@ function ToolFallbackResult({
     >
       <p className="aui-tool-fallback-result-header font-semibold">Result:</p>
       <pre className="aui-tool-fallback-result-content whitespace-pre-wrap">
-        {typeof result === "string" ? result : JSON.stringify(result, null, 2)}
+        {safeStringify(result, 2)}
       </pre>
     </div>
   );
@@ -224,10 +239,9 @@ function ToolFallbackError({
 }) {
   if (status?.type !== "incomplete") return null;
 
-  const error = status.error;
-  const errorText = error ? (typeof error === "string" ? error : JSON.stringify(error)) : null;
+  const reason = errorText(status.error);
 
-  if (!errorText) return null;
+  if (!reason) return null;
 
   const isCancelled = status.reason === "cancelled";
   const headerText = isCancelled ? "Cancelled reason:" : "Error:";
@@ -241,7 +255,7 @@ function ToolFallbackError({
       <p className="aui-tool-fallback-error-header font-semibold text-muted-foreground">
         {headerText}
       </p>
-      <p className="aui-tool-fallback-error-reason text-muted-foreground">{errorText}</p>
+      <p className="aui-tool-fallback-error-reason text-muted-foreground">{reason}</p>
     </div>
   );
 }
