@@ -50,13 +50,8 @@ export const Thread: FC = () => {
             <ThreadWelcome />
           </AuiIf>
 
-          <div
-            data-slot="aui_message-group"
-            className="mb-6 flex flex-col gap-y-6 empty:hidden"
-          >
-            <ThreadPrimitive.Messages>
-              {() => <ThreadMessage />}
-            </ThreadPrimitive.Messages>
+          <div data-slot="aui_message-group" className="mb-6 flex flex-col gap-y-6 empty:hidden">
+            <ThreadPrimitive.Messages>{() => <ThreadMessage />}</ThreadPrimitive.Messages>
             <WorkingIndicator />
           </div>
 
@@ -96,7 +91,7 @@ const ThreadScrollToBottom: FC = () => {
 const ThreadWelcome: FC = () => {
   return (
     <div className="aui-thread-welcome-root my-auto flex grow flex-col justify-center px-2 text-sm text-muted-foreground">
-      <p className="fade-in slide-in-from-bottom-1 animate-in fill-mode-both duration-200">
+      <p className="duration-200 animate-in fade-in slide-in-from-bottom-1 fill-mode-both">
         Hi! Ask me to fly to a place, buffer the visible area, or list features in view. I&apos;ll
         always confirm before writing to the database.
       </p>
@@ -109,7 +104,7 @@ const WorkingIndicator: FC = () => {
     <AuiIf condition={(s) => s.thread.isRunning}>
       <div
         data-slot="aui_working-indicator"
-        className="fade-in animate-in flex items-center gap-2 px-2 text-xs text-muted-foreground"
+        className="flex items-center gap-2 px-2 text-xs text-muted-foreground animate-in fade-in"
       >
         <Loader2Icon className="size-3.5 animate-spin" />
         Working…
@@ -188,7 +183,7 @@ const AssistantMessage: FC = () => {
     <MessagePrimitive.Root
       data-slot="aui_assistant-message-root"
       data-role="assistant"
-      className="fade-in slide-in-from-bottom-1 relative animate-in duration-150"
+      className="relative duration-150 animate-in fade-in slide-in-from-bottom-1"
     >
       <div
         data-slot="aui_assistant-message-content"
@@ -200,10 +195,7 @@ const AssistantMessage: FC = () => {
         <MessageError />
       </div>
 
-      <div
-        data-slot="aui_assistant-message-footer"
-        className="ms-2 flex items-center pt-1.5"
-      >
+      <div data-slot="aui_assistant-message-footer" className="ms-2 flex items-center pt-1.5">
         <BranchPicker />
         <AssistantActionBar />
       </div>
@@ -260,7 +252,7 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_user-message-root"
-      className="fade-in slide-in-from-bottom-1 grid animate-in auto-rows-auto grid-cols-[minmax(48px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [&:where(>*)]:col-start-2"
+      className="grid auto-rows-auto grid-cols-[minmax(48px,1fr)_auto] content-start gap-y-2 px-2 duration-150 animate-in fade-in slide-in-from-bottom-1 [&:where(>*)]:col-start-2"
       data-role="user"
     >
       <div className="aui-user-message-content-wrapper relative col-start-2 min-w-0">
@@ -298,10 +290,7 @@ const UserActionBar: FC = () => {
 
 const EditComposer: FC = () => {
   return (
-    <MessagePrimitive.Root
-      data-slot="aui_edit-composer-wrapper"
-      className="flex flex-col px-2"
-    >
+    <MessagePrimitive.Root data-slot="aui_edit-composer-wrapper" className="flex flex-col px-2">
       <ComposerPrimitive.Root className="aui-edit-composer-root ms-auto flex w-full max-w-[85%] flex-col rounded-2xl bg-muted">
         <ComposerPrimitive.Input
           className="aui-edit-composer-input min-h-12 w-full resize-none bg-transparent p-4 text-sm text-foreground outline-none"
