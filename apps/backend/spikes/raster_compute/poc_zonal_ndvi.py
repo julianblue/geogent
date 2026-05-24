@@ -10,12 +10,13 @@ Run (isolated venv, deps NOT added to the backend project):
 
     uv venv --python 3.12 /tmp/spike-venv
     uv pip install --python /tmp/spike-venv/bin/python \
-        rasterio rasterstats numpy shapely httpx
+        rasterio numpy shapely httpx
     /tmp/spike-venv/bin/python apps/backend/spikes/raster_compute/poc_zonal_ndvi.py
 
 The COGs live in the AWS Open Data bucket and are public over HTTPS, so no
-AWS credentials are required — we read them via GDAL's /vsicurl with the
-``aws_unsigned`` virtual filesystem turned off (plain HTTPS range reads).
+AWS credentials are required. We pass the asset hrefs to ``rasterio.open``
+straight from the STAC item; GDAL drives them as plain HTTPS range reads
+(``/vsicurl``) — no ``AWS_NO_SIGN_REQUEST``/S3 signing is involved.
 """
 
 from __future__ import annotations
@@ -117,21 +118,30 @@ def zonal_mean_ndvi_windowed(red_href: str, nir_href: str, geom_4326: dict) -> d
     """
     with rasterio.Env(**GDAL_ENV):
         with rasterio.open(red_href) as red_ds:
-            # Reproject the WGS84 polygon into the scene's UTM CRS.
+            # Reproject the WGS84 polygon into the scene's UTM CRS, then derive
+            # ONE canonical integer pixel window. Rounding to whole pixels here
+            # means the array we read, the mask grid, and ``win_transform`` all
+            # describe the same cells.
             geom_utm = transform_geom("EPSG:4326", red_ds.crs, geom_4326)
             minx, miny, maxx, maxy = shape(geom_utm).bounds
-            window = from_bounds(minx, miny, maxx, maxy, red_ds.transform)
-            red = red_ds.read(1, window=window).astype("float32")
+            window = (
+                from_bounds(minx, miny, maxx, maxy, red_ds.transform)
+                .round_offsets()
+                .round_lengths()
+            )
             win_transform = red_ds.window_transform(window)
+            red_grid = (red_ds.crs, red_ds.transform)
+            red = red_ds.read(1, window=window).astype("float32")
 
         with rasterio.open(nir_href) as nir_ds:
-            window_nir = from_bounds(minx, miny, maxx, maxy, nir_ds.transform)
-            nir = nir_ds.read(1, window=window_nir).astype("float32")
+            # B04 and B08 are both 10 m bands on the same UTM grid, so the same
+            # pixel window applies. Assert it rather than silently cropping to
+            # the min shape, which would hide a real misalignment.
+            if (nir_ds.crs, nir_ds.transform) != red_grid:
+                raise ValueError("red and nir bands are not on the same grid")
+            nir = nir_ds.read(1, window=window).astype("float32")
 
-    # Both 10 m bands share the grid, so windows align. Guard anyway.
-    h = min(red.shape[0], nir.shape[0])
-    w = min(red.shape[1], nir.shape[1])
-    red, nir = red[:h, :w], nir[:h, :w]
+    h, w = red.shape
 
     mask = geometry_mask(
         [geom_utm],
@@ -166,19 +176,17 @@ def full_band_bytes(href: str) -> int:
 
 
 def main() -> None:
-    bbox = [
-        FIELD_POLYGON["coordinates"][0][0][0],
-        FIELD_POLYGON["coordinates"][0][0][1],
-        FIELD_POLYGON["coordinates"][0][2][0],
-        FIELD_POLYGON["coordinates"][0][2][1],
-    ]
+    # min/max over all vertices so any polygon works, not just this
+    # axis-aligned rectangle in this vertex order.
+    bbox = list(shape(FIELD_POLYGON).bounds)
 
     print("1. STAC search (Earth Search v1, sentinel-2-l2a, cloud<20, newest)")
     with timer("stac_search"):
         item = find_scene(bbox)
+    cloud_cover = item["properties"].get("eo:cloud_cover") or 0.0
     print(f"   scene: {item['id']}")
     print(f"   datetime: {item['properties']['datetime']}")
-    print(f"   cloud_cover: {item['properties'].get('eo:cloud_cover'):.1f}%")
+    print(f"   cloud_cover: {cloud_cover:.1f}%")
     print(f"   crs (proj:epsg): {item['properties'].get('proj:epsg')}")
 
     red_href = item["assets"]["red"]["href"]

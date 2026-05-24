@@ -5,7 +5,7 @@ Blocks: #22, #23, #24, #26
 
 ## TL;DR
 
-Adopt **Option 1 — `rasterio` + `rasterstats` + `numpy` reading STAC COGs
+Adopt **Option 1 — `rasterio` + `numpy` reading STAC COGs
 directly inside FastAPI** for the first quantitative raster features (zonal
 stats, single-/few-scene reads). Run reads **synchronously** for single-scene
 requests and push **multi-scene time-series onto a background job** from day
@@ -34,10 +34,12 @@ polygon over a live Sentinel-2 scene using windowed COG range reads. See
 
 ## Options evaluated
 
-### Option 1 — `rasterio` + `rasterstats` (+`numpy`) in FastAPI  ✅ chosen
+### Option 1 — `rasterio` + `numpy` in FastAPI  ✅ chosen
 
 Open band COGs over `/vsicurl`, read only the polygon's pixel window, compute
-NDVI and zonal stats with numpy/rasterstats in-process.
+NDVI and zonal stats with numpy in-process. The PoC shows the zonal reduction
+is a few lines (`rasterio.features.geometry_mask` + `numpy.nanmean`), so
+`rasterstats` is **not** required — see the dependency note below.
 
 - **Pros:** no new service to deploy or monitor; reuses the existing FastAPI
   app, auth, and DB session; lowest moving-parts; windowed reads are fast
@@ -127,12 +129,17 @@ Measured in an isolated `uv` venv (Python 3.12) in this container:
 ```toml
 "numpy>=2.1",
 "rasterio>=1.4",   # bundles GDAL; manylinux wheel — no system libgdal
-"rasterstats>=0.20",
 ```
 
 (Spike pinned the versions it actually ran: `numpy==2.4.6`,
-`rasterio==1.5.0`, `rasterstats==0.21.0`.) `shapely` and `httpx` are already
-present. **Not** adding: `titiler`, `rio-tiler`, `stackstac`, `dask`,
+`rasterio==1.5.0`.) `shapely` and `httpx` are already present.
+
+`rasterstats` is intentionally **omitted**: the PoC computes the zonal
+reduction directly with `geometry_mask` + numpy, and `rasterstats.zonal_stats`
+adds little over that for our windowed single-/few-polygon case while pulling
+extra transitive deps. If #22 grows into ergonomic batch multi-polygon ×
+multi-stat queries, revisit adding it then. **Not** adding: `titiler`,
+`rio-tiler`, `stackstac`, `dask`,
 `xarray`, `rioxarray`.
 
 ## PoC results (live data)
@@ -188,7 +195,7 @@ decides the approach and proves the read path.
 
 ```bash
 uv venv --python 3.12 /tmp/spike-venv
-uv pip install --python /tmp/spike-venv/bin/python rasterio rasterstats numpy shapely httpx
+uv pip install --python /tmp/spike-venv/bin/python rasterio numpy shapely httpx
 # In this sandbox only, allow the intercepting proxy's cert:
 SPIKE_GDAL_UNSAFE_SSL=1 /tmp/spike-venv/bin/python \
   apps/backend/spikes/raster_compute/poc_zonal_ndvi.py
