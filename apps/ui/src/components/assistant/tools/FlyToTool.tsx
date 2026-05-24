@@ -21,6 +21,9 @@ export function FlyToTool() {
       mapRef.current?.flyTo({ center: [longitude, latitude], zoom: zoom ?? 12 });
       return { flown_to: [longitude, latitude], zoom: zoom ?? 12 };
     },
+    // Intentionally silent: panning the map is the only feedback needed, so we
+    // suppress the generic tool fallback chip for this tool.
+    render: () => null,
   });
   return null;
 }

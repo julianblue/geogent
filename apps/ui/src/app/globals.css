@@ -4,6 +4,8 @@
 
 @import "maplibre-gl/dist/maplibre-gl.css";
 
+@import "tw-shimmer";
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -6,6 +6,7 @@ import { useAssistantTool, type ToolCallMessagePartProps } from "@assistant-ui/r
 import { useMapState } from "@/components/map/MapStateProvider";
 import { addBufferOverlay } from "@/components/map/overlays";
 import { BufferPreviewCard } from "@/components/copilot/cards/BufferPreviewCard";
+import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
 import { viewportToBboxWkt } from "@/lib/geo";
 
 const bufferSchema = z.object({
@@ -47,6 +48,9 @@ export function BufferLayerTool() {
       result,
       status,
     }: ToolCallMessagePartProps<BufferArgs, BufferResult>) {
+      if (status.type === "incomplete" && status.reason === "error") {
+        return <ToolErrorChip label="Buffer" error={status.error} />;
+      }
       return (
         <BufferPreviewCard
           status={status.type === "complete" ? "complete" : "running"}
