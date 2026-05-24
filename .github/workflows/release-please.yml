@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # The default GITHUB_TOKEN cannot open PRs when "Allow GitHub Actions
+          # to create and approve pull requests" is disabled, and tags it pushes
+          # do not trigger release.yml. A PAT (RELEASE_PLEASE_TOKEN) avoids both.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
