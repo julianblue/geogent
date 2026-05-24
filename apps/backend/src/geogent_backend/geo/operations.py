@@ -106,6 +106,48 @@ async def geometries_intersect(session: AsyncSession, a_wkt: str, b_wkt: str) ->
     return bool(result.scalar_one())
 
 
+async def fields_in_bbox(
+    session: AsyncSession,
+    min_lon: float,
+    min_lat: float,
+    max_lon: float,
+    max_lat: float,
+) -> list[dict]:
+    """Fields whose geometry overlaps the given lon/lat bounding box (SRID 4326).
+
+    Uses the ``&&`` bounding-box operator so the GiST index on
+    ``fields.geometry`` does the work. Returns one dict per field including the
+    geometry as a GeoJSON string (``geojson``) so callers can render it directly.
+    """
+    if min_lon > max_lon or min_lat > max_lat:
+        raise GeometryValidationError(
+            "Invalid bbox: expected min_lon <= max_lon and min_lat <= max_lat"
+        )
+    sql = text(
+        """
+        SELECT id, name, crop, season, created_at, ST_AsGeoJSON(geometry) AS geojson
+        FROM fields
+        WHERE geometry && ST_MakeEnvelope(:min_lon, :min_lat, :max_lon, :max_lat, 4326)
+        ORDER BY id
+        """
+    )
+    result = await session.execute(
+        sql,
+        {"min_lon": min_lon, "min_lat": min_lat, "max_lon": max_lon, "max_lat": max_lat},
+    )
+    return [
+        {
+            "id": row.id,
+            "name": row.name,
+            "crop": row.crop,
+            "season": row.season,
+            "created_at": row.created_at,
+            "geojson": row.geojson,
+        }
+        for row in result
+    ]
+
+
 async def features_within(session: AsyncSession, wkt: str) -> list[dict]:
     """Features whose geometry is fully inside the input WKT (SRID 4326).
 
