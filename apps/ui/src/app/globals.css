@@ -66,3 +66,33 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+@layer utilities {
+  /* Animated text shimmer for in-progress tool labels. */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted-foreground) / 0.35) 0%,
+      hsl(var(--foreground)) 50%,
+      hsl(var(--muted-foreground) / 0.35) 100%
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 1.5s linear infinite;
+  }
+
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer {
+      animation: none;
+    }
+  }
+}

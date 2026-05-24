@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { useLangGraphInterruptState, useLangGraphSendCommand } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
@@ -33,12 +34,9 @@ export function ConfirmFeatureSaveTool() {
   async function handleSave(finalName: string) {
     const geometry = wktPolygonToGeoJSON(payload.geometry_wkt);
     if (!geometry) {
-      await sendCommand({
-        resume: JSON.stringify({
-          ok: false,
-          error: "Only Polygon WKT is supported by this UI for now.",
-        }),
-      });
+      const error = "Only Polygon WKT is supported by this UI for now.";
+      toast.error("Couldn't save feature", { description: error });
+      await sendCommand({ resume: JSON.stringify({ ok: false, error }) });
       setStatus("complete");
       return;
     }
@@ -48,9 +46,9 @@ export function ConfirmFeatureSaveTool() {
       body: JSON.stringify({ name: finalName, geometry, properties: {} }),
     });
     if (!res.ok) {
-      await sendCommand({
-        resume: JSON.stringify({ ok: false, error: `Save failed: ${res.status}` }),
-      });
+      const error = `Save failed: ${res.status}`;
+      toast.error("Couldn't save feature", { description: error });
+      await sendCommand({ resume: JSON.stringify({ ok: false, error }) });
       setStatus("complete");
       return;
     }

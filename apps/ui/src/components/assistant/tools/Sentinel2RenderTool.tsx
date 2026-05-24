@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useLangGraphInterruptState, useLangGraphSendCommand } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
@@ -78,14 +79,11 @@ export function Sentinel2RenderTool() {
         }
 
         if (!item) {
-          await sendCommand({
-            resume: JSON.stringify({
-              ok: false,
-              reason: payload.item_id
-                ? `STAC item ${payload.item_id} not found`
-                : "no cloud-free scene matched the bbox",
-            }),
-          });
+          const reason = payload.item_id
+            ? `STAC item ${payload.item_id} not found`
+            : "no cloud-free scene matched the bbox";
+          toast.error("Couldn't show Sentinel-2 scene", { description: reason });
+          await sendCommand({ resume: JSON.stringify({ ok: false, reason }) });
           return;
         }
 
@@ -102,12 +100,9 @@ export function Sentinel2RenderTool() {
           }),
         });
       } catch (err) {
-        await sendCommand({
-          resume: JSON.stringify({
-            ok: false,
-            reason: err instanceof Error ? err.message : String(err),
-          }),
-        });
+        const reason = err instanceof Error ? err.message : String(err);
+        toast.error("Couldn't show Sentinel-2 scene", { description: reason });
+        await sendCommand({ resume: JSON.stringify({ ok: false, reason }) });
       }
     })();
   }, [interrupt, sendCommand, setSentinel2Scene]);
