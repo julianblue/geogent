@@ -1,23 +1,32 @@
 import asyncio
 import time
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 
 import httpx
 
 from geogent_agent.config import get_settings
 
-# Module-level token cache shared by every client returned from
-# ``get_backend_client()``. ``_expires_at`` is a ``time.monotonic()`` deadline.
-_token: str | None = None
-_expires_at: float = 0.0
+
+@dataclass
+class _TokenCache:
+    """Service token shared by every client from ``get_backend_client()``.
+
+    ``expires_at`` is a ``time.monotonic()`` deadline.
+    """
+
+    token: str | None = None
+    expires_at: float = 0.0
+
+
+_cache = _TokenCache()
 _lock = asyncio.Lock()
 
 
 def _reset_token_cache() -> None:
     """Clear the cached service token. Intended for tests."""
-    global _token, _expires_at
-    _token = None
-    _expires_at = 0.0
+    _cache.token = None
+    _cache.expires_at = 0.0
 
 
 async def _login() -> tuple[str, int]:
@@ -38,15 +47,14 @@ async def _login() -> tuple[str, int]:
 
 async def _get_token(*, force_refresh: bool = False) -> str:
     """Return a valid service token, refreshing it (slightly early) when needed."""
-    global _token, _expires_at
     async with _lock:
-        if force_refresh or _token is None or time.monotonic() >= _expires_at:
+        if force_refresh or _cache.token is None or time.monotonic() >= _cache.expires_at:
             token, ttl = await _login()
-            _token = token
+            _cache.token = token
             # Refresh a minute before the real expiry to avoid races at the edge,
             # but never schedule the deadline in the past for short-lived tokens.
-            _expires_at = time.monotonic() + max(ttl - 60, 0)
-        return _token
+            _cache.expires_at = time.monotonic() + max(ttl - 60, 0)
+        return _cache.token
 
 
 class _ServiceTokenAuth(httpx.Auth):

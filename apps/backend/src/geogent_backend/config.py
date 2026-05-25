@@ -48,7 +48,6 @@ class Settings(BaseSettings):
         description="Root URL of the STAC API used to discover Sentinel-2 scenes.",
     )
     stac_collection: str = Field(default="sentinel-2-l2a")
-    raster_default_max_cloud_cover: float = Field(default=20)
     raster_max_scenes: int = Field(default=60)
     raster_job_concurrency: int = Field(default=4)
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -41,6 +42,8 @@ from geogent_backend.schemas.raster import (
     ZonalStatsRequest,
     ZonalStatsResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class FieldNotFoundError(Exception):
@@ -219,8 +222,14 @@ class RasterService:
                     "points": [json.loads(p.model_dump_json()) for p in points],
                 }
                 await jobs.set_result(job_id, result)
-            except Exception as exc:  # noqa: BLE001 — record any failure on the job row
+            except FieldNotFoundError as exc:
+                # Safe to surface: it only names the requested field id.
                 await jobs.set_error(job_id, str(exc))
+            except Exception:
+                # Log the full exception server-side; never leak internal detail
+                # (upstream URLs, file paths, library messages) to the API caller.
+                logger.exception("Time-series job %s failed", job_id)
+                await jobs.set_error(job_id, "Time-series computation failed.")
 
     async def get_time_series(self, job_id: UUID) -> TimeSeriesResultResponse | None:
         row = await self._jobs.get(job_id.hex)
