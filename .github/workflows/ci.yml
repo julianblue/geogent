@@ -123,8 +123,7 @@ jobs:
 
       - name: Prettier check
         run: pnpm exec prettier --check .
-      # `pnpm build` (next build) is intentionally omitted: the CopilotKit API
-      # route initializes its runtime at module load, which fails Next.js'
-      # build-time page-data collection without the configured backend env.
-      # Fix in an app-level PR (force-dynamic route or lazy runtime init),
-      # then re-enable here.
+      # `pnpm build` (next build) is intentionally omitted: pages and API
+      # routes depend on backend env that isn't configured in this job, so
+      # Next.js' build-time page-data collection fails. Wire the build env
+      # (and any force-dynamic routes), then re-enable here.

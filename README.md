@@ -6,7 +6,7 @@ Agentic geospatial application for analytics, insights, and exploration.
 
 | App             | Stack                                                                 | Port  |
 | --------------- | --------------------------------------------------------------------- | ----- |
-| `apps/ui`       | Next.js (App Router) + TypeScript + Tailwind + CopilotKit + MapLibre  | 3000  |
+| `apps/ui`       | Next.js (App Router) + TypeScript + Tailwind + assistant-ui + MapLibre| 3000  |
 | `apps/backend`  | FastAPI + Pydantic v2 + SQLAlchemy 2.0 (async) + GeoAlchemy2 + Alembic| 8000  |
 | `apps/agent`    | LangChain + LangGraph (LangGraph Platform layout)                     | 2024  |
 | `db` (compose)  | Postgres 16 + PostGIS 3.4                                             | 5432  |
@@ -14,9 +14,9 @@ Agentic geospatial application for analytics, insights, and exploration.
 ## Architecture
 
 ```
-  ┌──────────┐     /api/copilotkit      ┌──────────────┐
+  ┌──────────┐        /api/lg           ┌──────────────┐
   │   UI     │ ───────────────────────▶ │    Agent     │
-  │ Next.js  │      CopilotRuntime      │  LangGraph   │
+  │ Next.js  │       assistant-ui       │  LangGraph   │
   └────┬─────┘                          └──────┬───────┘
        │                                        │ HTTP (tools)
        │   REST /api/v1                         ▼
@@ -33,8 +33,9 @@ Agentic geospatial application for analytics, insights, and exploration.
 
 The **backend** owns persistence, auth, and all PostGIS queries. The **agent** is
 stateless over HTTP — its LangChain tools call backend endpoints rather than
-talking to Postgres directly. The **UI** hosts a CopilotKit runtime that proxies
-chat traffic to the agent, and also calls the backend directly for data fetches.
+talking to Postgres directly. The **UI** runs an assistant-ui runtime that
+proxies chat traffic to the agent through its `/api/lg` LangGraph route, and
+also calls the backend directly for data fetches.
 
 ## Quickstart
 
@@ -109,7 +110,7 @@ deployment is usable as soon as it's green.
 ```
 geogent/
 ├── apps/
-│   ├── ui/          # Next.js + CopilotKit
+│   ├── ui/          # Next.js + assistant-ui
 │   ├── backend/     # FastAPI + PostGIS
 │   └── agent/       # LangChain + LangGraph
 ├── infra/

@@ -13,7 +13,7 @@
 * **agent:** route AGENT_MODEL=openrouter:* through the OpenRouter gateway ([4bd3561](https://github.com/julianblue/geogent/commit/4bd35616982e5dfe07c3cfa3f0589e8a1b9c5395))
 * **agent:** wire LangSmith observability with run tagging ([3b33971](https://github.com/julianblue/geogent/commit/3b33971ffe3ea0702389d8e2866b4ce7ac6ae657))
 * **deploy:** add Railway deployment for the full stack ([f2c39e5](https://github.com/julianblue/geogent/commit/f2c39e56b2143da7a0895c7d9eae4c3845f13392))
-* **ui,agent:** swap CopilotKit for assistant-ui + add LangGraph e2e tests ([fd304e8](https://github.com/julianblue/geogent/commit/fd304e82a849228ce2d4315f3fdfb088085ddd6a))
+* **ui,agent:** migrate the chat UI to assistant-ui + add LangGraph e2e tests ([fd304e8](https://github.com/julianblue/geogent/commit/fd304e82a849228ce2d4315f3fdfb088085ddd6a))
 
 
 ### Bug Fixes

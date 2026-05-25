@@ -7,7 +7,7 @@
 - **agent+ui:** agent-driven Sentinel-2 rendering with deck.gl band math ([06ebed0](https://github.com/julianblue/geogent/commit/06ebed0a8523758ad955e16f36d76789ea495b22))
 - **agent+ui:** agent-driven Sentinel-2 rendering with deck.gl band math ([a5ed08a](https://github.com/julianblue/geogent/commit/a5ed08ae093be1079e81937e3844d52d8b7579a9))
 - **deploy:** add Railway deployment for the full stack ([f2c39e5](https://github.com/julianblue/geogent/commit/f2c39e56b2143da7a0895c7d9eae4c3845f13392))
-- **ui,agent:** swap CopilotKit for assistant-ui + add LangGraph e2e tests ([fd304e8](https://github.com/julianblue/geogent/commit/fd304e82a849228ce2d4315f3fdfb088085ddd6a))
+- **ui,agent:** migrate the chat UI to assistant-ui + add LangGraph e2e tests ([fd304e8](https://github.com/julianblue/geogent/commit/fd304e82a849228ce2d4315f3fdfb088085ddd6a))
 - **ui,backend:** JWT auth, login page, shadcn-driven copilot workspace ([c2a73d5](https://github.com/julianblue/geogent/commit/c2a73d540b6c654f392d20f071e74a0ac272423b))
 
 ### Bug Fixes
