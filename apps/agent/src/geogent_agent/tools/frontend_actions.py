@@ -66,6 +66,7 @@ def list_features_in_viewport() -> dict:
 @tool
 def show_sentinel2_scene(
     item_id: str | None = None,
+    field_id: int | None = None,
     bbox: list[float] | None = None,
     composite: str = "true-color",
 ) -> Any:
@@ -77,12 +78,17 @@ def show_sentinel2_scene(
     what got rendered.
 
     Pass either ``item_id`` (preferred — from a prior ``stac_search`` you ran
-    with the right sortby + cloud filter) or a ``bbox`` (the UI will pick the
-    latest cloud-free scene intersecting it automatically). If both are passed,
-    ``item_id`` wins.
+    with the right sortby + cloud filter), ``field_id`` (for parcel-scoped ag
+    workflows), or a ``bbox`` (the UI will pick the latest cloud-free scene
+    intersecting it automatically). If multiple targets are passed, ``item_id``
+    wins, then ``field_id``, then ``bbox``.
+
+    #24 UI note: this interrupt payload is consumed by upcoming agriculture
+    widgets, so keep field identifiers and index-composite intent explicit.
 
     Args:
         item_id: A Sentinel-2 L2A item id (e.g. ``"S2B_31UGS_20260501_0_L2A"``).
+        field_id: Field id to target when the user asks for a parcel/field.
         bbox: ``[west, south, east, north]`` in WGS84 degrees. Used when the
             caller hasn't already resolved an item id.
         composite: Visualization preset. Defaults to ``"true-color"``.
@@ -107,6 +113,7 @@ def show_sentinel2_scene(
         {
             "type": "show_sentinel2_scene",
             "item_id": item_id,
+            "field_id": field_id,
             "bbox": bbox,
             "composite": composite,
         }

@@ -16,6 +16,8 @@ from geogent_agent.tools import (
     features_within,
     geometries_intersect,
     list_features,
+    seasonal_index_time_series_for_field,
+    zonal_stats_for_field,
 )
 
 
@@ -138,3 +140,174 @@ async def test_buffer_raises_on_backend_error(monkeypatch: pytest.MonkeyPatch) -
 
     with pytest.raises(httpx.HTTPStatusError):
         await buffer_geometry.ainvoke({"geometry_wkt": "POINT(0 0)", "distance_m": 100.0})
+
+
+@pytest.mark.asyncio
+async def test_zonal_stats_for_field_posts_schema_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["path"] = request.url.path
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(
+            200,
+            json={
+                "field_id": 7,
+                "index": "ndvi",
+                "scene": {
+                    "id": "S2B_31UDQ_20260501_0_L2A",
+                    "datetime": "2026-05-01T10:30:00Z",
+                    "cloud_cover": 4.2,
+                    "epsg": 32631,
+                },
+                "stats": {
+                    "mean": 0.63,
+                    "min": 0.11,
+                    "max": 0.92,
+                    "std": 0.17,
+                    "valid_pixels": 12034,
+                    "nodata_pixels": 321,
+                },
+                "histogram": {"bin_edges": [-1.0, 0.0, 1.0], "counts": [20, 80]},
+                "cached": True,
+            },
+        )
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    result = await zonal_stats_for_field.ainvoke(
+        {
+            "field_id": 7,
+            "index": "ndvi",
+            "scene_id": "S2B_31UDQ_20260501_0_L2A",
+            "datetime": "2026-05-01T10:30:00Z",
+            "max_cloud_cover": 15,
+            "histogram_bins": 32,
+        }
+    )
+
+    assert captured["path"] == "/api/v1/analytics/zonal-stats"
+    assert captured["body"] == {
+        "field_id": 7,
+        "index": "ndvi",
+        "scene_id": "S2B_31UDQ_20260501_0_L2A",
+        "datetime": "2026-05-01T10:30:00Z",
+        "max_cloud_cover": 15,
+        "histogram_bins": 32,
+    }
+    assert result["field_id"] == 7
+    assert result["stats"]["mean"] == 0.63
+
+
+@pytest.mark.asyncio
+async def test_seasonal_time_series_starts_job_and_polls_until_succeeded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    call_count = {"polls": 0}
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured.setdefault("requests", []).append((request.method, request.url.path))
+        if request.method == "POST" and request.url.path == "/api/v1/analytics/time-series":
+            captured["start_body"] = json.loads(request.content)
+            return httpx.Response(
+                202,
+                json={"job_id": "11111111-1111-1111-1111-111111111111", "status": "pending"},
+            )
+        if request.method == "GET" and request.url.path == "/api/v1/analytics/time-series/11111111-1111-1111-1111-111111111111":
+            call_count["polls"] += 1
+            if call_count["polls"] == 1:
+                return httpx.Response(
+                    200,
+                    json={
+                        "job_id": "11111111-1111-1111-1111-111111111111",
+                        "status": "running",
+                        "field_id": 7,
+                        "index": "ndvi",
+                        "params": {},
+                        "points": [],
+                        "error": None,
+                    },
+                )
+            return httpx.Response(
+                200,
+                json={
+                    "job_id": "11111111-1111-1111-1111-111111111111",
+                    "status": "succeeded",
+                    "field_id": 7,
+                    "index": "ndvi",
+                    "params": {"start_date": "2025-04-01", "end_date": "2025-09-30"},
+                    "points": [
+                        {
+                            "scene_id": "S2A_31UDQ_20250412_0_L2A",
+                            "datetime": "2025-04-12T10:30:00Z",
+                            "cloud_cover": 6.1,
+                            "mean": 0.51,
+                            "min": 0.15,
+                            "max": 0.81,
+                            "std": 0.12,
+                            "valid_pixels": 11700,
+                        }
+                    ],
+                    "error": None,
+                },
+            )
+        return httpx.Response(404, json={"detail": "unexpected path"})
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    result = await seasonal_index_time_series_for_field.ainvoke(
+        {
+            "field_id": 7,
+            "index": "ndvi",
+            "start_date": "2025-04-01",
+            "end_date": "2025-09-30",
+            "max_cloud_cover": 20,
+            "max_scenes": 60,
+            "poll_interval_seconds": 0,
+            "poll_timeout_seconds": 5,
+        }
+    )
+
+    assert captured["start_body"] == {
+        "field_id": 7,
+        "index": "ndvi",
+        "start_date": "2025-04-01",
+        "end_date": "2025-09-30",
+        "max_cloud_cover": 20,
+        "max_scenes": 60,
+    }
+    assert call_count["polls"] == 2
+    assert result["status"] == "succeeded"
+    assert result["points"][0]["scene_id"] == "S2A_31UDQ_20250412_0_L2A"
+
+
+@pytest.mark.asyncio
+async def test_seasonal_time_series_raises_on_failed_job(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, _captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            return httpx.Response(
+                202,
+                json={"job_id": "11111111-1111-1111-1111-111111111111", "status": "pending"},
+            )
+        return httpx.Response(
+            200,
+            json={
+                "job_id": "11111111-1111-1111-1111-111111111111",
+                "status": "failed",
+                "field_id": 7,
+                "index": "ndvi",
+                "params": {},
+                "points": [],
+                "error": "boom",
+            },
+        )
+
+    _install_mock_backend(monkeypatch, handler)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        await seasonal_index_time_series_for_field.ainvoke(
+            {
+                "field_id": 7,
+                "index": "ndvi",
+                "start_date": "2025-04-01",
+                "end_date": "2025-09-30",
+                "poll_interval_seconds": 0,
+                "poll_timeout_seconds": 5,
+            }
+        )

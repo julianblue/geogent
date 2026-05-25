@@ -129,6 +129,28 @@
     max_steps: 12
     final_contains_any: ["vegetation", "ndvi", "scene", "displayed", "map"]
 
+- id: agriculture_field_ndvi_stats_and_series
+  input: >-
+    For field 7, show an NDVI composite on the map, then compute zonal stats and
+    a seasonal NDVI time series from 2025-04-01 to 2025-09-30.
+  configurable: {}
+  expect:
+    tools_required:
+      [
+        show_sentinel2_scene,
+        zonal_stats_for_field,
+        seasonal_index_time_series_for_field,
+      ]
+    args:
+      show_sentinel2_scene:
+        composite: {equals: ndvi}
+      zonal_stats_for_field:
+        field_id: {equals: 7}
+      seasonal_index_time_series_for_field:
+        field_id: {equals: 7}
+    max_steps: 18
+    final_contains_any: ["ndvi", "field 7", "zonal", "seasonal", "time series"]
+
 - id: save_viewport_feature
   input: "Save the current map view as a feature named 'Study Area'."
   configurable:
