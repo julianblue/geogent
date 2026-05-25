@@ -33,6 +33,12 @@ class Settings(BaseSettings):
 
     backend_url: str = Field(default="http://localhost:8000")
 
+    # Service-account credentials the agent uses to authenticate to the
+    # backend's auth-gated endpoints. Default to the backend's seeded dev user
+    # so local development works out of the box; override in shared deployments.
+    backend_service_email: str = Field(default="julian.blau@googlemail.com")
+    backend_service_password: str = Field(default="Lena2046")
+
     # Postgres checkpointer (langgraph-checkpoint-postgres). Plain libpq DSN
     # (postgresql://...), distinct from backend's SQLAlchemy URL which embeds
     # the asyncpg driver (postgresql+asyncpg://...). When unset the

@@ -8,6 +8,7 @@ from geogent_backend.api.v1.router import api_router
 from geogent_backend.config import get_settings
 from geogent_backend.core.logging import configure_logging
 from geogent_backend.geo.operations import GeometryValidationError
+from geogent_backend.geo.raster import RasterComputeError
 
 
 @asynccontextmanager
@@ -39,6 +40,11 @@ def create_app() -> FastAPI:
         _request: Request, exc: GeometryValidationError
     ) -> JSONResponse:
         return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+    @app.exception_handler(RasterComputeError)
+    async def _raster_compute_handler(_request: Request, exc: RasterComputeError) -> JSONResponse:
+        # An upstream COG/STAC read or zonal reduction failed.
+        return JSONResponse(status_code=502, content={"detail": str(exc)})
 
     return app
 
