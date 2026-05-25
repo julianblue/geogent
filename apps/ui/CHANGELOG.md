@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/julianblue/geogent/compare/geogent-ui-v0.2.0...geogent-ui-v0.3.0) (2026-05-25)
+
+
+### Features
+
+* **ui:** adopt assistant-ui registry thread, markdown & streaming controls ([e6c8bf2](https://github.com/julianblue/geogent/commit/e6c8bf2578e41063591a350e01a63ff127f6345c)), closes [#14](https://github.com/julianblue/geogent/issues/14) [#15](https://github.com/julianblue/geogent/issues/15)
+
+
+### Bug Fixes
+
+* **ui:** address Copilot review on chat foundation ([6d9af62](https://github.com/julianblue/geogent/commit/6d9af62ebc02c25f503a5236b86687a650f57601))
+* **ui:** prettier-format generated CHANGELOG to unblock CI ([45f46f5](https://github.com/julianblue/geogent/commit/45f46f5dc7590b483873306db7ced5cbe704769b))
+
 ## [0.2.0](https://github.com/julianblue/geogent/compare/geogent-ui-v0.1.0...geogent-ui-v0.2.0) (2026-05-24)
 
 ### Features

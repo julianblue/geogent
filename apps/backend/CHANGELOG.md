@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/julianblue/geogent/compare/geogent-backend-v0.3.0...geogent-backend-v0.4.0) (2026-05-25)
+
+
+### Features
+
+* **backend:** add field/parcel model, ingestion, CRUD + bbox query ([30e20c7](https://github.com/julianblue/geogent/commit/30e20c71fe06d025abd1b6be8047697ce7f55220)), closes [#29](https://github.com/julianblue/geogent/issues/29)
+* **backend:** agriculture raster compute — zonal stats + seasonal time-series ([fce034a](https://github.com/julianblue/geogent/commit/fce034a705d16eb493854ebb142b7e66e563f7ac))
+
+
+### Bug Fixes
+
+* add libexpat1 to Dockerfile apt-get install ([f1b15fb](https://github.com/julianblue/geogent/commit/f1b15fb26a4364021fbe09d3f0847b0cf579ab48))
+* address PR review correctness feedback ([2e333dc](https://github.com/julianblue/geogent/commit/2e333dcab0aae18f1788c0338958877897dfb066))
+* **backend:** validate STAC path segments to close partial SSRF ([e74fc2c](https://github.com/julianblue/geogent/commit/e74fc2cc511f740a3605f4c3035bf82d93c35f8a))
+
 ## [0.3.0](https://github.com/julianblue/geogent/compare/geogent-backend-v0.2.0...geogent-backend-v0.3.0) (2026-05-24)
 
 
