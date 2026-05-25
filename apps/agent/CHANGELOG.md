@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/julianblue/geogent/compare/geogent-agent-v0.3.0...geogent-agent-v0.4.0) (2026-05-25)
+
+
+### Features
+
+* **backend:** agriculture raster compute — zonal stats + seasonal time-series ([fce034a](https://github.com/julianblue/geogent/commit/fce034a705d16eb493854ebb142b7e66e563f7ac))
+
+
+### Bug Fixes
+
+* address PR review correctness feedback ([2e333dc](https://github.com/julianblue/geogent/commit/2e333dcab0aae18f1788c0338958877897dfb066))
+* **agent:** drop hardcoded service password default from source ([821bd63](https://github.com/julianblue/geogent/commit/821bd635d3d842bca1ee55961c6bcbf01f08db25))
+
+
+### Documentation
+
+* retire CopilotKit references; document assistant-ui architecture ([06b8c4c](https://github.com/julianblue/geogent/commit/06b8c4cd42cbcf23f89a69acb6f663b1b09d8c79))
+
 ## [0.3.0](https://github.com/julianblue/geogent/compare/geogent-agent-v0.2.0...geogent-agent-v0.3.0) (2026-05-24)
 
 
