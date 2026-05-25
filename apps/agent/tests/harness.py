@@ -61,6 +61,12 @@ def build_backend_stub() -> FastAPI:
     app = FastAPI()
     state: dict[str, object] = {"features": []}
 
+    @app.post("/api/v1/auth/login")
+    def login(_: dict) -> dict:
+        # The agent's backend_client authenticates before every call; mirror the
+        # real backend's TokenResponse shape so the auth flow gets a bearer token.
+        return {"access_token": "stub-token", "token_type": "bearer", "expires_in": 3600}
+
     @app.get("/api/v1/features")
     def list_features() -> list[dict]:
         return list(state["features"])  # type: ignore[arg-type]

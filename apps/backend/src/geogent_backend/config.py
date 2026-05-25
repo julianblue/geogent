@@ -43,6 +43,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256")
     jwt_access_token_expire_minutes: int = Field(default=60 * 24)
 
+    stac_api_url: str = Field(
+        default="https://earth-search.aws.element84.com/v1",
+        description="Root URL of the STAC API used to discover Sentinel-2 scenes.",
+    )
+    stac_collection: str = Field(default="sentinel-2-l2a")
+    raster_max_scenes: int = Field(default=60)
+    raster_job_concurrency: int = Field(default=4)
+
     @model_validator(mode="after")
     def _reject_weak_jwt_secret_outside_development(self) -> "Settings":
         if self.app_env != "development" and self.jwt_secret_key in _DEV_JWT_DEFAULTS:
