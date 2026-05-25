@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from sqlalchemy import update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.models.raster_job import RasterJob, RasterStatCache
@@ -54,8 +55,13 @@ class RasterStatCacheRepository:
 
     async def put(self, cache_key: str, stats: dict[str, Any], histogram: dict[str, Any]) -> None:
         # The cache is keyed on immutable inputs (scene + polygon + index + bins),
-        # so a concurrent insert of the same key is harmless; ignore conflicts.
-        if await self._session.get(RasterStatCache, cache_key) is not None:
-            return
-        self._session.add(RasterStatCache(cache_key=cache_key, stats=stats, histogram=histogram))
+        # so a concurrent insert of the same key is harmless. Use a single
+        # INSERT ... ON CONFLICT DO NOTHING so two racing transactions can't both
+        # pass a read-then-insert check and have one fail on the primary key.
+        stmt = (
+            pg_insert(RasterStatCache)
+            .values(cache_key=cache_key, stats=stats, histogram=histogram)
+            .on_conflict_do_nothing(index_elements=["cache_key"])
+        )
+        await self._session.execute(stmt)
         await self._session.commit()
