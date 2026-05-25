@@ -1,7 +1,7 @@
 # geogent-agent
 
-LangGraph agent that powers the CopilotKit experience in the UI. It calls the
-backend via HTTP for all geospatial data access — it does **not** talk to
+LangGraph agent that powers the assistant-ui chat experience in the UI. It calls
+the backend via HTTP for all geospatial data access — it does **not** talk to
 Postgres directly.
 
 ## Stack
@@ -9,7 +9,6 @@ Postgres directly.
 - LangGraph + LangChain
 - `langgraph-cli` for local dev server (`langgraph dev`)
 - Managed with [`uv`](https://docs.astral.sh/uv/)
-- `copilotkit` SDK for CopilotKit ↔ LangGraph state-sharing hooks
 
 ## Run locally
 

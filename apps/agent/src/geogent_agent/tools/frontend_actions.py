@@ -1,13 +1,17 @@
-"""Frontend-side action stubs.
+"""Frontend-side tool definitions.
 
-These tools exist so the LLM knows the UI exposes four side-effectful actions:
-flying the map, drawing a buffer overlay, listing features in the viewport,
-and asking the user to confirm a save. The actual work happens in the browser
-via assistant-ui's `makeAssistantToolUI` interception — these stubs just return
-a structured acknowledgement so the model can continue reasoning.
+These tools tell the LLM what side effects the UI can perform. They span two
+mechanisms handled in the browser under `components/assistant/tools/`:
 
-`confirm_feature_save` uses LangGraph's `interrupt` primitive so the graph
-pauses until the user clicks Save or Cancel in the confirmation card.
+1. Client tools (assistant-ui's `useAssistantTool`). The browser executes the
+   action and the tool just returns a structured acknowledgement so the model
+   can keep reasoning. These are `fly_to`, `add_buffer_layer`, and
+   `list_features_in_viewport`.
+
+2. LangGraph `interrupt()` tools. The graph pauses until the user acts in the
+   UI, which then resumes it with a result. These are `show_sentinel2_scene`
+   (the UI renders the scene and resumes) and `confirm_feature_save` (the user
+   clicks Save or Cancel in the confirmation card).
 """
 
 from typing import Any
