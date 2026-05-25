@@ -211,7 +211,11 @@ async def test_seasonal_time_series_starts_job_and_polls_until_succeeded(
                 202,
                 json={"job_id": "11111111-1111-1111-1111-111111111111", "status": "pending"},
             )
-        if request.method == "GET" and request.url.path == "/api/v1/analytics/time-series/11111111-1111-1111-1111-111111111111":
+        if (
+            request.method == "GET"
+            and request.url.path
+            == "/api/v1/analytics/time-series/11111111-1111-1111-1111-111111111111"
+        ):
             call_count["polls"] += 1
             if call_count["polls"] == 1:
                 return httpx.Response(
