@@ -8,6 +8,7 @@ items so callers can read band hrefs off ``item["assets"][key]["href"]``.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 
 import httpx
@@ -16,9 +17,20 @@ from geogent_backend.config import get_settings
 
 _USER_AGENT = "geogent-backend/0.3 (raster-compute)"
 
+# STAC collection ids and item ids are single URL path segments. Constrain them
+# to an unambiguous character set so a caller-supplied id cannot smuggle path
+# separators or traversal sequences into the request URL (SSRF).
+_PATH_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
 
 class StacError(Exception):
     """A STAC request failed or returned no usable result."""
+
+
+def _safe_segment(value: str, what: str) -> str:
+    if not _PATH_SEGMENT_RE.fullmatch(value):
+        raise StacError(f"Invalid STAC {what}.")
+    return value
 
 
 def _client() -> httpx.AsyncClient:
@@ -89,6 +101,8 @@ async def search_scenes(
 
 async def get_item(collection: str, item_id: str) -> dict:
     """Fetch a single full STAC item by collection + id."""
+    collection = _safe_segment(collection, "collection")
+    item_id = _safe_segment(item_id, "item id")
     async with _client() as client:
         resp = await client.get(f"/collections/{collection}/items/{item_id}")
         resp.raise_for_status()
