@@ -47,11 +47,13 @@ src/
 > import paths in `components/assistant/tools/`; this doc tracks the path until
 > that lands.
 
-## Agent tool patterns
+## Widget framework + agent tool patterns
 
 Frontend tools are defined server-side in
 `apps/agent/src/geogent_agent/tools/frontend_actions.py` and handled in the
-browser under `components/assistant/tools/`. There are two distinct mechanisms:
+browser under `components/assistant/tools/`. Interactive interrupt widgets live
+under `components/copilot/cards/` (to be renamed in #16). There are two
+distinct mechanisms:
 
 ### 1. Client tools (`useAssistantTool`)
 

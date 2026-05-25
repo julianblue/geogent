@@ -6,7 +6,7 @@ Agentic geospatial application for analytics, insights, and exploration.
 
 | App             | Stack                                                                 | Port  |
 | --------------- | --------------------------------------------------------------------- | ----- |
-| `apps/ui`       | Next.js (App Router) + TypeScript + Tailwind + assistant-ui + MapLibre| 3000  |
+| `apps/ui`       | Next.js (App Router) + TypeScript + Tailwind + `@assistant-ui/react` + `@assistant-ui/react-langgraph` + MapLibre (`/api/lg` proxy) | 3000  |
 | `apps/backend`  | FastAPI + Pydantic v2 + SQLAlchemy 2.0 (async) + GeoAlchemy2 + Alembic| 8000  |
 | `apps/agent`    | LangChain + LangGraph (LangGraph Platform layout)                     | 2024  |
 | `db` (compose)  | Postgres 16 + PostGIS 3.4                                             | 5432  |
@@ -14,9 +14,9 @@ Agentic geospatial application for analytics, insights, and exploration.
 ## Architecture
 
 ```
-  ┌──────────┐        /api/lg           ┌──────────────┐
+  ┌──────────┐   assistant-ui runtime   ┌──────────────┐
   │   UI     │ ───────────────────────▶ │    Agent     │
-  │ Next.js  │       assistant-ui       │  LangGraph   │
+  │ Next.js  │      via `/api/lg`       │  LangGraph   │
   └────┬─────┘                          └──────┬───────┘
        │                                        │ HTTP (tools)
        │   REST /api/v1                         ▼

@@ -1,12 +1,13 @@
 """Frontend-side tool definitions.
 
 These tools tell the LLM what side effects the UI can perform. They span two
-mechanisms handled in the browser under `components/assistant/tools/`:
+mechanisms handled in the browser under `components/assistant/tools/` and the
+interrupt-card widget layer under `components/copilot/cards/` (renamed in #16):
 
 1. Client tools (assistant-ui's `useAssistantTool`). The browser executes the
    action and the tool just returns a structured acknowledgement so the model
-   can keep reasoning. These are `fly_to`, `add_buffer_layer`, and
-   `list_features_in_viewport`.
+   can keep reasoning. These include `add_buffer_layer` and
+   `list_features_in_viewport` (plus `fly_to` for map camera movement).
 
 2. LangGraph `interrupt()` tools. The graph pauses until the user acts in the
    UI, which then resumes it with a result. These are `show_sentinel2_scene`
