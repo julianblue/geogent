@@ -42,7 +42,8 @@ def _canned_resume(interrupt: dict[str, Any]) -> dict[str, Any]:
     """Stand in for the UI's resume payload, keyed on the interrupt type.
 
     Shapes mirror the tool docstrings in ``tools/frontend_actions.py``:
-    ``show_sentinel2_scene`` resumes with ``{ok, item_id, datetime, cloud_cover}``
+    ``show_sentinel2_scene`` resumes with
+    ``{ok, item_id, datetime, cloud_cover, composite, field_id}``
     and ``confirm_feature_save`` with ``{ok, id}``.
     """
     value = interrupt.get("value")
@@ -54,6 +55,8 @@ def _canned_resume(interrupt: dict[str, Any]) -> dict[str, Any]:
             "item_id": item_id,
             "datetime": "2026-05-01T10:30:00Z",
             "cloud_cover": 4.2,
+            "composite": (value or {}).get("composite") or "true-color",
+            "field_id": (value or {}).get("field_id"),
         }
     if kind == "confirm_feature_save":
         return {"ok": True, "id": 4242}

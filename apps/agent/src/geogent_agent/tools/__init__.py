@@ -12,6 +12,8 @@ from geogent_agent.tools.geo_tools import (
     features_within,
     geometries_intersect,
     list_features,
+    seasonal_index_time_series_for_field,
+    zonal_stats_for_field,
 )
 from geogent_agent.tools.osm_tools import geocode_place
 from geogent_agent.tools.stac_tools import (
@@ -27,6 +29,8 @@ TOOLS = [
     area_of,
     geometries_intersect,
     features_within,
+    zonal_stats_for_field,
+    seasonal_index_time_series_for_field,
     geocode_place,
     stac_list_collections,
     stac_search,
@@ -51,8 +55,10 @@ __all__ = [
     "geometries_intersect",
     "list_features",
     "list_features_in_viewport",
+    "seasonal_index_time_series_for_field",
     "show_sentinel2_scene",
     "stac_get_item",
     "stac_list_collections",
     "stac_search",
+    "zonal_stats_for_field",
 ]

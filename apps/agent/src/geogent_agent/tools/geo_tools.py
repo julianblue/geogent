@@ -1,6 +1,15 @@
+import asyncio
+import time
+from typing import Literal
+
 from langchain_core.tools import tool
 
 from geogent_agent.tools.backend_client import get_backend_client
+
+# Polling cadence for the async time-series job. Kept as module constants (not
+# tool args) so the model can't set them.
+_TIME_SERIES_POLL_INTERVAL_SECONDS = 0.5
+_TIME_SERIES_POLL_TIMEOUT_SECONDS = 60.0
 
 
 @tool
@@ -96,3 +105,81 @@ async def features_within(geometry_wkt: str) -> list[dict]:
         )
         r.raise_for_status()
         return r.json()["features"]
+
+
+@tool
+async def zonal_stats_for_field(
+    field_id: int,
+    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    scene_id: str | None = None,
+    datetime: str | None = None,
+    max_cloud_cover: float = 20,
+    histogram_bins: int = 20,
+) -> dict:
+    """Compute per-field zonal stats for one raster scene.
+
+    ``index`` must be one of the backend-supported indices: ``ndvi``, ``ndwi``,
+    or ``evi``. Request/response field names mirror backend raster schemas for
+    #24 widgets.
+    """
+    async with get_backend_client() as client:
+        r = await client.post(
+            "/api/v1/analytics/zonal-stats",
+            json={
+                "field_id": field_id,
+                "index": index,
+                "scene_id": scene_id,
+                "datetime": datetime,
+                "max_cloud_cover": max_cloud_cover,
+                "histogram_bins": histogram_bins,
+            },
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@tool
+async def seasonal_index_time_series_for_field(
+    field_id: int,
+    start_date: str,
+    end_date: str,
+    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    max_cloud_cover: float = 20,
+    max_scenes: int = 60,
+) -> dict:
+    """Fetch a field's seasonal index series by starting and polling a backend job.
+
+    ``index`` must be one of the backend-supported indices: ``ndvi``, ``ndwi``,
+    or ``evi``. Returns the backend ``TimeSeriesResultResponse`` shape for #24
+    chart widgets.
+    """
+    async with get_backend_client() as client:
+        start = await client.post(
+            "/api/v1/analytics/time-series",
+            json={
+                "field_id": field_id,
+                "index": index,
+                "start_date": start_date,
+                "end_date": end_date,
+                "max_cloud_cover": max_cloud_cover,
+                "max_scenes": max_scenes,
+            },
+        )
+        start.raise_for_status()
+        job = start.json()
+        job_id = job["job_id"]
+        deadline = time.monotonic() + _TIME_SERIES_POLL_TIMEOUT_SECONDS
+
+        while True:
+            status_resp = await client.get(f"/api/v1/analytics/time-series/{job_id}")
+            status_resp.raise_for_status()
+            result = status_resp.json()
+            status = result.get("status")
+            if status == "succeeded":
+                return result
+            if status == "failed":
+                error = result.get("error") or f"time-series job {job_id} failed"
+                raise RuntimeError(str(error))
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"time-series job {job_id} did not finish before timeout")
+            await asyncio.sleep(_TIME_SERIES_POLL_INTERVAL_SECONDS)
