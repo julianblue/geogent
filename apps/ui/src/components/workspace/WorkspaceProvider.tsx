@@ -48,10 +48,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isOpen = useCallback((id: WidgetId) => openWidgetIds.includes(id), [openWidgetIds]);
-  const isPinned = useCallback(
-    (id: WidgetId) => pinnedWidgetIds.includes(id),
-    [pinnedWidgetIds],
-  );
+  const isPinned = useCallback((id: WidgetId) => pinnedWidgetIds.includes(id), [pinnedWidgetIds]);
 
   const value = useMemo<WorkspaceContextValue>(
     () => ({
