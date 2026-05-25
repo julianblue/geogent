@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_LINK_MODE=copy
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential libpq-dev curl \
+      build-essential libpq-dev curl libexpat1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
