@@ -14,6 +14,7 @@ from geogent_agent.tools import (
     buffer_geometry,
     distance_between,
     features_within,
+    geo_tools,
     geometries_intersect,
     list_features,
     seasonal_index_time_series_for_field,
@@ -251,6 +252,7 @@ async def test_seasonal_time_series_starts_job_and_polls_until_succeeded(
         return httpx.Response(404, json={"detail": "unexpected path"})
 
     captured = _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_TIME_SERIES_POLL_INTERVAL_SECONDS", 0)
     result = await seasonal_index_time_series_for_field.ainvoke(
         {
             "field_id": 7,
@@ -259,8 +261,6 @@ async def test_seasonal_time_series_starts_job_and_polls_until_succeeded(
             "end_date": "2025-09-30",
             "max_cloud_cover": 20,
             "max_scenes": 60,
-            "poll_interval_seconds": 0,
-            "poll_timeout_seconds": 5,
         }
     )
 
@@ -299,6 +299,7 @@ async def test_seasonal_time_series_raises_on_failed_job(monkeypatch: pytest.Mon
         )
 
     _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_TIME_SERIES_POLL_INTERVAL_SECONDS", 0)
 
     with pytest.raises(RuntimeError, match="boom"):
         await seasonal_index_time_series_for_field.ainvoke(
@@ -307,7 +308,5 @@ async def test_seasonal_time_series_raises_on_failed_job(monkeypatch: pytest.Mon
                 "index": "ndvi",
                 "start_date": "2025-04-01",
                 "end_date": "2025-09-30",
-                "poll_interval_seconds": 0,
-                "poll_timeout_seconds": 5,
             }
         )
