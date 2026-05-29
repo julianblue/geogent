@@ -7,7 +7,7 @@ import { RuntimeProvider } from "@/components/assistant/RuntimeProvider";
 import { Sentinel2RenderTool } from "@/components/assistant/tools/Sentinel2RenderTool";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
-import { WidgetInstanceProvider, InsightsHost } from "@/components/assistant/widgets";
+import { WidgetInstanceProvider, InsightsWorkspace } from "@/components/assistant/widgets";
 
 export function MapWorkspace() {
   return (
@@ -23,8 +23,9 @@ export function MapWorkspace() {
               <div className="relative flex-1">
                 <MapView />
                 <Sentinel2Overlay />
-                {/* Minimal Insights surface (#16); #17 replaces with drawer+rail. */}
-                <InsightsHost />
+                {/* Insights surface (#17): expands over the map when a widget
+                    is promoted; the chat panel collapses to a rail. */}
+                <InsightsWorkspace />
               </div>
               <AssistantPanel />
             </div>

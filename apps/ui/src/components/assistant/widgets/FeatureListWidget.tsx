@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMapState } from "@/components/map/MapStateProvider";
 import type { WidgetDefinition, WidgetRenderProps } from "@/components/assistant/widgets/types";
+import { BarChart, DataTable, StatTile, StatTileGrid } from "@/components/assistant/widgets/viz";
 
 type FeatureRef = { id: number | string; name: string };
 
@@ -76,45 +78,66 @@ function FeatureListInline({ data }: WidgetRenderProps<FeatureListWidgetData>) {
 function FeatureListExpanded({ data }: WidgetRenderProps<FeatureListWidgetData>) {
   const list = data.features ?? [];
   const zoomTo = useZoomToFeature();
+  const { features: known } = useMapState();
+
+  // Geometry-type distribution, joined from MapState which carries geometryType.
+  const distribution = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const f of data.features ?? []) {
+      const match = known.find((k) => k.id === String(f.id));
+      const type = match?.geometryType ?? "Unknown";
+      counts.set(type, (counts.get(type) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([label, count]) => ({ label, count }));
+  }, [data.features, known]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h2 className="flex items-center gap-2 text-lg font-semibold">
         <MapPin className="h-5 w-5" />
-        Features in view{" "}
-        <span className="text-sm font-normal text-muted-foreground">({list.length})</span>
+        Features in view
       </h2>
-      {list.length === 0 ? (
-        <div className="text-sm text-muted-foreground">No features inside the viewport.</div>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-muted-foreground">
-              <th className="py-2 font-medium">Name</th>
-              <th className="py-2 font-medium">ID</th>
-              <th className="py-2" />
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((f) => (
-              <tr key={String(f.id)} className="border-b border-border/50">
-                <td className="py-2">{f.name}</td>
-                <td className="py-2 font-mono text-xs text-muted-foreground">{String(f.id)}</td>
-                <td className="py-2 text-right">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => zoomTo(f.id)}
-                  >
-                    Zoom
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+
+      <StatTileGrid>
+        <StatTile label="Features" value={list.length} />
+        <StatTile label="Geometry types" value={distribution.length} />
+      </StatTileGrid>
+
+      {distribution.length > 0 ? (
+        <Card className="p-4">
+          <div className="mb-2 text-sm font-medium">Geometry-type distribution</div>
+          <BarChart data={distribution} xKey="label" yKey="count" height={200} multicolor />
+        </Card>
+      ) : null}
+
+      <DataTable
+        rows={list}
+        rowKey={(f) => String(f.id)}
+        empty="No features inside the viewport."
+        columns={[
+          { key: "name", header: "Name", cell: (f) => f.name },
+          {
+            key: "id",
+            header: "ID",
+            cell: (f) => <span className="font-mono text-xs text-muted-foreground">{String(f.id)}</span>,
+          },
+          {
+            key: "actions",
+            header: "",
+            align: "right",
+            cell: (f) => (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-xs"
+                onClick={() => zoomTo(f.id)}
+              >
+                Zoom
+              </Button>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

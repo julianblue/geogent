@@ -15,7 +15,7 @@ registerWidget(featureListWidget);
 registerWidget(confirmSaveWidget);
 
 export { Widget } from "@/components/assistant/widgets/Widget";
-export { InsightsHost } from "@/components/assistant/widgets/InsightsHost";
+export { InsightsWorkspace } from "@/components/assistant/widgets/InsightsWorkspace";
 export { WidgetInstanceProvider } from "@/components/assistant/widgets/WidgetInstanceProvider";
 export { registerWidget, getWidget } from "@/components/assistant/widgets/registry";
 export type {
