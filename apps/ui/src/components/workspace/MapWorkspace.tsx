@@ -3,6 +3,8 @@
 import { MapStateProvider } from "@/components/map/MapStateProvider";
 import { MapView } from "@/components/map/MapView";
 import { Sentinel2Overlay } from "@/components/map/Sentinel2Overlay";
+import { LayerSync } from "@/components/map/LayerSync";
+import { LayerManager } from "@/components/map/LayerManager";
 import { RuntimeProvider } from "@/components/assistant/RuntimeProvider";
 import { Sentinel2RenderTool } from "@/components/assistant/tools/Sentinel2RenderTool";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
@@ -23,6 +25,8 @@ export function MapWorkspace() {
               <div className="relative flex-1">
                 <MapView />
                 <Sentinel2Overlay />
+                <LayerSync />
+                <LayerManager />
                 {/* Insights surface (#17): expands over the map when a widget
                     is promoted; the chat panel collapses to a rail. */}
                 <InsightsWorkspace />

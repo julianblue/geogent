@@ -18,7 +18,7 @@ const bufferSchema = z.object({
 });
 
 type BufferArgs = z.infer<typeof bufferSchema>;
-type BufferResult = { buffered_wkt: string; distance_m: number };
+type BufferResult = { buffered_wkt: string; distance_m: number; layer_id: string };
 
 export function BufferLayerTool() {
   const { mapRef, viewport, upsertLayer } = useMapState();
@@ -40,8 +40,8 @@ export function BufferLayerTool() {
       const data = (await res.json()) as { buffered_wkt: string };
       const layerId = `buffer-${Date.now()}`;
       addBufferOverlay(mapRef.current, layerId, data.buffered_wkt);
-      upsertLayer({ id: layerId, label: `Buffer ${distance_meters} m`, visible: true });
-      return { buffered_wkt: data.buffered_wkt, distance_m: distance_meters };
+      upsertLayer({ id: layerId, label: `Buffer ${distance_meters} m`, visible: true, opacity: 1 });
+      return { buffered_wkt: data.buffered_wkt, distance_m: distance_meters, layer_id: layerId };
     },
     render: function BufferRender({
       args,
@@ -60,6 +60,7 @@ export function BufferLayerTool() {
             status: status.type === "complete" ? "complete" : "running",
             distanceMeters: args?.distance_meters ?? 0,
             resultWkt: result?.buffered_wkt,
+            layerId: result?.layer_id,
           }}
         />
       );

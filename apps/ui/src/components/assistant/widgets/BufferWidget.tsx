@@ -5,11 +5,14 @@ import { Loader2, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { WidgetDefinition, WidgetRenderProps } from "@/components/assistant/widgets/types";
+import { WidgetMapActions } from "@/components/assistant/widgets/WidgetMapActions";
 
 export type BufferWidgetData = {
   status: "running" | "complete" | string;
   distanceMeters: number;
   resultWkt?: string;
+  /** Map layer this buffer created, enabling zoom/toggle/undo affordances. */
+  layerId?: string;
 };
 
 function StatusBadge({ done }: { done: boolean }) {
@@ -24,7 +27,7 @@ function StatusBadge({ done }: { done: boolean }) {
 }
 
 function BufferInline({ data }: WidgetRenderProps<BufferWidgetData>) {
-  const { status, distanceMeters, resultWkt } = data;
+  const { status, distanceMeters, resultWkt, layerId } = data;
   const done = status === "complete";
   return (
     <Card className="my-2 max-w-md border-l-4 border-l-primary">
@@ -44,6 +47,7 @@ function BufferInline({ data }: WidgetRenderProps<BufferWidgetData>) {
         ) : (
           <div className="italic">Waiting for backend…</div>
         )}
+        {layerId ? <WidgetMapActions layerId={layerId} zoomWkt={resultWkt} /> : null}
       </CardContent>
     </Card>
   );
@@ -69,6 +73,7 @@ function BufferExpanded({ data }: WidgetRenderProps<BufferWidgetData>) {
           {resultWkt ?? <span className="italic text-muted-foreground">Waiting for backend…</span>}
         </dd>
       </dl>
+      {data.layerId ? <WidgetMapActions layerId={data.layerId} zoomWkt={resultWkt} /> : null}
     </div>
   );
 }
