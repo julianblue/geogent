@@ -119,7 +119,9 @@ function FeatureListExpanded({ data }: WidgetRenderProps<FeatureListWidgetData>)
           {
             key: "id",
             header: "ID",
-            cell: (f) => <span className="font-mono text-xs text-muted-foreground">{String(f.id)}</span>,
+            cell: (f) => (
+              <span className="font-mono text-xs text-muted-foreground">{String(f.id)}</span>
+            ),
           },
           {
             key: "actions",

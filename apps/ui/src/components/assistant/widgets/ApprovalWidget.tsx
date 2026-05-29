@@ -73,9 +73,7 @@ function ApprovalInline({ data }: WidgetRenderProps<ApprovalWidgetData>) {
             />
           </div>
         ))}
-        {description ? (
-          <div className="text-xs text-muted-foreground">{description}</div>
-        ) : null}
+        {description ? <div className="text-xs text-muted-foreground">{description}</div> : null}
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDeny} disabled={done || submitting}>

@@ -45,9 +45,7 @@ export function WidgetInstanceProvider({ children }: { children: ReactNode }) {
     [registerInstance, getInstance],
   );
 
-  return (
-    <WidgetInstanceContext.Provider value={value}>{children}</WidgetInstanceContext.Provider>
-  );
+  return <WidgetInstanceContext.Provider value={value}>{children}</WidgetInstanceContext.Provider>;
 }
 
 export function useWidgetInstances(): WidgetInstanceContextValue {

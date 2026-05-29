@@ -30,15 +30,16 @@ type BarChartProps = {
 export function BarChart({ data, xKey, yKey, height = 240, multicolor = false }: BarChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart data={data as ChartRow[]} margin={{ top: 8, right: 12, bottom: 4, left: -8 }}>
+      <RechartsBarChart
+        data={data as ChartRow[]}
+        margin={{ top: 8, right: 12, bottom: 4, left: -8 }}
+      >
         <CartesianGrid stroke={GRID_COLOR} strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey={xKey} {...axisProps} />
         <YAxis {...axisProps} />
         <Tooltip {...tooltipStyle} />
         <Bar dataKey={yKey} radius={[3, 3, 0, 0]} isAnimationActive={false} fill={seriesColor(0)}>
-          {multicolor
-            ? data.map((_, i) => <Cell key={i} fill={seriesColor(i)} />)
-            : null}
+          {multicolor ? data.map((_, i) => <Cell key={i} fill={seriesColor(i)} />) : null}
         </Bar>
       </RechartsBarChart>
     </ResponsiveContainer>

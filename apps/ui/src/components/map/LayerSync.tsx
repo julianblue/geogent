@@ -3,7 +3,11 @@
 import { useEffect } from "react";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import { applyOverlayOrder, setOverlayOpacity, setOverlayVisibility } from "@/components/map/overlays";
+import {
+  applyOverlayOrder,
+  setOverlayOpacity,
+  setOverlayVisibility,
+} from "@/components/map/overlays";
 
 /**
  * Headless bridge: applies declarative layer state (visibility, opacity,

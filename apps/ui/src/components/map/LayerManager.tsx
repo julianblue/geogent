@@ -77,11 +77,7 @@ export function LayerManager() {
                     aria-label={layer.visible ? "Hide layer" : "Show layer"}
                     className="text-muted-foreground hover:text-foreground"
                   >
-                    {layer.visible ? (
-                      <Eye className="h-4 w-4" />
-                    ) : (
-                      <EyeOff className="h-4 w-4" />
-                    )}
+                    {layer.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <span className="min-w-0 flex-1 truncate text-sm" title={layer.label}>
                     {layer.label}

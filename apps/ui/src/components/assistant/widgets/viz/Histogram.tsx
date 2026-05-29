@@ -26,7 +26,11 @@ type HistogramProps = {
 export function Histogram({ bins, height = 240 }: HistogramProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart data={bins} margin={{ top: 8, right: 12, bottom: 4, left: -8 }} barCategoryGap={1}>
+      <RechartsBarChart
+        data={bins}
+        margin={{ top: 8, right: 12, bottom: 4, left: -8 }}
+        barCategoryGap={1}
+      >
         <CartesianGrid stroke={GRID_COLOR} strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="label" {...axisProps} interval="preserveStartEnd" />
         <YAxis {...axisProps} />

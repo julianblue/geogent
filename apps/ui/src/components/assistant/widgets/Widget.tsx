@@ -66,7 +66,7 @@ export function Widget<TData>({ type, data, id }: WidgetProps<TData>) {
           size="icon"
           onClick={() => promoteWidget(widgetId)}
           aria-label="Open in workspace"
-          className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
         >
           <Maximize2 className="h-3.5 w-3.5" />
         </Button>

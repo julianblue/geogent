@@ -21,9 +21,7 @@ type DataTableProps<T> = {
 /** Themed, dependency-free data table for the insights workspace. */
 export function DataTable<T>({ columns, rows, rowKey, empty }: DataTableProps<T>) {
   if (rows.length === 0) {
-    return (
-      <div className="text-sm text-muted-foreground">{empty ?? "No rows."}</div>
-    );
+    return <div className="text-sm text-muted-foreground">{empty ?? "No rows."}</div>;
   }
   return (
     <div className="overflow-x-auto">
