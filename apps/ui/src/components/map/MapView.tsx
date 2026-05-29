@@ -14,11 +14,14 @@ import Map, {
 import type { Ref } from "react";
 
 import { useMapState } from "@/components/map/MapStateProvider";
+import { FEATURE_LAYER_IDS } from "@/components/map/overlays";
 
-const FEATURE_FILL = "geogent-features-fill";
-const FEATURE_LINE = "geogent-features-line";
-const FEATURE_POINT = "geogent-features-point";
-const INTERACTIVE_FEATURE_LAYERS = [FEATURE_FILL, FEATURE_POINT];
+const { fill: FEATURE_FILL, line: FEATURE_LINE, point: FEATURE_POINT } = FEATURE_LAYER_IDS;
+const POLYGON_TYPES = ["Polygon", "MultiPolygon"];
+const LINE_TYPES = ["LineString", "MultiLineString"];
+const POINT_TYPES = ["Point", "MultiPoint"];
+// Lines and fills/points are all clickable for selection.
+const INTERACTIVE_FEATURE_LAYERS = [FEATURE_FILL, FEATURE_LINE, FEATURE_POINT];
 
 const OSM_STYLE = {
   version: 8 as const,
@@ -108,7 +111,7 @@ export function MapView() {
         <Layer
           id={FEATURE_FILL}
           type="fill"
-          filter={["==", ["geometry-type"], "Polygon"]}
+          filter={["in", ["geometry-type"], ["literal", POLYGON_TYPES]]}
           paint={{
             "fill-color": ["case", ["==", ["get", "selected"], 1], "#f59e0b", "#2563eb"],
             "fill-opacity": ["case", ["==", ["get", "selected"], 1], 0.35, 0.15],
@@ -117,7 +120,7 @@ export function MapView() {
         <Layer
           id={FEATURE_LINE}
           type="line"
-          filter={["==", ["geometry-type"], "Polygon"]}
+          filter={["in", ["geometry-type"], ["literal", [...POLYGON_TYPES, ...LINE_TYPES]]]}
           paint={{
             "line-color": ["case", ["==", ["get", "selected"], 1], "#d97706", "#1d4ed8"],
             "line-width": ["case", ["==", ["get", "selected"], 1], 2.5, 1.5],
@@ -126,7 +129,7 @@ export function MapView() {
         <Layer
           id={FEATURE_POINT}
           type="circle"
-          filter={["==", ["geometry-type"], "Point"]}
+          filter={["in", ["geometry-type"], ["literal", POINT_TYPES]]}
           paint={{
             "circle-radius": ["case", ["==", ["get", "selected"], 1], 7, 5],
             "circle-color": ["case", ["==", ["get", "selected"], 1], "#f59e0b", "#2563eb"],

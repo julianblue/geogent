@@ -32,6 +32,8 @@ export type ApprovalWidgetData = {
  */
 function ApprovalInline({ data }: WidgetRenderProps<ApprovalWidgetData>) {
   const { status, title, description, fields, approveLabel, onApprove, onDeny } = data;
+  // Field defaults are snapshotted once: a given approval interrupt's payload
+  // is immutable for the lifetime of this widget instance.
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries((fields ?? []).map((f) => [f.name, f.value])),
   );
