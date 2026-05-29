@@ -30,12 +30,17 @@ export function FeaturesInViewportTool() {
       if (!res.ok) throw new Error(`features-within failed: ${res.status}`);
       return (await res.json()) as Result;
     },
-    render: function FeaturesRender({ result, status }: ToolCallMessagePartProps<Args, Result>) {
+    render: function FeaturesRender({
+      result,
+      status,
+      toolCallId,
+    }: ToolCallMessagePartProps<Args, Result>) {
       if (status.type === "incomplete" && status.reason === "error") {
         return <ToolErrorChip label="Features in view" error={status.error} />;
       }
       return (
         <Widget
+          id={toolCallId}
           type="feature-list"
           data={{
             status: status.type === "complete" ? "complete" : "running",

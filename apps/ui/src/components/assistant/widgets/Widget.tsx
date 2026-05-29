@@ -14,8 +14,10 @@ type WidgetProps<TData> = {
   /** Result payload passed to the widget's renderers. */
   data: TData;
   /**
-   * Stable instance id. Omit to derive one from React's `useId` — stable across
-   * re-renders of this mounted tool-call part, which is what callers want.
+   * Stable instance id. Promotable widgets should pass a durable id (e.g. the
+   * assistant-ui `toolCallId`) so a promoted widget survives a thread reload or
+   * remount. Omitting it falls back to React's `useId`, which is stable only
+   * for the lifetime of this mounted part — fine for inline-only widgets.
    */
   id?: WidgetId;
 };
@@ -36,11 +38,14 @@ export function Widget<TData>({ type, data, id }: WidgetProps<TData>) {
   const { registerInstance } = useWidgetInstances();
   const { promoteWidget } = useWorkspace();
 
-  // Keep the instance store current so a promoted widget can be re-rendered
-  // from its id alone, independent of this transcript message.
+  // Only promotable widgets (those with an expanded view) need a stored
+  // instance — the workspace re-renders them from their id alone. Inline-only
+  // widgets are never promoted, so registering them would just retain their
+  // data (and any callbacks) for nothing.
+  const promotable = Boolean(definition?.Expanded);
   useEffect(() => {
-    if (definition) registerInstance({ id: widgetId, type, data });
-  }, [definition, registerInstance, widgetId, type, data]);
+    if (promotable) registerInstance({ id: widgetId, type, data });
+  }, [promotable, registerInstance, widgetId, type, data]);
 
   if (!definition) {
     return (

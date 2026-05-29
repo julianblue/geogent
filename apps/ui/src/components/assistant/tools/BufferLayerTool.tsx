@@ -47,12 +47,14 @@ export function BufferLayerTool() {
       args,
       result,
       status,
+      toolCallId,
     }: ToolCallMessagePartProps<BufferArgs, BufferResult>) {
       if (status.type === "incomplete" && status.reason === "error") {
         return <ToolErrorChip label="Buffer" error={status.error} />;
       }
       return (
         <Widget
+          id={toolCallId}
           type="buffer"
           data={{
             status: status.type === "complete" ? "complete" : "running",

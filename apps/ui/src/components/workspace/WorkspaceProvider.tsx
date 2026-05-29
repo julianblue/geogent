@@ -32,17 +32,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   // Pinning is intentionally orthogonal to open state: a widget stays pinned
   // after being closed (pin = "keep around"), so closeWidget does not unpin.
-  const closeWidget = useCallback(
-    (id: WidgetId) => {
-      setOpenWidgetIds((prev) => prev.filter((wid) => wid !== id));
-      setActiveWidgetId((prevActive) => {
-        if (prevActive !== id) return prevActive;
-        const remaining = openWidgetIds.filter((wid) => wid !== id);
-        return remaining[remaining.length - 1] ?? null;
-      });
-    },
-    [openWidgetIds],
-  );
+  // The next active id is derived inside the open-list updater so batched
+  // closes (e.g. "close all") each see the freshly-filtered list rather than a
+  // stale snapshot.
+  const closeWidget = useCallback((id: WidgetId) => {
+    setOpenWidgetIds((prev) => {
+      const remaining = prev.filter((wid) => wid !== id);
+      setActiveWidgetId((active) =>
+        active === id ? (remaining[remaining.length - 1] ?? null) : active,
+      );
+      return remaining;
+    });
+  }, []);
 
   const setActiveWidget = useCallback((id: WidgetId | null) => {
     if (id !== null) {
