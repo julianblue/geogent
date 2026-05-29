@@ -30,6 +30,8 @@ export type MapLayer = {
   id: string;
   label: string;
   visible: boolean;
+  /** 0..1; defaults to 1 when omitted. */
+  opacity?: number;
 };
 
 /**
@@ -59,6 +61,10 @@ type MapStateContextValue = {
   layers: MapLayer[];
   upsertLayer: (layer: MapLayer) => void;
   removeLayer: (id: string) => void;
+  setLayerVisibility: (id: string, visible: boolean) => void;
+  setLayerOpacity: (id: string, opacity: number) => void;
+  /** Reorder a layer relative to its neighbours (affects map z-order). */
+  moveLayer: (id: string, direction: "up" | "down") => void;
   sentinel2Scene: Sentinel2Scene | null;
   setSentinel2Scene: (scene: Sentinel2Scene | null) => void;
 };
@@ -121,6 +127,27 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
     setLayers((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
+  const setLayerVisibility = useCallback((id: string, visible: boolean) => {
+    setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, visible } : l)));
+  }, []);
+
+  const setLayerOpacity = useCallback((id: string, opacity: number) => {
+    const clamped = Math.min(1, Math.max(0, opacity));
+    setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, opacity: clamped } : l)));
+  }, []);
+
+  const moveLayer = useCallback((id: string, direction: "up" | "down") => {
+    setLayers((prev) => {
+      const idx = prev.findIndex((l) => l.id === id);
+      if (idx === -1) return prev;
+      const swapWith = direction === "up" ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= prev.length) return prev;
+      const next = prev.slice();
+      [next[idx], next[swapWith]] = [next[swapWith], next[idx]];
+      return next;
+    });
+  }, []);
+
   const value = useMemo<MapStateContextValue>(
     () => ({
       mapRef,
@@ -137,6 +164,9 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      setLayerVisibility,
+      setLayerOpacity,
+      moveLayer,
       sentinel2Scene,
       setSentinel2Scene,
     }),
@@ -152,6 +182,9 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      setLayerVisibility,
+      setLayerOpacity,
+      moveLayer,
       sentinel2Scene,
     ],
   );

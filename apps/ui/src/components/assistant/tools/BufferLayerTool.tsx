@@ -5,7 +5,7 @@ import { useAssistantTool, type ToolCallMessagePartProps } from "@assistant-ui/r
 
 import { useMapState } from "@/components/map/MapStateProvider";
 import { addBufferOverlay } from "@/components/map/overlays";
-import { BufferPreviewCard } from "@/components/copilot/cards/BufferPreviewCard";
+import { Widget } from "@/components/assistant/widgets";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
 import { viewportToBboxWkt } from "@/lib/geo";
 
@@ -18,7 +18,7 @@ const bufferSchema = z.object({
 });
 
 type BufferArgs = z.infer<typeof bufferSchema>;
-type BufferResult = { buffered_wkt: string; distance_m: number };
+type BufferResult = { buffered_wkt: string; distance_m: number; layer_id: string };
 
 export function BufferLayerTool() {
   const { mapRef, viewport, upsertLayer } = useMapState();
@@ -40,22 +40,28 @@ export function BufferLayerTool() {
       const data = (await res.json()) as { buffered_wkt: string };
       const layerId = `buffer-${Date.now()}`;
       addBufferOverlay(mapRef.current, layerId, data.buffered_wkt);
-      upsertLayer({ id: layerId, label: `Buffer ${distance_meters} m`, visible: true });
-      return { buffered_wkt: data.buffered_wkt, distance_m: distance_meters };
+      upsertLayer({ id: layerId, label: `Buffer ${distance_meters} m`, visible: true, opacity: 1 });
+      return { buffered_wkt: data.buffered_wkt, distance_m: distance_meters, layer_id: layerId };
     },
     render: function BufferRender({
       args,
       result,
       status,
+      toolCallId,
     }: ToolCallMessagePartProps<BufferArgs, BufferResult>) {
       if (status.type === "incomplete" && status.reason === "error") {
         return <ToolErrorChip label="Buffer" error={status.error} />;
       }
       return (
-        <BufferPreviewCard
-          status={status.type === "complete" ? "complete" : "running"}
-          distanceMeters={args?.distance_meters ?? 0}
-          resultWkt={result?.buffered_wkt}
+        <Widget
+          id={toolCallId}
+          type="buffer"
+          data={{
+            status: status.type === "complete" ? "complete" : "running",
+            distanceMeters: args?.distance_meters ?? 0,
+            resultWkt: result?.buffered_wkt,
+            layerId: result?.layer_id,
+          }}
         />
       );
     },
