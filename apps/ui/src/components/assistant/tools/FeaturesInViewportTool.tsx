@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useAssistantTool, type ToolCallMessagePartProps } from "@assistant-ui/react";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import { FeatureListCard } from "@/components/copilot/cards/FeatureListCard";
+import { Widget } from "@/components/assistant/widgets";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
 import { viewportToBboxWkt } from "@/lib/geo";
 
@@ -35,9 +35,12 @@ export function FeaturesInViewportTool() {
         return <ToolErrorChip label="Features in view" error={status.error} />;
       }
       return (
-        <FeatureListCard
-          status={status.type === "complete" ? "complete" : "running"}
-          features={result?.features}
+        <Widget
+          type="feature-list"
+          data={{
+            status: status.type === "complete" ? "complete" : "running",
+            features: result?.features,
+          }}
         />
       );
     },

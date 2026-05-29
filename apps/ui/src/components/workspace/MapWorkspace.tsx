@@ -7,6 +7,7 @@ import { RuntimeProvider } from "@/components/assistant/RuntimeProvider";
 import { Sentinel2RenderTool } from "@/components/assistant/tools/Sentinel2RenderTool";
 import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
+import { WidgetInstanceProvider, InsightsHost } from "@/components/assistant/widgets";
 
 export function MapWorkspace() {
   return (
@@ -16,15 +17,19 @@ export function MapWorkspace() {
             subscribe to the LangGraph thread state, but outside the visible
             layout so they render nothing. */}
         <Sentinel2RenderTool />
-        <WorkspaceProvider>
-          <div className="flex h-full min-h-0 w-full">
-            <div className="relative flex-1">
-              <MapView />
-              <Sentinel2Overlay />
+        <WidgetInstanceProvider>
+          <WorkspaceProvider>
+            <div className="flex h-full min-h-0 w-full">
+              <div className="relative flex-1">
+                <MapView />
+                <Sentinel2Overlay />
+                {/* Minimal Insights surface (#16); #17 replaces with drawer+rail. */}
+                <InsightsHost />
+              </div>
+              <AssistantPanel />
             </div>
-            <AssistantPanel />
-          </div>
-        </WorkspaceProvider>
+          </WorkspaceProvider>
+        </WidgetInstanceProvider>
       </RuntimeProvider>
     </MapStateProvider>
   );

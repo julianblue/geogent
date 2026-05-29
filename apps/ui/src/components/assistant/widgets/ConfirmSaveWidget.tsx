@@ -7,20 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { WidgetDefinition, WidgetRenderProps } from "@/components/assistant/widgets/types";
 
-export function ConfirmSaveCard({
-  status,
-  defaultName,
-  wkt,
-  onSave,
-  onCancel,
-}: {
+export type ConfirmSaveWidgetData = {
   status: string;
   defaultName: string;
   wkt: string;
   onSave: (name: string) => Promise<void> | void;
   onCancel: () => void;
-}) {
+};
+
+function ConfirmSaveInline({ data }: WidgetRenderProps<ConfirmSaveWidgetData>) {
+  const { status, defaultName, wkt, onSave, onCancel } = data;
   const [name, setName] = useState(defaultName);
   const [submitting, setSubmitting] = useState(false);
   const done = status === "complete";
@@ -71,3 +69,13 @@ export function ConfirmSaveCard({
     </Card>
   );
 }
+
+/**
+ * Approval widget for the `confirm_feature_save` LangGraph interrupt — proves
+ * the framework covers the interrupt path alongside client tools. Inline-only:
+ * an approval is acted on in the transcript, so there is no expanded view.
+ */
+export const confirmSaveWidget: WidgetDefinition<ConfirmSaveWidgetData> = {
+  type: "confirm-save",
+  Inline: ConfirmSaveInline,
+};

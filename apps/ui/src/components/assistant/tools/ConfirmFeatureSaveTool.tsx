@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useLangGraphInterruptState, useLangGraphSendCommand } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import { ConfirmSaveCard } from "@/components/copilot/cards/ConfirmSaveCard";
+import { Widget } from "@/components/assistant/widgets";
 import { wktPolygonToGeoJSON } from "@/lib/geo";
 
 type ConfirmPayload = {
@@ -69,12 +69,15 @@ export function ConfirmFeatureSaveTool() {
   }
 
   return (
-    <ConfirmSaveCard
-      status={status}
-      defaultName={payload.name}
-      wkt={payload.geometry_wkt}
-      onSave={handleSave}
-      onCancel={handleCancel}
+    <Widget
+      type="confirm-save"
+      data={{
+        status,
+        defaultName: payload.name,
+        wkt: payload.geometry_wkt,
+        onSave: handleSave,
+        onCancel: handleCancel,
+      }}
     />
   );
 }

@@ -5,7 +5,7 @@ import { useAssistantTool, type ToolCallMessagePartProps } from "@assistant-ui/r
 
 import { useMapState } from "@/components/map/MapStateProvider";
 import { addBufferOverlay } from "@/components/map/overlays";
-import { BufferPreviewCard } from "@/components/copilot/cards/BufferPreviewCard";
+import { Widget } from "@/components/assistant/widgets";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
 import { viewportToBboxWkt } from "@/lib/geo";
 
@@ -52,10 +52,13 @@ export function BufferLayerTool() {
         return <ToolErrorChip label="Buffer" error={status.error} />;
       }
       return (
-        <BufferPreviewCard
-          status={status.type === "complete" ? "complete" : "running"}
-          distanceMeters={args?.distance_meters ?? 0}
-          resultWkt={result?.buffered_wkt}
+        <Widget
+          type="buffer"
+          data={{
+            status: status.type === "complete" ? "complete" : "running",
+            distanceMeters: args?.distance_meters ?? 0,
+            resultWkt: result?.buffered_wkt,
+          }}
         />
       );
     },
