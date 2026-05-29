@@ -31,7 +31,8 @@ export function ConfirmFeatureSaveTool() {
   if (!interrupt || !isConfirmPayload(interrupt.value)) return null;
   const payload = interrupt.value;
 
-  async function handleSave(finalName: string) {
+  async function handleSave(values: Record<string, string>) {
+    const finalName = values.name?.trim() || payload.name;
     const geometry = wktPolygonToGeoJSON(payload.geometry_wkt);
     if (!geometry) {
       const error = "Only Polygon WKT is supported by this UI for now.";
@@ -70,13 +71,15 @@ export function ConfirmFeatureSaveTool() {
 
   return (
     <Widget
-      type="confirm-save"
+      type="approval"
       data={{
         status,
-        defaultName: payload.name,
-        wkt: payload.geometry_wkt,
-        onSave: handleSave,
-        onCancel: handleCancel,
+        title: "Save feature",
+        description: `Geometry: ${payload.geometry_wkt.slice(0, 64)}…`,
+        fields: [{ name: "name", label: "Name", value: payload.name }],
+        approveLabel: "Save",
+        onApprove: handleSave,
+        onDeny: handleCancel,
       }}
     />
   );

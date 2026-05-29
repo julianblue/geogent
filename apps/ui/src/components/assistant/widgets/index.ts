@@ -8,11 +8,11 @@
 import { registerWidget } from "@/components/assistant/widgets/registry";
 import { bufferWidget } from "@/components/assistant/widgets/BufferWidget";
 import { featureListWidget } from "@/components/assistant/widgets/FeatureListWidget";
-import { confirmSaveWidget } from "@/components/assistant/widgets/ConfirmSaveWidget";
+import { approvalWidget } from "@/components/assistant/widgets/ApprovalWidget";
 
 registerWidget(bufferWidget);
 registerWidget(featureListWidget);
-registerWidget(confirmSaveWidget);
+registerWidget(approvalWidget);
 
 export { Widget } from "@/components/assistant/widgets/Widget";
 export { InsightsWorkspace } from "@/components/assistant/widgets/InsightsWorkspace";
