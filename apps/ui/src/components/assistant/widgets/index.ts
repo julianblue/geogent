@@ -9,10 +9,12 @@ import { registerWidget } from "@/components/assistant/widgets/registry";
 import { bufferWidget } from "@/components/assistant/widgets/BufferWidget";
 import { featureListWidget } from "@/components/assistant/widgets/FeatureListWidget";
 import { approvalWidget } from "@/components/assistant/widgets/ApprovalWidget";
+import { dashboardWidget } from "@/components/assistant/widgets/dashboard/DashboardWidget";
 
 registerWidget(bufferWidget);
 registerWidget(featureListWidget);
 registerWidget(approvalWidget);
+registerWidget(dashboardWidget);
 
 export { Widget } from "@/components/assistant/widgets/Widget";
 export { InsightsWorkspace } from "@/components/assistant/widgets/InsightsWorkspace";

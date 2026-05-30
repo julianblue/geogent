@@ -14,10 +14,11 @@ mechanisms handled in the browser under `components/assistant/tools/`:
    clicks Save or Cancel in the confirmation card).
 """
 
-from typing import Any
+from typing import Annotated, Any, Literal, Union
 
 from langchain_core.tools import tool
 from langgraph.types import interrupt
+from pydantic import BaseModel, Field
 
 
 @tool
@@ -118,6 +119,104 @@ def show_sentinel2_scene(
             "composite": composite,
         }
     )
+
+
+# --- render_dashboard: LLM-composed dashboard spec (ADR 0001, tier 2) ---------
+#
+# The agent assembles several panels into a vetted layout; the browser validates
+# this spec (mirrored as a Zod schema in
+# apps/ui/src/components/assistant/widgets/dashboard/schema.ts) and renders each
+# panel through shared chart/stat/table primitives. Keep the two in sync.
+
+
+class StatItem(BaseModel):
+    label: str
+    value: float | str
+    unit: str | None = None
+    hint: str | None = None
+
+
+class StatPanel(BaseModel):
+    type: Literal["stat"] = "stat"
+    title: str | None = None
+    stats: list[StatItem]
+
+
+class SeriesPoint(BaseModel):
+    x: str  # ISO date or category label
+    y: float
+
+
+class Series(BaseModel):
+    key: str
+    label: str | None = None
+    points: list[SeriesPoint]
+
+
+class TimeSeriesPanel(BaseModel):
+    type: Literal["timeseries"] = "timeseries"
+    title: str | None = None
+    series: list[Series]
+
+
+class HistogramBin(BaseModel):
+    label: str
+    count: int
+
+
+class HistogramPanel(BaseModel):
+    type: Literal["histogram"] = "histogram"
+    title: str | None = None
+    bins: list[HistogramBin]
+
+
+class TableColumn(BaseModel):
+    key: str
+    header: str
+    align: Literal["left", "right"] | None = None
+
+
+class TablePanel(BaseModel):
+    type: Literal["table"] = "table"
+    title: str | None = None
+    columns: list[TableColumn]
+    rows: list[dict[str, str | float]]
+
+
+Panel = Annotated[
+    Union[StatPanel, TimeSeriesPanel, HistogramPanel, TablePanel],
+    Field(discriminator="type"),
+]
+
+
+class DashboardSpec(BaseModel):
+    title: str | None = None
+    layout: Literal["stack", "grid", "columns"] = "stack"
+    panels: list[Panel]
+
+
+@tool
+def render_dashboard(spec: DashboardSpec) -> dict:
+    """Render a composed insights dashboard in the chat from a structured spec.
+
+    This is the tool for *visualizing* results once you've computed them: it
+    combines multiple panels into one vetted layout (the browser draws each via
+    shared chart/stat/table primitives). Pass the data inline — this tool does
+    not re-fetch. A typical field-health dashboard pairs a seasonal-index
+    ``timeseries`` with ``stat`` tiles and a ``histogram`` from zonal stats.
+
+    Panels (discriminated by ``type``):
+      - ``stat``: {type, title?, stats: [{label, value, unit?, hint?}]}
+      - ``timeseries``: {type, title?, series: [{key, label?, points: [{x, y}]}]}
+        where ``x`` is an ISO date/category string and ``y`` is a number.
+      - ``histogram``: {type, title?, bins: [{label, count}]}
+      - ``table``: {type, title?, columns: [{key, header, align?}], rows: [{...}]}
+
+    Args:
+        spec: ``layout`` (``stack`` | ``grid`` | ``columns``) plus the ordered
+            list of ``panels`` to render, with their data inline.
+    """
+    return {"queued_dashboard": True, "panel_count": len(spec.panels)}
 
 
 @tool

@@ -1,6 +1,6 @@
 # ADR 0001: Library choice for agent-driven UI components
 
-Status: **proposed** · Date: 2026-05-29 · Branch: `claude/agent-ui-components-research-yXCqL`
+Status: **accepted** · Date: 2026-05-30 · Branch: `claude/agent-ui-components-research-yXCqL`
 
 ## TL;DR
 
@@ -9,18 +9,44 @@ mechanism for agent-driven UI. We already have the right primitive in place —
 **assistant-ui generative UI (Tool UI) streamed over LangGraph** — and we are
 most of the way into the pattern those libraries are selling.
 
-Recommended path, in tiers:
+Chosen path, in tiers:
 
-1. **Now (no new deps):** consolidate on the assistant-ui Tools API. Formalize
-   the existing per-tool component pattern into a small typed widget registry.
-   Migrate off the deprecated `makeAssistantToolUI` toward the `Tools()` API as
-   we add widgets.
-2. **When we need LLM-*composed* layouts:** borrow the *pattern* from
-   `json-render` (catalog + Zod schema + render registry) by implementing a
-   single `render_panel`-style tool over our own LangGraph stream — **not** the
-   Vercel package.
+1. **Done — no new deps:** the assistant-ui Tool UI pattern, formalized into a
+   typed widget registry (`components/assistant/widgets/`). Migrate off the
+   deprecated `makeAssistantToolUI` toward the `Tools()` API as we add widgets.
+2. **Done — built now (this ADR's decision):** a *curated composition layer we
+   own* — the `json-render` *pattern* (catalog + Zod schema + render registry)
+   implemented as a single `render_dashboard` tool over our existing LangGraph
+   stream, **not** the Vercel package. The agent composes multiple panels into
+   vetted layout templates; it does not emit raw UI. See "Tier 2: implemented".
 3. **Watch, don't adopt:** `A2UI`, as a possible long-term portability standard.
-   Keeping agent UI intent as declarative JSON in tier 2 keeps that door open.
+   Keeping agent UI intent as declarative, Zod-validated JSON in tier 2 keeps
+   that door open at low cost.
+
+### Why build tier 2 now, and why our own thin layer (not A2UI)
+
+The product goal is for the agent to **combine multiple visuals into rich,
+composed insights** (agriculture field-health dashboards), and to grow that
+catalog over time. That is genuinely beyond tier 1 — selection-only frameworks
+(assistant-ui, Vercel AI SDK, CopilotKit) stack widgets vertically but give the
+agent no control over *layout/composition*. Only spec-driven approaches (A2UI,
+json-render) do.
+
+We deliberately built a **thin composition layer we own** rather than adopting
+A2UI/json-render, because for a single flagship app:
+
+- **Quality by construction.** The agent picks from a few vetted, responsive
+  layout templates and a curated panel catalog — it can't emit free-form UI, so
+  every composition stays on-brand. Adopting a generic renderer reintroduces the
+  "wrong-looking generated UI" risk we explicitly want to avoid.
+- **The standardized schema is ours and tighter.** A2UI standardizes the
+  *layout envelope*, not our *domain data* — we'd still hand-write every panel's
+  data schema. Our Zod panel schemas + the `DashboardSpec` envelope are a fully
+  typed, validated contract native to the stack.
+- **No dependency on a young, churning spec** and no second runtime. We own
+  ~150 lines and keep the `interrupt()` HITL flow and the `/api/lg` stream.
+- **Door stays open.** Because panel data schemas are already separated from the
+  layout envelope, mapping onto A2UI later (for cross-client interop) is cheap.
 
 ## Context
 
@@ -107,41 +133,48 @@ boundaries safely.
 
 ## Decision
 
-Adopt **Option A now**. Implement **Option B's pattern natively** when we need
-LLM-composed layouts. **Track Option C** without building on it.
+Adopt **Option A** (tier 1, already in place) **and implement Option B's
+pattern natively now** (tier 2) — because LLM-composed dashboards are a current
+product goal, not a someday-maybe. **Track Option C** without building on it.
 
-### Tier 2 sketch (when needed)
+### Tier 2: implemented
 
-Agent — a catalog-style tool alongside the existing ones:
+A single composition tool the agent fills, validated client-side and rendered
+through the existing viz primitives inside vetted layout templates.
 
-```python
-@tool
-def render_panel(spec: dict) -> dict:
-    """Render a composed UI panel (chart/stat/table) from a validated spec."""
-    return {"queued_panel": True, "spec": spec}
-```
+**Agent** — `tools/frontend_actions.py`: `render_dashboard(spec: DashboardSpec)`,
+registered in `tools/__init__.py` and documented in `prompts/system.py`. `spec`
+is a Pydantic model (so the LLM gets a real JSON schema): a `layout`
+(`stack` | `grid` | `columns`) plus an ordered list of discriminated `panels`
+(`stat` | `timeseries` | `histogram` | `table`), data passed inline.
 
-Browser — `components/assistant/tools/RenderPanelTool.tsx`: validate the spec
-with Zod (already a dependency) and map it onto a registry of existing
-components.
+**Browser** — under `components/assistant/widgets/dashboard/`:
 
-```tsx
-const Registry = { chart: ChartPanel, stat: StatCard, table: FeatureTable };
-// useAssistantTool({ toolName: "render_panel", render: ({ args }) =>
-//   <PanelRenderer spec={PanelSchema.parse(args.spec)} registry={Registry} /> })
-```
+- `schema.ts` — the Zod mirror of `DashboardSpec` (the standardized contract).
+- `panels.tsx` — `PanelView`, an exhaustive switch mapping each panel type to a
+  shared viz primitive (`StatTile`/`TimeSeriesChart`/`Histogram`/`DataTable`).
+- `DashboardWidget.tsx` — registered as the `"dashboard"` widget; lays panels
+  into the chosen template and gets the inline + promotable workspace views for
+  free from the widget framework.
+- `tools/RenderDashboardTool.tsx` — `useAssistantTool({ toolName:
+  "render_dashboard" })`: `safeParse`s the streamed spec and renders
+  `<Widget type="dashboard" …>`, degrading to a `ToolErrorChip` on a completed
+  invalid spec.
 
-This reuses the Recharts/deck.gl/Radix stack, the `/api/lg` stream, and the
-HITL pattern — no new runtime. Keeping the agent's UI intent as declarative,
-Zod-validated JSON also makes a future mapping onto A2UI cheap if that spec
-stabilizes and a solid React renderer lands.
+Adding a panel type is a two-file change (extend the union in `schema.ts` and
+add a case in `panels.tsx`); adding a whole new widget stays a one-tool +
+one-registered-component change. No new runtime; reuses the Recharts/Radix
+stack, the `/api/lg` stream, and the `interrupt()` HITL flow.
 
 ## Consequences
 
-- No new runtime dependency is introduced now; risk stays low.
-- New agent-driven visualizations follow a single, documented pattern (one tool
-  + one registered component).
-- We accept that, until tier 2, the agent can only render pre-built widgets.
+- No new runtime dependency; risk stays low.
+- Two documented patterns: a single-purpose widget (one tool + one registered
+  component) and a composed dashboard (fill the `DashboardSpec`).
+- The agent can now **compose** multiple visuals into one layout, but only from
+  the curated panel catalog and vetted templates — by design.
+- The agent-side Pydantic `DashboardSpec` and the browser-side Zod schema must
+  be kept in sync (inherent to the Python-agent / TS-UI split).
 - We take on a small migration task: move existing tool UIs from the deprecated
   `makeAssistantToolUI` to the `Tools()` API as the set grows.
 
