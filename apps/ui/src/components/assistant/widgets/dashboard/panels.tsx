@@ -12,18 +12,25 @@ import type { Panel, TablePanel, TimeSeriesPanel } from "./schema";
 
 type TableRow = Record<string, string | number>;
 
-function TimeSeriesPanelView({ panel }: { panel: TimeSeriesPanel }) {
-  // The agent supplies each series independently; merge them into chart rows
-  // keyed by x so multiple series share one axis.
+/**
+ * Merge independently-supplied series into chart rows keyed by x, sorted by x,
+ * so multiple series share one axis. Pure and exported for unit testing — this
+ * is the one bit of non-trivial logic in the panel layer.
+ */
+export function mergeSeriesRows(series: TimeSeriesPanel["series"]): TableRow[] {
   const rowsByX = new Map<string, TableRow>();
-  for (const s of panel.series) {
+  for (const s of series) {
     for (const p of s.points) {
       const row = rowsByX.get(p.x) ?? { x: p.x };
       row[s.key] = p.y;
       rowsByX.set(p.x, row);
     }
   }
-  const rows = [...rowsByX.values()].sort((a, b) => String(a.x).localeCompare(String(b.x)));
+  return [...rowsByX.values()].sort((a, b) => String(a.x).localeCompare(String(b.x)));
+}
+
+function TimeSeriesPanelView({ panel }: { panel: TimeSeriesPanel }) {
+  const rows = mergeSeriesRows(panel.series);
   const series = panel.series.map((s) => ({ key: s.key, label: s.label }));
   return <TimeSeriesChart data={rows} xKey="x" series={series} />;
 }

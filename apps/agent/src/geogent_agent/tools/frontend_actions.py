@@ -14,7 +14,7 @@ mechanisms handled in the browser under `components/assistant/tools/`:
    clicks Save or Cancel in the confirmation card).
 """
 
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from langchain_core.tools import tool
 from langgraph.types import interrupt
@@ -184,7 +184,7 @@ class TablePanel(BaseModel):
 
 
 Panel = Annotated[
-    Union[StatPanel, TimeSeriesPanel, HistogramPanel, TablePanel],
+    StatPanel | TimeSeriesPanel | HistogramPanel | TablePanel,
     Field(discriminator="type"),
 ]
 
