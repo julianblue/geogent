@@ -97,6 +97,18 @@ def test_unknown_panel_type_is_rejected() -> None:
         DashboardSpec.model_validate({"panels": [{"type": "scatterplot", "data": []}]})
 
 
+def test_empty_panel_list_is_rejected() -> None:
+    # min_length mirrors the browser Zod `.min(1)`, so the agent fails fast with
+    # a recoverable error instead of after the round trip.
+    with pytest.raises(ValidationError):
+        DashboardSpec.model_validate({"panels": []})
+
+
+def test_empty_panel_data_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        DashboardSpec.model_validate({"panels": [{"type": "histogram", "bins": []}]})
+
+
 def test_render_dashboard_acks_with_panel_count() -> None:
     result = render_dashboard.invoke({"spec": _FIELD_HEALTH_SPEC})
     assert result == {"queued_dashboard": True, "panel_count": 4}

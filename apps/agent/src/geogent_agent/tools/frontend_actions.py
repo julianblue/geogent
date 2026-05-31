@@ -139,7 +139,7 @@ class StatItem(BaseModel):
 class StatPanel(BaseModel):
     type: Literal["stat"] = "stat"
     title: str | None = None
-    stats: list[StatItem]
+    stats: Annotated[list[StatItem], Field(min_length=1)]
 
 
 class SeriesPoint(BaseModel):
@@ -156,7 +156,7 @@ class Series(BaseModel):
 class TimeSeriesPanel(BaseModel):
     type: Literal["timeseries"] = "timeseries"
     title: str | None = None
-    series: list[Series]
+    series: Annotated[list[Series], Field(min_length=1)]
 
 
 class HistogramBin(BaseModel):
@@ -167,7 +167,7 @@ class HistogramBin(BaseModel):
 class HistogramPanel(BaseModel):
     type: Literal["histogram"] = "histogram"
     title: str | None = None
-    bins: list[HistogramBin]
+    bins: Annotated[list[HistogramBin], Field(min_length=1)]
 
 
 class TableColumn(BaseModel):
@@ -179,7 +179,7 @@ class TableColumn(BaseModel):
 class TablePanel(BaseModel):
     type: Literal["table"] = "table"
     title: str | None = None
-    columns: list[TableColumn]
+    columns: Annotated[list[TableColumn], Field(min_length=1)]
     rows: list[dict[str, str | float]]
 
 
@@ -192,7 +192,7 @@ Panel = Annotated[
 class DashboardSpec(BaseModel):
     title: str | None = None
     layout: Literal["stack", "grid", "columns"] = "stack"
-    panels: list[Panel]
+    panels: Annotated[list[Panel], Field(min_length=1)]
 
 
 @tool
