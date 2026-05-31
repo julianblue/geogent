@@ -3,6 +3,7 @@ from geogent_agent.tools.frontend_actions import (
     confirm_feature_save,
     fly_to,
     list_features_in_viewport,
+    render_dashboard,
     show_sentinel2_scene,
 )
 from geogent_agent.tools.geo_tools import (
@@ -40,6 +41,7 @@ TOOLS = [
     list_features_in_viewport,
     confirm_feature_save,
     show_sentinel2_scene,
+    render_dashboard,
 ]
 
 __all__ = [
@@ -55,6 +57,7 @@ __all__ = [
     "geometries_intersect",
     "list_features",
     "list_features_in_viewport",
+    "render_dashboard",
     "seasonal_index_time_series_for_field",
     "show_sentinel2_scene",
     "stac_get_item",

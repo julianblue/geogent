@@ -9,6 +9,7 @@ import { FlyToTool } from "@/components/assistant/tools/FlyToTool";
 import { BufferLayerTool } from "@/components/assistant/tools/BufferLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
 import { ConfirmFeatureSaveTool } from "@/components/assistant/tools/ConfirmFeatureSaveTool";
+import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboardTool";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 
 export function AssistantPanel() {
@@ -52,6 +53,7 @@ export function AssistantPanel() {
       <BufferLayerTool />
       <FeaturesInViewportTool />
       <ConfirmFeatureSaveTool />
+      <RenderDashboardTool />
 
       {expanded ? (
         <div className="min-h-0 flex-1 overflow-hidden">
