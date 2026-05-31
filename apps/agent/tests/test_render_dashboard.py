@@ -94,9 +94,7 @@ def test_stat_value_accepts_number_or_string() -> None:
 
 def test_unknown_panel_type_is_rejected() -> None:
     with pytest.raises(ValidationError):
-        DashboardSpec.model_validate(
-            {"panels": [{"type": "scatterplot", "data": []}]}
-        )
+        DashboardSpec.model_validate({"panels": [{"type": "scatterplot", "data": []}]})
 
 
 def test_render_dashboard_acks_with_panel_count() -> None:
