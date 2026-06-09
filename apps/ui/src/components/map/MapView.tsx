@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import Map, {
   Layer,
