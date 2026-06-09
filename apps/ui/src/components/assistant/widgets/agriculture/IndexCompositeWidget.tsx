@@ -93,7 +93,8 @@ function CompositeExpanded({ data }: WidgetRenderProps<CompositeResult>) {
   if (data.ok === false) return <ErrorCard reason={data.reason} />;
 
   const liveComposite = sentinel2Scene?.compositeId;
-  const shownComposite = liveComposite ?? data.composite;
+  // Always a real preset id so the controlled <select> never gets `undefined`.
+  const shownComposite = liveComposite ?? data.composite ?? SENTINEL2_PRESETS[0].id;
 
   function zoomToScene() {
     const bbox = sentinel2Scene?.item.bbox;

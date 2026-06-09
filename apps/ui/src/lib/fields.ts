@@ -17,14 +17,14 @@ export type Field = {
 export type Bounds = { west: number; south: number; east: number; north: number };
 
 /** Fetch fields whose geometry intersects the given lon/lat bounding box. */
-export async function listFieldsInBbox(bounds: Bounds): Promise<Field[]> {
+export async function listFieldsInBbox(bounds: Bounds, signal?: AbortSignal): Promise<Field[]> {
   const params = new URLSearchParams({
     min_lon: String(bounds.west),
     min_lat: String(bounds.south),
     max_lon: String(bounds.east),
     max_lat: String(bounds.north),
   });
-  const res = await fetch(`/api/proxy/fields/in-bbox?${params}`, { cache: "no-store" });
+  const res = await fetch(`/api/proxy/fields/in-bbox?${params}`, { cache: "no-store", signal });
   if (!res.ok) throw new Error(`fields/in-bbox failed: ${res.status}`);
   return (await res.json()) as Field[];
 }

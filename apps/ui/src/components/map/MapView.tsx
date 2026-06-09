@@ -131,7 +131,7 @@ export function MapView() {
     if (!bounds) return;
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      void listFieldsInBbox(bounds)
+      void listFieldsInBbox(bounds, controller.signal)
         .then((rows) => {
           if (controller.signal.aborted) return;
           setFields(
