@@ -10,11 +10,17 @@ import { bufferWidget } from "@/components/assistant/widgets/BufferWidget";
 import { featureListWidget } from "@/components/assistant/widgets/FeatureListWidget";
 import { approvalWidget } from "@/components/assistant/widgets/ApprovalWidget";
 import { dashboardWidget } from "@/components/assistant/widgets/dashboard/DashboardWidget";
+import { zonalStatsWidget } from "@/components/assistant/widgets/agriculture/ZonalStatsWidget";
+import { indexTimeSeriesWidget } from "@/components/assistant/widgets/agriculture/IndexTimeSeriesWidget";
+import { indexCompositeWidget } from "@/components/assistant/widgets/agriculture/IndexCompositeWidget";
 
 registerWidget(bufferWidget);
 registerWidget(featureListWidget);
 registerWidget(approvalWidget);
 registerWidget(dashboardWidget);
+registerWidget(zonalStatsWidget);
+registerWidget(indexTimeSeriesWidget);
+registerWidget(indexCompositeWidget);
 
 export { Widget } from "@/components/assistant/widgets/Widget";
 export { InsightsWorkspace } from "@/components/assistant/widgets/InsightsWorkspace";

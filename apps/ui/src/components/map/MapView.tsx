@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import Map, {
   Layer,
@@ -14,14 +14,18 @@ import Map, {
 import type { Ref } from "react";
 
 import { useMapState } from "@/components/map/MapStateProvider";
-import { FEATURE_LAYER_IDS } from "@/components/map/overlays";
+import { FEATURE_LAYER_IDS, FIELD_LAYER_IDS } from "@/components/map/overlays";
+import { listFieldsInBbox } from "@/lib/fields";
 
 const { fill: FEATURE_FILL, line: FEATURE_LINE, point: FEATURE_POINT } = FEATURE_LAYER_IDS;
+const { fill: FIELD_FILL, line: FIELD_LINE } = FIELD_LAYER_IDS;
 const POLYGON_TYPES = ["Polygon", "MultiPolygon"];
 const LINE_TYPES = ["LineString", "MultiLineString"];
 const POINT_TYPES = ["Point", "MultiPoint"];
-// Lines and fills/points are all clickable for selection.
-const INTERACTIVE_FEATURE_LAYERS = [FEATURE_FILL, FEATURE_LINE, FEATURE_POINT];
+// Fields sit below features so a feature drawn inside a field stays clickable.
+const INTERACTIVE_FEATURE_LAYERS = [FEATURE_FILL, FEATURE_LINE, FEATURE_POINT, FIELD_FILL];
+// How long after the last map move before we refetch fields for the viewport.
+const FIELDS_FETCH_DEBOUNCE_MS = 250;
 
 const OSM_STYLE = {
   version: 8 as const,
@@ -37,8 +41,19 @@ const OSM_STYLE = {
 };
 
 export function MapView() {
-  const { mapRef, viewport, setViewport, setMapReady, features, selectedIds, toggleSelected } =
-    useMapState();
+  const {
+    mapRef,
+    viewport,
+    setViewport,
+    setMapReady,
+    features,
+    selectedIds,
+    toggleSelected,
+    fields,
+    setFields,
+    selectedFieldId,
+    selectField,
+  } = useMapState();
 
   // Stored features as a FeatureCollection so they're clickable on the map.
   // `id` is promoted to the GeoJSON feature id and selection drives a paint
@@ -56,13 +71,36 @@ export function MapView() {
     [features, selectedIds],
   );
 
-  const onFeatureClick = useCallback(
+  // Agricultural fields (#24) as their own selectable collection.
+  const fieldCollection = useMemo<GeoJSON.FeatureCollection>(
+    () => ({
+      type: "FeatureCollection",
+      features: fields.map((f) => ({
+        type: "Feature",
+        id: f.id,
+        geometry: f.geometry,
+        properties: { fieldId: f.id, name: f.name, selected: f.id === selectedFieldId ? 1 : 0 },
+      })),
+    }),
+    [fields, selectedFieldId],
+  );
+
+  const onMapClick = useCallback(
     (e: MapLayerMouseEvent) => {
-      const hit = e.features?.[0];
-      const id = hit?.properties?.id;
-      if (typeof id === "string") toggleSelected(id);
+      // A field hit only counts when no feature is under the cursor, so feature
+      // selection (the prior behaviour) always wins on overlap.
+      const featureHit = e.features?.find((h) => typeof h.properties?.id === "string");
+      if (featureHit) {
+        toggleSelected(featureHit.properties!.id as string);
+        return;
+      }
+      const fieldHit = e.features?.find((h) => typeof h.properties?.fieldId === "number");
+      if (fieldHit) {
+        const id = fieldHit.properties!.fieldId as number;
+        selectField(id === selectedFieldId ? null : id);
+      }
     },
-    [toggleSelected],
+    [toggleSelected, selectField, selectedFieldId],
   );
 
   const syncFromMap = useCallback(
@@ -86,6 +124,30 @@ export function MapView() {
     [setViewport],
   );
 
+  // Load fields intersecting the current viewport, debounced and abortable so
+  // rapid panning doesn't stack requests or apply a stale response.
+  const bounds = viewport.bounds;
+  useEffect(() => {
+    if (!bounds) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      void listFieldsInBbox(bounds, controller.signal)
+        .then((rows) => {
+          if (controller.signal.aborted) return;
+          setFields(
+            rows.map((r) => ({ id: r.id, name: r.name, crop: r.crop, geometry: r.geometry })),
+          );
+        })
+        .catch(() => {
+          // Field overlay is best-effort; a failed fetch shouldn't break the map.
+        });
+    }, FIELDS_FETCH_DEBOUNCE_MS);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [bounds, setFields]);
+
   return (
     <Map
       ref={mapRef as Ref<MapRef>}
@@ -102,10 +164,30 @@ export function MapView() {
       }}
       onMoveEnd={(e: ViewStateChangeEvent) => syncFromMap(e.target as MapLibreMap)}
       interactiveLayerIds={INTERACTIVE_FEATURE_LAYERS}
-      onClick={onFeatureClick}
+      onClick={onMapClick}
     >
       <NavigationControl position="top-left" />
       <ScaleControl position="bottom-left" />
+
+      <Source id="geogent-fields" type="geojson" data={fieldCollection}>
+        <Layer
+          id={FIELD_FILL}
+          type="fill"
+          paint={{
+            "fill-color": ["case", ["==", ["get", "selected"], 1], "#16a34a", "#22c55e"],
+            "fill-opacity": ["case", ["==", ["get", "selected"], 1], 0.3, 0.12],
+          }}
+        />
+        <Layer
+          id={FIELD_LINE}
+          type="line"
+          paint={{
+            "line-color": ["case", ["==", ["get", "selected"], 1], "#15803d", "#16a34a"],
+            "line-width": ["case", ["==", ["get", "selected"], 1], 2.5, 1.25],
+            "line-dasharray": [2, 1],
+          }}
+        />
+      </Source>
 
       <Source id="geogent-features" type="geojson" data={featureCollection}>
         <Layer

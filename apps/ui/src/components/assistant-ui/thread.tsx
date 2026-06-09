@@ -1,6 +1,7 @@
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { SelectionChips } from "@/components/workspace/SelectionChips";
+import { FieldContextChip } from "@/components/workspace/FieldContextChip";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -121,6 +122,7 @@ const Composer: FC = () => {
         data-slot="aui_composer-shell"
         className="flex w-full flex-col gap-2 rounded-[var(--composer-radius)] border bg-background p-[var(--composer-padding)] transition-shadow focus-within:border-ring/75 focus-within:ring-2 focus-within:ring-ring/20"
       >
+        <FieldContextChip />
         <SelectionChips />
         <ComposerPrimitive.Input
           placeholder="Ask geogent…"

@@ -19,6 +19,16 @@ export const FEATURE_LAYER_IDS = {
 } as const;
 
 /**
+ * Declarative agricultural-field layers (#24). Rendered as a fill+outline pair
+ * with a selection highlight, mirroring FEATURE_LAYER_IDS so clicks can drive
+ * field-selection-as-context.
+ */
+export const FIELD_LAYER_IDS = {
+  fill: "geogent-fields-fill",
+  line: "geogent-fields-line",
+} as const;
+
+/**
  * Add (or replace) a polygon overlay rendered as a fill+outline layer pair on the map.
  * The id is namespaced so we can have multiple overlays at once.
  */
