@@ -83,6 +83,30 @@ export type CompositeResult = {
   reason?: string;
 };
 
+/**
+ * Normalise a render-only tool-UI `result` to an object.
+ *
+ * Server-executed LangChain tools return a dict that LangGraph serialises into
+ * the `ToolMessage` content as a JSON **string**, and `@assistant-ui/react-
+ * langgraph` passes that content through as `result` verbatim (no parse —
+ * `convertLangChainMessages.js`, `result: message.content`). So a tool UI keyed
+ * to a server tool receives a string and must parse it. Client tools
+ * (`useAssistantTool`) hand back the object directly, so we accept both. Returns
+ * `null` while the result is absent (tool still running) or unparseable.
+ */
+export function parseToolResult<T = unknown>(result: unknown): T | null {
+  if (result == null) return null;
+  if (typeof result === "object") return result as T;
+  if (typeof result === "string") {
+    try {
+      return JSON.parse(result) as T;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 function fmtEdge(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }

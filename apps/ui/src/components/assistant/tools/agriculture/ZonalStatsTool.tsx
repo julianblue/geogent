@@ -4,7 +4,10 @@ import { makeAssistantToolUI } from "@assistant-ui/react";
 
 import { Widget } from "@/components/assistant/widgets";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
-import type { ZonalStatsResult } from "@/components/assistant/widgets/agriculture/shared";
+import {
+  parseToolResult,
+  type ZonalStatsResult,
+} from "@/components/assistant/widgets/agriculture/shared";
 
 /**
  * Render-only UI (#24) for the SERVER-executed `zonal_stats_for_field` tool. The
@@ -13,13 +16,14 @@ import type { ZonalStatsResult } from "@/components/assistant/widgets/agricultur
  * to the tool name and read its `result`. No client `execute` — the work already
  * happened on the agent.
  */
-export const ZonalStatsTool = makeAssistantToolUI<Record<string, unknown>, ZonalStatsResult>({
+export const ZonalStatsTool = makeAssistantToolUI<Record<string, unknown>, unknown>({
   toolName: "zonal_stats_for_field",
   render: function ZonalStatsRender({ result, status, toolCallId }) {
     if (status.type === "incomplete" && status.reason === "error") {
       return <ToolErrorChip label="Zonal stats" error={status.error} />;
     }
-    if (!result || typeof result !== "object" || !("stats" in result)) return null;
-    return <Widget id={toolCallId} type="zonal-stats" data={result} />;
+    const data = parseToolResult<ZonalStatsResult>(result);
+    if (!data || !("stats" in data)) return null;
+    return <Widget id={toolCallId} type="zonal-stats" data={data} />;
   },
 });

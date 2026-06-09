@@ -4,7 +4,10 @@ import { makeAssistantToolUI } from "@assistant-ui/react";
 
 import { Widget } from "@/components/assistant/widgets";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
-import type { CompositeResult } from "@/components/assistant/widgets/agriculture/shared";
+import {
+  parseToolResult,
+  type CompositeResult,
+} from "@/components/assistant/widgets/agriculture/shared";
 
 /**
  * Render-only UI (#24) for `show_sentinel2_scene`. That tool is a LangGraph
@@ -14,16 +17,14 @@ import type { CompositeResult } from "@/components/assistant/widgets/agriculture
  * part — this binding draws the dual-mode composite widget from that result. The
  * two coexist: one does the work, the other renders the persisted provenance.
  */
-export const Sentinel2SceneWidgetTool = makeAssistantToolUI<
-  Record<string, unknown>,
-  CompositeResult
->({
+export const Sentinel2SceneWidgetTool = makeAssistantToolUI<Record<string, unknown>, unknown>({
   toolName: "show_sentinel2_scene",
   render: function Sentinel2SceneRender({ result, status, toolCallId }) {
     if (status.type === "incomplete" && status.reason === "error") {
       return <ToolErrorChip label="Sentinel-2 scene" error={status.error} />;
     }
-    if (!result || typeof result !== "object" || !("ok" in result)) return null;
-    return <Widget id={toolCallId} type="index-composite" data={result} />;
+    const data = parseToolResult<CompositeResult>(result);
+    if (!data || !("ok" in data)) return null;
+    return <Widget id={toolCallId} type="index-composite" data={data} />;
   },
 });

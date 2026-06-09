@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { histogramToBins, indexLabel } from "./shared";
+import { histogramToBins, indexLabel, parseToolResult } from "./shared";
 
 describe("histogramToBins", () => {
   it("maps N+1 bin_edges and N counts to N labelled bars (no off-by-one)", () => {
@@ -20,6 +20,26 @@ describe("histogramToBins", () => {
 
   it("returns [] for missing histogram", () => {
     expect(histogramToBins(undefined)).toEqual([]);
+  });
+});
+
+describe("parseToolResult", () => {
+  it("parses a JSON string result (server-executed LangChain tool path)", () => {
+    // LangGraph serialises a dict tool return into ToolMessage content as a
+    // string; the tool UI must parse it before reading fields.
+    const parsed = parseToolResult<{ stats: { mean: number } }>('{"stats":{"mean":0.6}}');
+    expect(parsed?.stats.mean).toBe(0.6);
+  });
+
+  it("passes an object result through unchanged (client tool path)", () => {
+    const obj = { points: [] };
+    expect(parseToolResult(obj)).toBe(obj);
+  });
+
+  it("returns null for missing or unparseable results", () => {
+    expect(parseToolResult(undefined)).toBeNull();
+    expect(parseToolResult(null)).toBeNull();
+    expect(parseToolResult("not json")).toBeNull();
   });
 });
 
