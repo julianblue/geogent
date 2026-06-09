@@ -13,6 +13,7 @@ from geogent_agent.tools.geo_tools import (
     features_within,
     geometries_intersect,
     list_features,
+    list_fields,
     seasonal_index_time_series_for_field,
     zonal_stats_for_field,
 )
@@ -30,6 +31,7 @@ TOOLS = [
     area_of,
     geometries_intersect,
     features_within,
+    list_fields,
     zonal_stats_for_field,
     seasonal_index_time_series_for_field,
     geocode_place,
@@ -57,6 +59,7 @@ __all__ = [
     "geometries_intersect",
     "list_features",
     "list_features_in_viewport",
+    "list_fields",
     "render_dashboard",
     "seasonal_index_time_series_for_field",
     "show_sentinel2_scene",

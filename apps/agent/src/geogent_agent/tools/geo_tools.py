@@ -22,6 +22,24 @@ async def list_features() -> list[dict]:
 
 
 @tool
+async def list_fields() -> list[dict]:
+    """List agricultural fields/parcels available for raster analytics.
+
+    Returns one object per field with its integer ``id``, ``name``, optional
+    ``crop``/``season`` metadata, and GeoJSON ``geometry``. Use this to resolve
+    the ``field_id`` that ``zonal_stats_for_field`` and
+    ``seasonal_index_time_series_for_field`` require when the user names or
+    describes a field (e.g. "my north field") rather than selecting one on the
+    map. When the user has already clicked a field, prefer
+    ``map_state.selected_field.id`` and skip this call.
+    """
+    async with get_backend_client() as client:
+        r = await client.get("/api/v1/fields")
+        r.raise_for_status()
+        return r.json()
+
+
+@tool
 async def buffer_geometry(geometry_wkt: str, distance_m: float) -> str:
     """Buffer a WKT geometry by `distance_m` meters via PostGIS. Returns WKT.
 

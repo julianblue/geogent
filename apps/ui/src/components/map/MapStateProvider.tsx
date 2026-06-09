@@ -26,6 +26,18 @@ export type MapFeature = {
   geometry: GeoJSON.Geometry;
 };
 
+/**
+ * An agricultural field/parcel (#24). Kept separate from `features` because the
+ * field-raster tools key off an integer `id`, whereas feature ids are strings;
+ * conflating them would corrupt selection-as-context for ordinary features.
+ */
+export type MapField = {
+  id: number;
+  name: string;
+  crop: string | null;
+  geometry: GeoJSON.Geometry;
+};
+
 export type MapLayer = {
   id: string;
   label: string;
@@ -58,6 +70,10 @@ type MapStateContextValue = {
   selectedIds: string[];
   toggleSelected: (id: string) => void;
   clearSelected: () => void;
+  fields: MapField[];
+  setFields: (fields: MapField[]) => void;
+  selectedFieldId: number | null;
+  selectField: (id: number | null) => void;
   layers: MapLayer[];
   upsertLayer: (layer: MapLayer) => void;
   removeLayer: (id: string) => void;
@@ -87,6 +103,8 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT);
   const [features, setFeatures] = useState<MapFeature[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [fields, setFields] = useState<MapField[]>([]);
+  const [selectedFieldId, setSelectedFieldId] = useState<number | null>(null);
   const [layers, setLayers] = useState<MapLayer[]>([]);
   const [sentinel2Scene, setSentinel2Scene] = useState<Sentinel2Scene | null>(null);
 
@@ -112,6 +130,8 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearSelected = useCallback(() => setSelectedIds([]), []);
+
+  const selectField = useCallback((id: number | null) => setSelectedFieldId(id), []);
 
   const upsertLayer = useCallback((layer: MapLayer) => {
     setLayers((prev) => {
@@ -161,6 +181,10 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       selectedIds,
       toggleSelected,
       clearSelected,
+      fields,
+      setFields,
+      selectedFieldId,
+      selectField,
       layers,
       upsertLayer,
       removeLayer,
@@ -179,6 +203,9 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       selectedIds,
       toggleSelected,
       clearSelected,
+      fields,
+      selectedFieldId,
+      selectField,
       layers,
       upsertLayer,
       removeLayer,

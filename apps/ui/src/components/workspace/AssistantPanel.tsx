@@ -10,6 +10,9 @@ import { BufferLayerTool } from "@/components/assistant/tools/BufferLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
 import { ConfirmFeatureSaveTool } from "@/components/assistant/tools/ConfirmFeatureSaveTool";
 import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboardTool";
+import { ZonalStatsTool } from "@/components/assistant/tools/agriculture/ZonalStatsTool";
+import { IndexTimeSeriesTool } from "@/components/assistant/tools/agriculture/IndexTimeSeriesTool";
+import { Sentinel2SceneWidgetTool } from "@/components/assistant/tools/agriculture/Sentinel2SceneWidgetTool";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 
 export function AssistantPanel() {
@@ -54,6 +57,9 @@ export function AssistantPanel() {
       <FeaturesInViewportTool />
       <ConfirmFeatureSaveTool />
       <RenderDashboardTool />
+      <ZonalStatsTool />
+      <IndexTimeSeriesTool />
+      <Sentinel2SceneWidgetTool />
 
       {expanded ? (
         <div className="min-h-0 flex-1 overflow-hidden">

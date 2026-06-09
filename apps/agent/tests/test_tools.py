@@ -17,6 +17,7 @@ from geogent_agent.tools import (
     geo_tools,
     geometries_intersect,
     list_features,
+    list_fields,
     seasonal_index_time_series_for_field,
     zonal_stats_for_field,
 )
@@ -51,6 +52,20 @@ async def test_list_features_calls_get(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert captured == {"method": "GET", "path": "/api/v1/features"}
     assert result == [{"id": 1, "name": "alpha"}]
+
+
+@pytest.mark.asyncio
+async def test_list_fields_calls_get(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured["method"] = request.method
+        captured["path"] = request.url.path
+        return httpx.Response(200, json=[{"id": 7, "name": "North field", "crop": "wheat"}])
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    result = await list_fields.ainvoke({})
+
+    assert captured == {"method": "GET", "path": "/api/v1/fields"}
+    assert result == [{"id": 7, "name": "North field", "crop": "wheat"}]
 
 
 @pytest.mark.asyncio
