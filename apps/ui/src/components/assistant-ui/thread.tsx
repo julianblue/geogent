@@ -1,3 +1,22 @@
+/**
+ * Blessed tool integration patterns for this thread:
+ *
+ * Pattern A — Client tool with UI (useAssistantTool + execute + render):
+ *   FlyToTool, BufferLayerTool, FeaturesInViewportTool, RenderDashboardTool.
+ *   The tool executes in the browser; render shows inline progress/result.
+ *
+ * Pattern B — LangGraph interrupt (useLangGraphInterruptState + useLangGraphSendCommand):
+ *   ConfirmFeatureSaveTool, Sentinel2RenderTool.
+ *   The agent calls interrupt(); the browser renders the approval widget and
+ *   resumes the graph via sendCommand({ resume: ... }).
+ *
+ * Pattern C — Render-only for server-executed tools (useAssistantTool, no-op execute):
+ *   ZonalStatsTool, IndexTimeSeriesTool, Sentinel2SceneWidgetTool.
+ *   The agent runs the tool server-side; the browser only renders the result.
+ *   Use z.any() as parameters and execute: async () => ({}) as no-op stub.
+ *
+ * Do NOT use makeAssistantToolUI (deprecated factory).
+ */
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { SelectionChips } from "@/components/workspace/SelectionChips";
@@ -30,9 +49,9 @@ import {
   RefreshCwIcon,
   SquareIcon,
 } from "lucide-react";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 
-export const Thread: FC = () => {
+export const Thread: FC<{ welcome?: ReactNode }> = ({ welcome }) => {
   return (
     <ThreadPrimitive.Root
       className="aui-root aui-thread-root @container flex h-full min-h-0 flex-col bg-background"
@@ -49,7 +68,7 @@ export const Thread: FC = () => {
       >
         <div className="mx-auto flex w-full max-w-[var(--thread-max-width)] flex-1 flex-col px-3 pt-4">
           <AuiIf condition={(s) => s.thread.isEmpty}>
-            <ThreadWelcome />
+            <ThreadWelcome>{welcome}</ThreadWelcome>
           </AuiIf>
 
           <div data-slot="aui_message-group" className="mb-6 flex flex-col gap-y-6 empty:hidden">
@@ -90,13 +109,12 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
-const ThreadWelcome: FC = () => {
+const ThreadWelcome: FC<{ children?: ReactNode }> = ({ children }) => {
   return (
     <div className="aui-thread-welcome-root my-auto flex grow flex-col justify-center px-2 text-sm text-muted-foreground">
-      <p className="duration-200 animate-in fade-in slide-in-from-bottom-1 fill-mode-both">
-        Hi! Ask me to fly to a place, buffer the visible area, or list features in view. I&apos;ll
-        always confirm before writing to the database.
-      </p>
+      <div className="duration-200 animate-in fade-in slide-in-from-bottom-1 fill-mode-both">
+        {children ?? <p>How can I help you?</p>}
+      </div>
     </div>
   );
 };
