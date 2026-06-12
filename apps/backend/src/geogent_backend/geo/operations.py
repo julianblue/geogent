@@ -112,29 +112,42 @@ async def fields_in_bbox(
     min_lat: float,
     max_lon: float,
     max_lat: float,
+    crop: str | None = None,
+    limit: int | None = None,
 ) -> list[dict]:
     """Fields whose geometry overlaps the given lon/lat bounding box (SRID 4326).
 
     Uses the ``&&`` bounding-box operator so the GiST index on
     ``fields.geometry`` does the work. Returns one dict per field including the
     geometry as a GeoJSON string (``geojson``) so callers can render it directly.
+
+    ``crop`` is a case-insensitive substring filter ("wheat" matches
+    "winter_wheat") and ``limit`` caps the rows returned — both matter once the
+    table holds thousands of imported parcels rather than a handful of
+    hand-drawn fields.
     """
     if min_lon > max_lon or min_lat > max_lat:
         raise GeometryValidationError(
             "Invalid bbox: expected min_lon <= max_lon and min_lat <= max_lat"
         )
+    crop_clause = "AND crop ILIKE :crop_pattern" if crop else ""
+    limit_clause = "LIMIT :limit" if limit is not None else ""
     sql = text(
-        """
+        f"""
         SELECT id, name, crop, season, created_at, ST_AsGeoJSON(geometry) AS geojson
         FROM fields
         WHERE geometry && ST_MakeEnvelope(:min_lon, :min_lat, :max_lon, :max_lat, 4326)
+        {crop_clause}
         ORDER BY id
+        {limit_clause}
         """
     )
-    result = await session.execute(
-        sql,
-        {"min_lon": min_lon, "min_lat": min_lat, "max_lon": max_lon, "max_lat": max_lat},
-    )
+    params: dict = {"min_lon": min_lon, "min_lat": min_lat, "max_lon": max_lon, "max_lat": max_lat}
+    if crop:
+        params["crop_pattern"] = f"%{crop}%"
+    if limit is not None:
+        params["limit"] = limit
+    result = await session.execute(sql, params)
     return [
         {
             "id": row.id,
@@ -143,6 +156,50 @@ async def fields_in_bbox(
             "season": row.season,
             "created_at": row.created_at,
             "geojson": row.geojson,
+        }
+        for row in result
+    ]
+
+
+async def crop_stats_in_bbox(
+    session: AsyncSession,
+    min_lon: float,
+    min_lat: float,
+    max_lon: float,
+    max_lat: float,
+) -> list[dict]:
+    """Aggregate fields overlapping the bbox: parcel count + area per crop.
+
+    The summary the agent needs for "what is grown here?" without streaming
+    parcel geometries through its context window. Area is true hectares via
+    the geography cast; crops are NULL-bucketed as 'unknown'; ordered by area
+    so the dominant crop comes first.
+    """
+    if min_lon > max_lon or min_lat > max_lat:
+        raise GeometryValidationError(
+            "Invalid bbox: expected min_lon <= max_lon and min_lat <= max_lat"
+        )
+    sql = text(
+        """
+        SELECT
+            COALESCE(crop, 'unknown') AS crop,
+            COUNT(*) AS parcels,
+            SUM(ST_Area(geometry::geography)) / 10000.0 AS total_area_ha
+        FROM fields
+        WHERE geometry && ST_MakeEnvelope(:min_lon, :min_lat, :max_lon, :max_lat, 4326)
+        GROUP BY COALESCE(crop, 'unknown')
+        ORDER BY total_area_ha DESC
+        """
+    )
+    result = await session.execute(
+        sql,
+        {"min_lon": min_lon, "min_lat": min_lat, "max_lon": max_lon, "max_lat": max_lat},
+    )
+    return [
+        {
+            "crop": row.crop,
+            "parcels": int(row.parcels),
+            "total_area_ha": round(float(row.total_area_ha), 2),
         }
         for row in result
     ]

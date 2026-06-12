@@ -21,8 +21,13 @@ async def list_features() -> list[dict]:
         return r.json()
 
 
+# With imported parcel datasets (e.g. EuroCrops) the fields table holds
+# thousands of rows; cap what a blanket listing feeds back into the context.
+_LIST_FIELDS_CAP = 50
+
+
 @tool
-async def list_fields() -> list[dict]:
+async def list_fields() -> list[dict] | dict:
     """List agricultural fields/parcels available for raster analytics.
 
     Returns one object per field with its integer ``id``, ``name``, optional
@@ -32,9 +37,100 @@ async def list_fields() -> list[dict]:
     describes a field (e.g. "my north field") rather than selecting one on the
     map. When the user has already clicked a field, prefer
     ``map_state.selected_field.id`` and skip this call.
+
+    Only suitable for small field collections: with a large imported parcel
+    dataset the response is truncated and you should use ``fields_within_bbox``
+    (spatially scoped, crop-filterable) instead.
     """
     async with get_backend_client() as client:
         r = await client.get("/api/v1/fields")
+        r.raise_for_status()
+        fields = r.json()
+    if len(fields) <= _LIST_FIELDS_CAP:
+        return fields
+    compact = [
+        {k: f.get(k) for k in ("id", "name", "crop", "season")} for f in fields[:_LIST_FIELDS_CAP]
+    ]
+    return {
+        "truncated": True,
+        "total_fields": len(fields),
+        "fields": compact,
+        "note": (
+            f"showing {_LIST_FIELDS_CAP} of {len(fields)} fields without geometry; "
+            "use fields_within_bbox to query by area and crop instead"
+        ),
+    }
+
+
+@tool
+async def fields_within_bbox(
+    min_lon: float,
+    min_lat: float,
+    max_lon: float,
+    max_lat: float,
+    crop: str | None = None,
+    limit: int = 25,
+) -> list[dict]:
+    """Fields/parcels overlapping a lon/lat bounding box, optionally by crop.
+
+    The right way to navigate large imported parcel datasets (e.g. EuroCrops):
+    spatially scoped and filterable, unlike ``list_fields``. Defaults the bbox
+    naturally to ``map_state.viewport.bounds`` (west, south, east, north) when
+    the user asks about "here" / the current view.
+
+    Args:
+        min_lon: West edge of the bbox (degrees).
+        min_lat: South edge of the bbox (degrees).
+        max_lon: East edge of the bbox (degrees).
+        max_lat: North edge of the bbox (degrees).
+        crop: Case-insensitive crop-name substring, e.g. 'wheat' matches
+            'winter_common_soft_wheat'.
+        limit: Max parcels to return (default 25).
+
+    Returns compact parcels (id, name, crop, season — no geometry); feed an
+    ``id`` into ``zonal_stats_for_field`` / ``seasonal_index_time_series_for_field``.
+    """
+    params: dict = {
+        "min_lon": min_lon,
+        "min_lat": min_lat,
+        "max_lon": max_lon,
+        "max_lat": max_lat,
+        "limit": limit,
+    }
+    if crop:
+        params["crop"] = crop
+    async with get_backend_client() as client:
+        r = await client.get("/api/v1/fields/in-bbox", params=params)
+        r.raise_for_status()
+        fields = r.json()
+    return [{k: f.get(k) for k in ("id", "name", "crop", "season")} for f in fields]
+
+
+@tool
+async def crop_stats_within_bbox(
+    min_lon: float,
+    min_lat: float,
+    max_lon: float,
+    max_lat: float,
+) -> list[dict]:
+    """Summarize what is grown inside a lon/lat bounding box.
+
+    Returns one row per crop — ``{crop, parcels, total_area_ha}`` — ordered by
+    area, so the dominant crop comes first. Prefer this over listing parcels
+    when the user asks what is grown in an area, how much of a crop there is,
+    or for an area breakdown; defaults the bbox to
+    ``map_state.viewport.bounds`` for questions about the current view.
+    """
+    async with get_backend_client() as client:
+        r = await client.get(
+            "/api/v1/fields/crop-stats",
+            params={
+                "min_lon": min_lon,
+                "min_lat": min_lat,
+                "max_lon": max_lon,
+                "max_lat": max_lat,
+            },
+        )
         r.raise_for_status()
         return r.json()
 
@@ -108,9 +204,13 @@ async def geometries_intersect(a_wkt: str, b_wkt: str) -> bool:
 
 @tool
 async def features_within(geometry_wkt: str) -> list[dict]:
-    """Features whose geometry is fully inside the given WKT search area.
+    """Features whose geometry is fully inside the given WKT search area —
+    returned TO YOU, so you can name, count, or reason about them in chat.
 
-    Returns a list of ``{id, name}`` references; use ``list_features`` for full
+    This is the right tool whenever the user asks what features are in an
+    area / the current view: build the WKT polygon from the viewport bounds.
+    (`list_features_in_viewport` is display-only and returns no data.) Returns
+    a list of ``{id, name}`` references; use ``list_features`` for full
     geometries and properties.
 
     Args:

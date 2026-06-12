@@ -1,6 +1,8 @@
 """Aggregate per-case scores into a report; optionally push to LangSmith.
 
-``score_case`` applies all four scorers to one (case, trajectory) pair.
+``score_case`` applies every scorer to one (case, trajectory) pair: the four
+deterministic ones, agentevals' trajectory match, and — when a ``judge`` is
+passed and the case has no keyword expectation — the LLM final-answer judge.
 ``build_report`` collects many of those. ``render_table`` formats a plain-text
 table for the console / CI logs. ``maybe_push_to_langsmith`` is a no-op unless
 ``LANGSMITH_API_KEY`` is set, so importing and calling it is always safe.
@@ -12,6 +14,11 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
+from tests.evals.agentevals_bridge import (
+    FinalAnswerJudge,
+    score_graph_steps,
+    score_trajectory_match,
+)
 from tests.evals.dataset import EvalCase
 from tests.evals.scorers import (
     ScoreResult,
@@ -21,7 +28,15 @@ from tests.evals.scorers import (
     score_trajectory_length,
 )
 
-SCORER_NAMES = ("tool_selection", "args", "length", "final")
+SCORER_NAMES = (
+    "tool_selection",
+    "args",
+    "length",
+    "final",
+    "trajectory_match",
+    "graph_steps",
+    "final_judge",
+)
 
 
 @dataclass(frozen=True)
@@ -51,28 +66,52 @@ class CaseReport:
         return sum(s.score for s in self.scores.values())
 
 
-def score_case(case: EvalCase, trajectory: dict[str, Any]) -> CaseReport:
+def score_case(
+    case: EvalCase, trajectory: dict[str, Any], *, judge: FinalAnswerJudge | None = None
+) -> CaseReport:
     e = case.expect
     scores = {
         "tool_selection": score_tool_selection(trajectory, e.tools_required),
         "args": score_argument_correctness(trajectory, e.args),
         "length": score_trajectory_length(trajectory, e.max_steps),
         "final": score_final_answer(trajectory, e.final_contains_any),
+        "trajectory_match": score_trajectory_match(trajectory, case),
     }
+    if e.graph_steps is not None:
+        scores["graph_steps"] = score_graph_steps(trajectory, case)
+    # The judge covers exactly the gap the deterministic final check leaves:
+    # cases whose free-form output has no stable keyword to assert on.
+    if judge is not None and not e.final_contains_any:
+        scores["final_judge"] = judge(case, trajectory)
     return CaseReport(case_id=case.id, scores=scores, xfail=case.xfail)
 
 
-def build_report(pairs: list[tuple[EvalCase, dict[str, Any]]]) -> list[CaseReport]:
-    return [score_case(case, traj) for case, traj in pairs]
+def build_report(
+    pairs: list[tuple[EvalCase, dict[str, Any]]], *, judge: FinalAnswerJudge | None = None
+) -> list[CaseReport]:
+    return [score_case(case, traj, judge=judge) for case, traj in pairs]
 
 
 def render_table(reports: list[CaseReport]) -> str:
-    """Render a per-case + overall pass/fail table as monospace text."""
+    """Render a per-case + overall pass/fail table as monospace text.
+
+    A ``-`` cell means the scorer didn't apply to that case (e.g. the LLM
+    judge on a case with deterministic keywords, or with no judge configured).
+    """
     id_w = max([len("case")] + [len(r.case_id) for r in reports], default=4)
-    header = f"{'case':<{id_w}}  " + "  ".join(f"{n:>14}" for n in SCORER_NAMES) + "  result"
+    names = [n for n in SCORER_NAMES if any(n in r.scores for r in reports)]
+    widths = [max(len(n), 4) for n in names]
+    header = (
+        f"{'case':<{id_w}}  "
+        + "  ".join(f"{n:>{w}}" for n, w in zip(names, widths, strict=True))
+        + "  result"
+    )
     lines = [header, "-" * len(header)]
     for r in reports:
-        cells = "  ".join(f"{('PASS' if r.scores[n].score else 'FAIL'):>14}" for n in SCORER_NAMES)
+        cells = "  ".join(
+            f"{('-' if r.scores.get(n) is None else 'PASS' if r.scores[n].score else 'FAIL'):>{w}}"
+            for n, w in zip(names, widths, strict=True)
+        )
         lines.append(f"{r.case_id:<{id_w}}  {cells}  {r.result}")
 
     passed = sum(1 for r in reports if r.passed)

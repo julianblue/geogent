@@ -1,0 +1,183 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "What satellite imagery collections can I search? List a few.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "b1342555-f153-4b54-a4e7-523ba103387d"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 6,
+            "prompt_tokens": 5447,
+            "total_tokens": 5453,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4856,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00033798,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00033798,
+              "upstream_inference_prompt_cost": 0.00032298,
+              "upstream_inference_completions_cost": 1.5e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273231-3Y0nS9ISoAV82VTaIzxT",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-816c-71c2-a2e3-353261b02da1-0",
+        "tool_calls": [
+          {
+            "name": "stac_list_collections",
+            "args": {},
+            "id": "tool_stac_list_collections_G4ZGbHgRRA72QceDlBMP",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5447,
+          "output_tokens": 6,
+          "total_tokens": 5453,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4856
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "[{\"id\": \"sentinel-2-pre-c1-l2a\", \"title\": \"Sentinel-2 Pre-Collection 1 Level-2A \", \"description\": \"Sentinel-2 Pre-Collection 1 Level-2A (baseline < 05.00), with data and metadata matching collection sentinel-2-c1-l2a\"}, {\"id\": \"cop-dem-glo-30\", \"title\": \"Copernicus DEM GLO-30\", \"description\": \"The Copernicus DEM is a Digital Surface Model (DSM) which represents the surface of the Earth including buildings, infrastructure and vegetation. GLO-30 Public provides limited worldwide coverage at 30 meters because a small subset of tiles covering specific countries are not yet released to the public by the Copernicus Programme.\"}, {\"id\": \"naip\", \"title\": \"NAIP: National Agriculture Imagery Program\", \"description\": \"The [National Agriculture Imagery Program](https://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-programs/naip-imagery/) (NAIP) provides U.S.-wide, high-resolution aerial imagery, with four spectral bands (R, G, B, IR).  NAIP is administered by the [Aerial Field Photography Office](https://www.fsa.usda.gov/programs-and-services/aerial-photography/) (AFPO) within the [US Department of Agriculture](https://www.usda.gov/) (USDA).  Data are captured at least once every three years for each state.  This dataset represents NAIP data from 2010-present, in [cloud-optimized GeoTIFF](https://www.cogeo.org/) format.\\n\"}, {\"id\": \"cop-dem-glo-90\", \"title\": \"Copernicus DEM GLO-90\", \"description\": \"The Copernicus DEM is a Digital Surface Model (DSM) which represents the surface of the Earth including buildings, infrastructure and vegetation. GLO-90 provides worldwide coverage at 90 meters.\"}, {\"id\": \"landsat-c2-l2\", \"title\": \"Landsat Collection 2 Level-2\", \"description\": \"Atmospherically corrected global Landsat Collection 2 Level-2 data from the Thematic Mapper (TM) onboard Landsat 4 and 5, the Enhanced Thematic Mapper Plus (ETM+) onboard Landsat 7, and the Operational Land Imager (OLI) and Thermal Infrared Sensor (TIRS) onboard Landsat 8 and 9.\"}, {\"id\": \"sentinel-2-l2a\", \"title\": \"Sentinel-2 Level-2A\", \"description\": \"Global Sentinel-2 data from the Multispectral Instrument (MSI) onboard Sentinel-2\"}, {\"id\": \"sentinel-2-l1c\", \"title\": \"Sentinel-2 Level-1C\", \"description\": \"Global Sentinel-2 data from the Multispectral Instrument (MSI) onboard Sentinel-2\"}, {\"id\": \"sentinel-2-c1-l2a\", \"title\": \"Sentinel-2 Collection 1 Level-2A\", \"description\": \"Sentinel-2 Collection 1 Level-2A, data from the Multispectral Instrument (MSI) onboard Sentinel-2\"}, {\"id\": \"sentinel-1-grd\", \"title\": \"Sentinel-1 Level-1C Ground Range Detected (GRD)\", \"description\": \"Sentinel-1 is a pair of Synthetic Aperture Radar (SAR) imaging satellites launched in 2014 and 2016 by the European Space Agency (ESA). Their 6 day revisit cycle and ability to observe through clouds makes this dataset perfect for sea and land monitoring, emergency response due to environmental disasters, and economic applications. This dataset represents the global Sentinel-1 GRD archive, from beginning to the present, converted to cloud-optimized GeoTIFF format.\"}]",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "stac_list_collections",
+        "id": "283838ce-de40-4b7f-9211-31413b481f73",
+        "tool_call_id": "tool_stac_list_collections_G4ZGbHgRRA72QceDlBMP",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "You can search for a variety of satellite imagery collections, including:\n\n*   **Sentinel-2 Level-2A**: Global Sentinel-2 data from the Multispectral Instrument (MSI) onboard Sentinel-2.\n*   **NAIP: National Agriculture Imagery Program**: U.S.-wide, high-resolution aerial imagery with four spectral bands (R, G, B, IR).\n*   **Landsat Collection 2 Level-2**: Atmospherically corrected global Landsat data from Landsat 4, 5, 7, 8, and 9.\n*   **Sentinel-1 Level-1C Ground Range Detected (GRD)**: Global Sentinel-1 Synthetic Aperture Radar (SAR) data.\n*   **Copernicus DEM GLO-30/GLO-90**: Digital Surface Models (DSM) representing the Earth's surface at 30 and 90 meters resolution.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 196,
+            "prompt_tokens": 6194,
+            "total_tokens": 6390,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4897,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00102601,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00102601,
+              "upstream_inference_prompt_cost": 0.00053601,
+              "upstream_inference_completions_cost": 0.00049
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273234-fIEHqvqILe15iH01kOaQ",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-8c31-7f00-9550-6b9033d1cbb5-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 6194,
+          "output_tokens": 196,
+          "total_tokens": 6390,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4897
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
+    "run_id": "019ebc28-7d6c-74b0-8b64-2e1f4b1851a6",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "6f1f63d1-eb5a-4011-90e8-d863b1df3224"
+  },
+  "created_at": "2026-06-12T14:07:16.222046+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f166680-46f2-6406-8003-e9a50ef5c51b",
+    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f166680-35de-640e-8002-cfbb15a5f5e0",
+    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f166680-46f2-6406-8003-e9a50ef5c51b",
+  "parent_checkpoint_id": "1f166680-35de-640e-8002-cfbb15a5f5e0"
+}

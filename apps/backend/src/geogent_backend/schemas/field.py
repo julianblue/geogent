@@ -52,3 +52,11 @@ class FieldRead(FieldBase):
     id: int
     geometry: Geometry
     created_at: datetime
+
+
+class CropStat(BaseModel):
+    """One row of the per-crop aggregation over a bbox (see /fields/crop-stats)."""
+
+    crop: str
+    parcels: int
+    total_area_ha: float

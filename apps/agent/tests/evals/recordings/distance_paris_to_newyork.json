@@ -1,0 +1,342 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "How far is it from Paris, France to New York City? Give me the distance.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "9d9cc22d-f2db-4b31-af63-619b265adab0"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 5453,
+            "total_tokens": 5460,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4857,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00034201,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00034201,
+              "upstream_inference_prompt_cost": 0.00032451,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273221-ezn5IC0b7jO5YtKEYVj3",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-5a9f-7943-97be-80eea269a305-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "Paris, France"
+            },
+            "id": "tool_geocode_place_pmYAUS8P7r9FOOpKNUvw",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5453,
+          "output_tokens": 7,
+          "total_tokens": 5460,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4857
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 48.8534951, \"lon\": 2.3483915, \"display_name\": \"Paris, \u00cele-de-France, France m\u00e9tropolitaine, France\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "8df218a5-db84-4f88-9fbb-2c740bb8def3",
+        "tool_call_id": "tool_geocode_place_pmYAUS8P7r9FOOpKNUvw",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 5485,
+            "total_tokens": 5492,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4823,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00036079,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00036079,
+              "upstream_inference_prompt_cost": 0.00034329,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273225-cgHQGIyKMb35OmK8vh2r",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-681a-7180-9241-8c0ae3362323-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "New York City"
+            },
+            "id": "tool_geocode_place_imgQM9G0qBcXKxDSU7ZM",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5485,
+          "output_tokens": 7,
+          "total_tokens": 5492,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4823
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 40.7127281, \"lon\": -74.0060152, \"display_name\": \"New York, United States\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "55a29f56-7779-4495-a4cc-0692e12bd952",
+        "tool_call_id": "tool_geocode_place_imgQM9G0qBcXKxDSU7ZM",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 58,
+            "prompt_tokens": 5507,
+            "total_tokens": 5565,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4788,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00050434,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00050434,
+              "upstream_inference_prompt_cost": 0.00035934,
+              "upstream_inference_completions_cost": 0.000145
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273226-IBnQYTeDk4KVsN5ScUWN",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-6b0b-7ec2-b3c2-6b2d38adcd38-0",
+        "tool_calls": [
+          {
+            "name": "distance_between",
+            "args": {
+              "a_wkt": "POINT(2.3483915 48.8534951)",
+              "b_wkt": "POINT(-74.0060152 40.7127281)"
+            },
+            "id": "tool_distance_between_3vUnk6OzJtudpT3KHMs4",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5507,
+          "output_tokens": 58,
+          "total_tokens": 5565,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4788
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "4123456.7",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "distance_between",
+        "id": "666ac958-b5c8-4b2c-be31-f01fc3a234f9",
+        "tool_call_id": "tool_distance_between_3vUnk6OzJtudpT3KHMs4",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The distance from Paris, France to New York City is approximately 4,123,456.7 meters.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 5578,
+            "total_tokens": 5604,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4779,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00044807,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00044807,
+              "upstream_inference_prompt_cost": 0.00038307,
+              "upstream_inference_completions_cost": 6.5e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273227-nv0evpGwKMv52lUW5Orr",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-6ec3-7800-8e2f-794518bc014a-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5578,
+          "output_tokens": 26,
+          "total_tokens": 5604,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4779
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "1ad2d0df-eb5e-4e49-97b7-5e5ec4501b7e",
+    "run_id": "019ebc28-56ad-73c0-85f4-a9d748a1bfc8",
+    "source": "loop",
+    "step": 7,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "57ba1718-9ce8-458e-a994-307c27ffd986"
+  },
+  "created_at": "2026-06-12T14:07:07.669475+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f16667f-f561-6f3b-8007-29650d795637",
+    "thread_id": "1ad2d0df-eb5e-4e49-97b7-5e5ec4501b7e",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f16667f-ee02-6c2e-8006-635cdf0cc887",
+    "thread_id": "1ad2d0df-eb5e-4e49-97b7-5e5ec4501b7e",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f16667f-f561-6f3b-8007-29650d795637",
+  "parent_checkpoint_id": "1f16667f-ee02-6c2e-8006-635cdf0cc887"
+}

@@ -4,10 +4,10 @@ from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from geogent_backend.geo.operations import fields_in_bbox
+from geogent_backend.geo.operations import crop_stats_in_bbox, fields_in_bbox
 from geogent_backend.models.field import Field
 from geogent_backend.repositories.field_repo import FieldRepository
-from geogent_backend.schemas.field import FieldCreate, FieldRead, FieldUpdate
+from geogent_backend.schemas.field import CropStat, FieldCreate, FieldRead, FieldUpdate
 
 
 def field_to_read(row: Field) -> FieldRead:
@@ -51,9 +51,17 @@ class FieldService:
         return True
 
     async def fields_in_bbox(
-        self, min_lon: float, min_lat: float, max_lon: float, max_lat: float
+        self,
+        min_lon: float,
+        min_lat: float,
+        max_lon: float,
+        max_lat: float,
+        crop: str | None = None,
+        limit: int | None = None,
     ) -> list[FieldRead]:
-        rows = await fields_in_bbox(self._session, min_lon, min_lat, max_lon, max_lat)
+        rows = await fields_in_bbox(
+            self._session, min_lon, min_lat, max_lon, max_lat, crop=crop, limit=limit
+        )
         return [
             FieldRead(
                 id=r["id"],
@@ -65,3 +73,9 @@ class FieldService:
             )
             for r in rows
         ]
+
+    async def crop_stats(
+        self, min_lon: float, min_lat: float, max_lon: float, max_lat: float
+    ) -> list[CropStat]:
+        rows = await crop_stats_in_bbox(self._session, min_lon, min_lat, max_lon, max_lat)
+        return [CropStat(**r) for r in rows]

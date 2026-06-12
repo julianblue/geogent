@@ -179,9 +179,10 @@ async def test_delete_field_missing_returns_404(
 @pytest.mark.asyncio
 async def test_fields_in_bbox(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
     async def fake_bbox(
-        self, min_lon: float, min_lat: float, max_lon: float, max_lat: float
+        self, min_lon: float, min_lat: float, max_lon: float, max_lat: float, crop=None, limit=None
     ) -> list[FieldRead]:  # noqa: ANN001, ARG001
         assert (min_lon, min_lat, max_lon, max_lat) == (-94.0, 41.0, -93.0, 43.0)
+        assert crop is None and limit is None
         return [_read()]
 
     monkeypatch.setattr(fields_routes.FieldService, "fields_in_bbox", fake_bbox)
@@ -219,3 +220,62 @@ def test_field_to_read_round_trips_fixture_polygon() -> None:
     read = field_to_read(row)
     assert read.geometry.type == "Polygon"
     assert shape(read.geometry.model_dump()).equals(geom)
+
+
+@pytest.mark.asyncio
+async def test_fields_in_bbox_forwards_crop_and_limit(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict = {}
+
+    async def fake_bbox(self, min_lon, min_lat, max_lon, max_lat, crop=None, limit=None):  # noqa: ANN001, ARG001
+        captured.update(crop=crop, limit=limit)
+        return [_read(crop="winter_common_soft_wheat")]
+
+    monkeypatch.setattr(fields_routes.FieldService, "fields_in_bbox", fake_bbox)
+
+    r = await client.get(
+        "/api/v1/fields/in-bbox",
+        params={
+            "min_lon": 13.75,
+            "min_lat": 53.20,
+            "max_lon": 14.05,
+            "max_lat": 53.40,
+            "crop": "wheat",
+            "limit": 10,
+        },
+    )
+    assert r.status_code == 200
+    assert captured == {"crop": "wheat", "limit": 10}
+    assert r.json()[0]["crop"] == "winter_common_soft_wheat"
+
+
+@pytest.mark.asyncio
+async def test_crop_stats(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from geogent_backend.schemas.field import CropStat
+
+    async def fake_stats(self, min_lon, min_lat, max_lon, max_lat):  # noqa: ANN001, ARG001
+        return [
+            CropStat(crop="winter_common_soft_wheat", parcels=81, total_area_ha=1843.5),
+            CropStat(crop="winter_barley", parcels=48, total_area_ha=588.1),
+        ]
+
+    monkeypatch.setattr(fields_routes.FieldService, "crop_stats", fake_stats)
+
+    r = await client.get(
+        "/api/v1/fields/crop-stats",
+        params={"min_lon": 13.75, "min_lat": 53.20, "max_lon": 14.05, "max_lat": 53.40},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body[0] == {"crop": "winter_common_soft_wheat", "parcels": 81, "total_area_ha": 1843.5}
+    assert len(body) == 2
+
+
+@pytest.mark.asyncio
+async def test_crop_stats_rejects_bad_bbox_params(client: AsyncClient) -> None:
+    r = await client.get(
+        "/api/v1/fields/crop-stats",
+        params={"min_lon": 13.75, "min_lat": -95.0, "max_lon": 14.05, "max_lat": 53.40},
+    )
+    assert r.status_code == 422

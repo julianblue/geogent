@@ -1,0 +1,186 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Save the current map view as a feature named 'Study Area'.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "3bcd3525-1ec4-41cc-beaf-9186f09151e3"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 67,
+            "prompt_tokens": 5557,
+            "total_tokens": 5624,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0018346,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0018346,
+              "upstream_inference_prompt_cost": 0.0016671,
+              "upstream_inference_completions_cost": 0.0001675
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273261-qCeo3soWgmDx2qlRbUCu",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-f0ac-7160-b3f2-e0f950cea3d7-0",
+        "tool_calls": [
+          {
+            "name": "confirm_feature_save",
+            "args": {
+              "name": "Study Area",
+              "geometry_wkt": "POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))"
+            },
+            "id": "tool_confirm_feature_save_CHYv9cq74cxZoqvOv2hZ",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5557,
+          "output_tokens": 67,
+          "total_tokens": 5624,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"ok\": true, \"id\": 4242}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "confirm_feature_save",
+        "id": "1c68dc1d-2035-4b9f-9ff0-2c77664c3d07",
+        "tool_call_id": "tool_confirm_feature_save_CHYv9cq74cxZoqvOv2hZ",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "OK. I've saved the current map view as a feature named 'Study Area' with ID 4242.\n",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 27,
+            "prompt_tokens": 5524,
+            "total_tokens": 5551,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0017247,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0017247,
+              "upstream_inference_prompt_cost": 0.0016572,
+              "upstream_inference_completions_cost": 6.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273264-2zyzoZJVmnzQRb41KJbO",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-ff72-7c63-86bd-404126700733-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5524,
+          "output_tokens": 27,
+          "total_tokens": 5551,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "4879e961-1e51-41b8-8283-f06afcdea41b",
+    "run_id": "019ebc28-fb60-71c1-a798-47ea3dcaa73a",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "b8ee7328-e1b3-4e75-8833-028f8d640d6f"
+  },
+  "created_at": "2026-06-12T14:07:45.026212+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f166681-59a4-6ec3-8003-2b9d73993072",
+    "thread_id": "4879e961-1e51-41b8-8283-f06afcdea41b",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f166681-4f29-6831-8002-a5dcb79b20b4",
+    "thread_id": "4879e961-1e51-41b8-8283-f06afcdea41b",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f166681-59a4-6ec3-8003-2b9d73993072",
+  "parent_checkpoint_id": "1f166681-4f29-6831-8002-a5dcb79b20b4"
+}

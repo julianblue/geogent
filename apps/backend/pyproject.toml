@@ -34,6 +34,12 @@ dev = [
   "ruff>=0.7",
   "mypy>=1.13",
 ]
+# Heavy GDAL-stack deps used only by scripts/ingest_eurocrops.py; kept out of
+# dev so the test/CI environment stays lean. Run with: uv run --group ingest ...
+ingest = [
+  "geopandas>=1.0",
+  "pyogrio>=0.10",
+]
 
 [build-system]
 requires = ["hatchling"]

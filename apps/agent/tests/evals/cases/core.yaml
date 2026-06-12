@@ -38,7 +38,13 @@
     max_steps: 8
 
 - id: features_within_viewport
-  input: "What features are in the current map view? List them by name."
+  # "in your answer" matters: the UI-side list_features_in_viewport tool only
+  # acks (names render in the UI, not the transcript), so naming features in
+  # chat needs the backend features_within path the keywords assert on.
+  # gemini-2.5-flash used to pick the UI tool anyway (was xfail); fixed by the
+  # display-only tool contracts + the UI-routing rule in the system prompt.
+  input: >-
+    What features are in the current map view? Name each one in your answer.
   configurable:
     map_state:
       viewport:
@@ -170,10 +176,9 @@
 
 - id: buffer_then_save_eiffel
   # Hardest chain (geocode -> buffer -> confirm_feature_save, with an interrupt).
-  # gemini-2.5-flash is flaky here: it often buffers then drops the save step,
-  # ending with an empty message. Tracked as a known weakness rather than a
-  # red CI gate; stronger models complete it (it then xpasses).
-  xfail: "gemini-2.5-flash flaky on the 3-tool save chain"
+  # gemini-2.5-flash used to drop the save step (was xfail); fixed by the
+  # multi-step completion rule in the system prompt. Re-add xfail if it
+  # re-flakes — and re-measure with experiment.py --repetitions first.
   input: >-
     Save a 500-meter buffer around the Eiffel Tower as a new feature named
     'Eiffel buffer'.
@@ -187,3 +192,38 @@
         name: {equals: "Eiffel buffer"}
     max_steps: 14
     final_contains_any: ["saved", "eiffel buffer", "buffer"]
+
+# --- EuroCrops parcel queries (deterministic backend-stub data, Brandenburg) -
+# The stub serves canned Uckermark-style parcels with real HCAT crop names;
+# locally, ingest the committed sample via scripts/ingest_eurocrops.py for the
+# same shape of answers from the real backend.
+
+- id: crops_grown_in_viewport
+  input: >-
+    What crops are grown in the current map view, and roughly how many hectares
+    of each? Name the dominant crop.
+  configurable:
+    map_state:
+      viewport:
+        longitude: 13.9
+        latitude: 53.3
+        zoom: 11
+        bounds: {west: 13.75, south: 53.20, east: 14.05, north: 53.40}
+  expect:
+    tools_required: [crop_stats_within_bbox]
+    max_steps: 8
+    final_contains_any: ["wheat"]
+
+- id: wheat_parcels_in_viewport
+  input: "Find the wheat parcels in the current map view and list them."
+  configurable:
+    map_state:
+      viewport:
+        longitude: 13.9
+        latitude: 53.3
+        zoom: 11
+        bounds: {west: 13.75, south: 53.20, east: 14.05, north: 53.40}
+  expect:
+    tools_required: [fields_within_bbox]
+    max_steps: 8
+    final_contains_any: ["DEBBNF0000201", "DEBBNF0000202", "wheat"]

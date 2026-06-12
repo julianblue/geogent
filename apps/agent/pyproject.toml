@@ -34,6 +34,8 @@ dev = [
   "langgraph-sdk>=0.1.50",
   "fastapi>=0.115",
   "uvicorn>=0.32",
+  "agentevals>=0.0.8",
+  "openevals>=0.0.19",
 ]
 
 [build-system]

@@ -1,0 +1,201 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "What crops are grown in the current map view, and roughly how many hectares of each? Name the dominant crop.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "2580bff6-8e27-4703-8096-dcd591f3f066"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 23,
+            "prompt_tokens": 5567,
+            "total_tokens": 5590,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0017276,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0017276,
+              "upstream_inference_prompt_cost": 0.0016701,
+              "upstream_inference_completions_cost": 5.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273324-tQ26wJT9RF9NKCwgCMwJ",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc29-ea17-7e60-83e4-87fedada6bef-0",
+        "tool_calls": [
+          {
+            "name": "crop_stats_within_bbox",
+            "args": {
+              "max_lon": 14.05,
+              "min_lon": 13.75,
+              "max_lat": 53.4,
+              "min_lat": 53.2
+            },
+            "id": "tool_crop_stats_within_bbox_kt4yjZvUeXmbVGTcPKcV",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5567,
+          "output_tokens": 23,
+          "total_tokens": 5590,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "[{\"crop\": \"winter_common_soft_wheat\", \"parcels\": 81, \"total_area_ha\": 1843.5}, {\"crop\": \"pasture_meadow_grassland_grass\", \"parcels\": 147, \"total_area_ha\": 1210.4}, {\"crop\": \"winter_rapeseed_rape\", \"parcels\": 40, \"total_area_ha\": 612.3}, {\"crop\": \"winter_barley\", \"parcels\": 48, \"total_area_ha\": 588.1}, {\"crop\": \"green_silo_maize\", \"parcels\": 10, \"total_area_ha\": 142.7}, {\"crop\": \"sugar_beet\", \"parcels\": 11, \"total_area_ha\": 95.2}]",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "crop_stats_within_bbox",
+        "id": "20d72af1-e3e6-46fa-bbe7-f5fc729b3f3a",
+        "tool_call_id": "tool_crop_stats_within_bbox_kt4yjZvUeXmbVGTcPKcV",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "In the current map view, the following crops are grown:\n\n*   **Winter Common Soft Wheat**: 81 parcels, totaling approximately 1843.5 hectares.\n*   **Pasture/Meadow/Grassland Grass**: 147 parcels, totaling approximately 1210.4 hectares.\n*   **Winter Rapeseed/Rape**: 40 parcels, totaling approximately 612.3 hectares.\n*   **Winter Barley**: 48 parcels, totaling approximately 588.1 hectares.\n*   **Green Silo Maize**: 10 parcels, totaling approximately 142.7 hectares.\n*   **Sugar Beet**: 11 parcels, totaling approximately 95.2 hectares.\n\nThe dominant crop in this area is Winter Common Soft Wheat.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 174,
+            "prompt_tokens": 5701,
+            "total_tokens": 5875,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0021453,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0021453,
+              "upstream_inference_prompt_cost": 0.0017103,
+              "upstream_inference_completions_cost": 0.000435
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273325-n4QfPqRyxuKlOBaNYg5g",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc29-ed84-7572-ab7a-ec6b6c782105-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5701,
+          "output_tokens": 174,
+          "total_tokens": 5875,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "map_state": {
+      "viewport": {
+        "longitude": 13.9,
+        "latitude": 53.3,
+        "zoom": 11,
+        "bounds": {
+          "west": 13.75,
+          "south": 53.2,
+          "east": 14.05,
+          "north": 53.4
+        }
+      }
+    },
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "13b5b340-2e22-44ec-9ca1-e92a473823c7",
+    "run_id": "019ebc29-e629-72a1-a49b-1378f80a67dc",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "97200258-2355-480b-9a73-4230da8f1b24"
+  },
+  "created_at": "2026-06-12T14:08:46.722815+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f166683-a607-668d-8003-32595cd61114",
+    "thread_id": "13b5b340-2e22-44ec-9ca1-e92a473823c7",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f166683-9472-68fc-8002-aa4cbbe5e1de",
+    "thread_id": "13b5b340-2e22-44ec-9ca1-e92a473823c7",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f166683-a607-668d-8003-32595cd61114",
+  "parent_checkpoint_id": "1f166683-9472-68fc-8002-aa4cbbe5e1de"
+}

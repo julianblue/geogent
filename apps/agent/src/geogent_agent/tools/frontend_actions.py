@@ -55,13 +55,22 @@ def add_buffer_layer(distance_meters: float, geometry_wkt: str | None = None) ->
 
 @tool
 def list_features_in_viewport() -> dict:
-    """Ask the UI to render the features currently inside the user's viewport.
+    """Display-only: open an interactive feature-list panel in the user's UI.
 
-    Prefer the server-side `features_within` tool when you need to *read* the
-    list yourself for further reasoning. Use this tool when the user wants to
-    *see* the list as an interactive card with zoom buttons.
+    Returns ONLY an acknowledgement — the feature names and data are never
+    returned to you, so you cannot answer any question with this tool. If the
+    user asks what features are in view (or wants them named, counted, or
+    compared in chat), call the server-side `features_within` tool instead;
+    it returns the actual features to you. Use this tool only when the user
+    explicitly wants an interactive panel with zoom buttons in the UI.
     """
-    return {"queued_feature_list": True}
+    return {
+        "queued_feature_list": True,
+        "note": (
+            "panel queued in the UI; feature data NOT returned to you — "
+            "call features_within if you need the names"
+        ),
+    }
 
 
 @tool

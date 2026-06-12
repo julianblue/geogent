@@ -1,0 +1,183 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "List all the geospatial features saved in the database.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "a33b76e8-6246-4940-99a3-1cef0ba29eff"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 3,
+            "prompt_tokens": 5445,
+            "total_tokens": 5448,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4856,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00032988,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00032988,
+              "upstream_inference_prompt_cost": 0.00032238,
+              "upstream_inference_completions_cost": 7.5e-06
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273228-IQf6aXQWSh0ujXiicooX",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-75b3-7aa2-bc54-ff82f687fef5-0",
+        "tool_calls": [
+          {
+            "name": "list_features",
+            "args": {},
+            "id": "tool_list_features_o5Ylpsc6vrSyIQryC9U8",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5445,
+          "output_tokens": 3,
+          "total_tokens": 5448,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4856
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": [],
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "list_features",
+        "id": "b44ad845-e961-4733-bbcd-6786036979b9",
+        "tool_call_id": "tool_list_features_o5Ylpsc6vrSyIQryC9U8",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "There are no features saved in the database.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 9,
+            "prompt_tokens": 5452,
+            "total_tokens": 5461,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4837,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00035211,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00035211,
+              "upstream_inference_prompt_cost": 0.00032961,
+              "upstream_inference_completions_cost": 2.25e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781273229-nX4K9SpXvOOCXnNrHrFN",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebc28-7a3a-7d63-8c64-7bb3d645a656-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5452,
+          "output_tokens": 9,
+          "total_tokens": 5461,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4837
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "f66116a6-937b-4f03-b7d8-4406aa72631c",
+    "run_id": "019ebc28-71c6-79b3-8ec4-d21bb8b667f9",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "54034607-b6fd-41ba-bb70-a04e2c76f888"
+  },
+  "created_at": "2026-06-12T14:07:10.647791+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f166680-11c9-63b7-8003-c1b41ad78c74",
+    "thread_id": "f66116a6-937b-4f03-b7d8-4406aa72631c",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f166680-0a09-6db7-8002-715cbc916276",
+    "thread_id": "f66116a6-937b-4f03-b7d8-4406aa72631c",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f166680-11c9-63b7-8003-c1b41ad78c74",
+  "parent_checkpoint_id": "1f166680-0a09-6db7-8002-715cbc916276"
+}
