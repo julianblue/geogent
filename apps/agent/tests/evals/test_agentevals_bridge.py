@@ -11,15 +11,18 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from tests.evals.agentevals_bridge import (
     build_reference_trajectory,
     extract_graph_trajectory,
     make_final_answer_scorer,
     reference_tool_names,
+    score_graph_steps,
     score_trajectory_match,
     to_openai_messages,
 )
-from tests.evals.dataset import load_cases
+from tests.evals.dataset import EvalCase, load_cases
 from tests.evals.report import score_case
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -133,6 +136,43 @@ def test_reference_trajectory_is_well_formed() -> None:
     calls = messages[1]["tool_calls"]
     assert [c["function"]["name"] for c in calls] == ["geocode_place"]
     assert messages[-1]["role"] == "assistant"
+
+
+# --- golden graph steps (strict match) -----------------------------------------
+
+PARIS_STEPS = [["__start__", "agent", "tools", "agent", "tools", "agent"]]
+
+
+def _case_with_steps(steps: list[list[str]] | None) -> EvalCase:
+    return EvalCase.from_dict(
+        {"id": "steps_case", "input": "x", "expect": {"graph_steps": steps} if steps else {}}
+    )
+
+
+def test_graph_steps_strict_match_pass_and_fail() -> None:
+    good = _load("paris_fly_to.json")
+    assert score_graph_steps(good, _case_with_steps(PARIS_STEPS)).score == 1
+    res = score_graph_steps(good, _case_with_steps([["__start__", "agent"]]))
+    assert res.score == 0
+    assert "expected" in res.reason
+
+
+def test_graph_steps_without_constraint_passes() -> None:
+    assert score_graph_steps(_load("paris_fly_to.json"), _case_with_steps(None)).score == 1
+
+
+def test_graph_steps_yaml_validation_fails_loudly() -> None:
+    with pytest.raises(ValueError, match="graph_steps"):
+        EvalCase.from_dict(
+            {"id": "bad", "input": "x", "expect": {"graph_steps": ["agent", "tools"]}}
+        )
+
+
+def test_score_case_includes_graph_steps_only_when_pinned() -> None:
+    good = _load("paris_fly_to.json")
+    assert "graph_steps" not in score_case(PARIS_CASE, good).scores
+    pinned = _case_with_steps(PARIS_STEPS)
+    assert score_case(pinned, good).scores["graph_steps"].score == 1
 
 
 # --- LLM-judge plumbing (stubbed, offline) -------------------------------------

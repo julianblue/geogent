@@ -1,0 +1,186 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Buffer POINT(-122.42 37.77) by 1000 meters and show me the resulting geometry.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c1895d18-070e-4c37-b6a6-edfad41498d0"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 4449,
+            "total_tokens": 4475,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3947,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00033401,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00033401,
+              "upstream_inference_prompt_cost": 0.00026901,
+              "upstream_inference_completions_cost": 6.5e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260675-2Q0G2YhesnqeeGvNFIBq",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-ea6a-77a1-a8e5-86dcd4c064f9-0",
+        "tool_calls": [
+          {
+            "name": "buffer_geometry",
+            "args": {
+              "distance_m": 1000,
+              "geometry_wkt": "POINT(-122.42 37.77)"
+            },
+            "id": "tool_buffer_geometry_snJYNeXOJ6A7apSjsdHz",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4449,
+          "output_tokens": 26,
+          "total_tokens": 4475,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3947
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "BUFFERED(POINT(-122.42 37.77), 1000.0m)",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "buffer_geometry",
+        "id": "6825142d-9d6e-4202-8a7f-cd862a010e83",
+        "tool_call_id": "tool_buffer_geometry_snJYNeXOJ6A7apSjsdHz",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The buffered geometry is BUFFERED(POINT(-122.42 37.77), 1000.0m).",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 31,
+            "prompt_tokens": 4506,
+            "total_tokens": 4537,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3934,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00036712,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00036712,
+              "upstream_inference_prompt_cost": 0.00028962,
+              "upstream_inference_completions_cost": 7.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260676-qgO1MfT90gPENgtk0jKH",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-ef09-7ae1-8a9c-9ba1baef1f30-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4506,
+          "output_tokens": 31,
+          "total_tokens": 4537,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3934
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb68-e674-7701-9871-f6157e38736f",
+    "thread_id": "1aba87ad-11a8-4d05-83fb-8d63051311c2",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "d7cae290-3900-4ff7-b1b7-458592cfc0d0"
+  },
+  "created_at": "2026-06-12T10:37:58.356292+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ac-75ce-6501-8003-84d41ae3ccaf",
+    "thread_id": "1aba87ad-11a8-4d05-83fb-8d63051311c2",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ac-6737-6f62-8002-08204bb9fc9f",
+    "thread_id": "1aba87ad-11a8-4d05-83fb-8d63051311c2",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ac-75ce-6501-8003-84d41ae3ccaf",
+  "parent_checkpoint_id": "1f1664ac-6737-6f62-8002-08204bb9fc9f"
+}

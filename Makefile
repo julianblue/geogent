@@ -7,7 +7,7 @@
         dev-backend dev-agent dev-ui \
         fmt fmt-py fmt-ts \
         lint lint-py lint-ts \
-        test test-backend test-agent test-ui \
+        test test-backend test-agent test-ui eval-sync eval-experiment \
         migrate revision agent-migrate seed-user \
         clean
 
@@ -128,6 +128,14 @@ test-agent:
 
 test-ui:
 	cd apps/ui && pnpm test --if-present
+
+# Agent eval extras (see apps/agent/tests/evals/README.md). Both need
+# LANGSMITH_API_KEY; eval-experiment also needs OPENROUTER_API_KEY.
+eval-sync:
+	cd apps/agent && uv run python -m tests.evals.langsmith_dataset
+
+eval-experiment:
+	cd apps/agent && uv run python -m tests.evals.experiment
 
 clean:
 	rm -rf apps/backend/.pytest_cache apps/agent/.pytest_cache

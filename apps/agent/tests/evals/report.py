@@ -14,7 +14,11 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from tests.evals.agentevals_bridge import FinalAnswerJudge, score_trajectory_match
+from tests.evals.agentevals_bridge import (
+    FinalAnswerJudge,
+    score_graph_steps,
+    score_trajectory_match,
+)
 from tests.evals.dataset import EvalCase
 from tests.evals.scorers import (
     ScoreResult,
@@ -24,7 +28,15 @@ from tests.evals.scorers import (
     score_trajectory_length,
 )
 
-SCORER_NAMES = ("tool_selection", "args", "length", "final", "trajectory_match", "final_judge")
+SCORER_NAMES = (
+    "tool_selection",
+    "args",
+    "length",
+    "final",
+    "trajectory_match",
+    "graph_steps",
+    "final_judge",
+)
 
 
 @dataclass(frozen=True)
@@ -65,6 +77,8 @@ def score_case(
         "final": score_final_answer(trajectory, e.final_contains_any),
         "trajectory_match": score_trajectory_match(trajectory, case),
     }
+    if e.graph_steps is not None:
+        scores["graph_steps"] = score_graph_steps(trajectory, case)
     # The judge covers exactly the gap the deterministic final check leaves:
     # cases whose free-form output has no stable keyword to assert on.
     if judge is not None and not e.final_contains_any:

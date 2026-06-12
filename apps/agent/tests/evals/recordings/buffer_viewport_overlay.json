@@ -1,0 +1,199 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Buffer the current view by 500 meters and add it as an overlay.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "a49066bb-cac4-404f-b7bc-a9a7c5f78f7c"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 68,
+            "prompt_tokens": 4545,
+            "total_tokens": 4613,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0015335,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0015335,
+              "upstream_inference_prompt_cost": 0.0013635,
+              "upstream_inference_completions_cost": 0.00017
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260669-lX3QB1hh3rvhBJEBKrjY",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-d13e-71e3-a912-9c5607f5dccd-0",
+        "tool_calls": [
+          {
+            "name": "add_buffer_layer",
+            "args": {
+              "geometry_wkt": "POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))",
+              "distance_meters": 500
+            },
+            "id": "tool_add_buffer_layer_aEm88R1jR0ZzH9uJJ2wW",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4545,
+          "output_tokens": 68,
+          "total_tokens": 4613,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"queued_overlay\": true, \"distance_m\": 500.0, \"geometry_wkt\": \"POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add_buffer_layer",
+        "id": "c785f587-4053-436a-9dca-84ce4762373f",
+        "tool_call_id": "tool_add_buffer_layer_aEm88R1jR0ZzH9uJJ2wW",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "I've added a 500-meter buffer around the current viewport as an overlay on the map.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 23,
+            "prompt_tokens": 4685,
+            "total_tokens": 4708,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.001463,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.001463,
+              "upstream_inference_prompt_cost": 0.0014055,
+              "upstream_inference_completions_cost": 5.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260670-xixgciWW9GIHHoheylSp",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-d4a9-7b62-bbc1-66d8dd703547-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4685,
+          "output_tokens": 23,
+          "total_tokens": 4708,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "map_state": {
+      "viewport": {
+        "longitude": 2.349,
+        "latitude": 48.864,
+        "zoom": 12,
+        "bounds": {
+          "west": 2.2,
+          "south": 48.8,
+          "east": 2.5,
+          "north": 48.93
+        }
+      }
+    },
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb68-cd43-74b0-94b2-234f7264bf93",
+    "thread_id": "28748f82-ec59-4781-84f5-1540ba5f419b",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "41fd727b-3e34-4306-b78c-6b487a5603f1"
+  },
+  "created_at": "2026-06-12T10:37:51.746537+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ac-36c5-6396-8003-f0ee398c5621",
+    "thread_id": "28748f82-ec59-4781-84f5-1540ba5f419b",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ac-26d6-6704-8002-8dc493990415",
+    "thread_id": "28748f82-ec59-4781-84f5-1540ba5f419b",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ac-36c5-6396-8003-f0ee398c5621",
+  "parent_checkpoint_id": "1f1664ac-26d6-6704-8002-8dc493990415"
+}

@@ -1,0 +1,205 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Find the most recent low-cloud Sentinel-2 scene within the bounding box [2.25, 48.80, 2.42, 48.90] (Paris). Tell me its item id.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "35ad749e-6b9a-4a39-94a2-e5256d93e041"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 36,
+            "prompt_tokens": 4469,
+            "total_tokens": 4505,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0014307,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0014307,
+              "upstream_inference_prompt_cost": 0.0013407,
+              "upstream_inference_completions_cost": 9e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260690-VHVgYX4pDeMiapC5VO1J",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-24a3-76d1-9c78-0ca5e3aa57e9-0",
+        "tool_calls": [
+          {
+            "name": "stac_search",
+            "args": {
+              "bbox": [
+                2.25,
+                48.8,
+                2.42,
+                48.9
+              ],
+              "sortby": [
+                {
+                  "field": "properties.datetime",
+                  "direction": "desc"
+                }
+              ],
+              "query": {
+                "eo:cloud_cover": {
+                  "lt": 20
+                }
+              },
+              "limit": 1,
+              "collections": [
+                "sentinel-2-l2a"
+              ]
+            },
+            "id": "tool_stac_search_1kOHrZW1cfhVLqsEvOVl",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4469,
+          "output_tokens": 36,
+          "total_tokens": 4505,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "[{\"id\": \"S2B_31UDQ_20260527_0_L2A\", \"collection\": \"sentinel-2-l2a\", \"bbox\": [1.614286, 48.657929, 2.979134, 49.652712], \"properties\": {\"platform\": \"sentinel-2b\", \"constellation\": \"sentinel-2\", \"instruments\": [\"msi\"], \"eo:cloud_cover\": 0.00289, \"proj:epsg\": 32631, \"datetime\": \"2026-05-27T11:07:19.332000Z\"}, \"asset_keys\": [\"aot\", \"aot-jp2\", \"blue\", \"blue-jp2\", \"cloud\", \"coastal\", \"coastal-jp2\", \"granule_metadata\", \"green\", \"green-jp2\", \"nir\", \"nir-jp2\", \"nir08\", \"nir08-jp2\", \"nir09\", \"nir09-jp2\", \"product_metadata\", \"red\", \"red-jp2\", \"rededge1\", \"rededge1-jp2\", \"rededge2\", \"rededge2-jp2\", \"rededge3\", \"rededge3-jp2\", \"scl\", \"scl-jp2\", \"snow\", \"swir16\", \"swir16-jp2\", \"swir22\", \"swir22-jp2\", \"thumbnail\", \"tileinfo_metadata\", \"visual\", \"visual-jp2\", \"wvp\", \"wvp-jp2\"]}]",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "stac_search",
+        "id": "878abd2d-def8-49df-b945-4fea87191f19",
+        "tool_call_id": "tool_stac_search_1kOHrZW1cfhVLqsEvOVl",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The most recent low-cloud Sentinel-2 scene within the bounding box is S2B_31UDQ_20260527_0_L2A.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 39,
+            "prompt_tokens": 4740,
+            "total_tokens": 4779,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3854,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00047892,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00047892,
+              "upstream_inference_prompt_cost": 0.00038142,
+              "upstream_inference_completions_cost": 9.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260692-JS24qtY3XRil17PTwbCq",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-2a40-7890-9bf7-a5745f370c84-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4740,
+          "output_tokens": 39,
+          "total_tokens": 4779,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3854
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb69-20b3-76a0-af57-8a1f80db3b54",
+    "thread_id": "779e56df-76af-4b04-9335-033be90a1e98",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "f53c09e6-9185-4aee-910f-ad821967b481"
+  },
+  "created_at": "2026-06-12T10:38:12.854530+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ad-0012-666d-8003-a8d7c4461b37",
+    "thread_id": "779e56df-76af-4b04-9335-033be90a1e98",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ac-f7bc-60af-8002-2656772875a8",
+    "thread_id": "779e56df-76af-4b04-9335-033be90a1e98",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ad-0012-666d-8003-a8d7c4461b37",
+  "parent_checkpoint_id": "1f1664ac-f7bc-60af-8002-2656772875a8"
+}

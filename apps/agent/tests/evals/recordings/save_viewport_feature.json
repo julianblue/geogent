@@ -1,0 +1,186 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Save the current map view as a feature named 'Study Area'.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "cd465f00-6cd9-4342-ad4c-25363aa74465"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 67,
+            "prompt_tokens": 4541,
+            "total_tokens": 4608,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0015298,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0015298,
+              "upstream_inference_prompt_cost": 0.0013623,
+              "upstream_inference_completions_cost": 0.0001675
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260712-g7LKIQoMAK1hngpJgy8s",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-7b9d-72d2-be5a-b651f3efb9af-0",
+        "tool_calls": [
+          {
+            "name": "confirm_feature_save",
+            "args": {
+              "name": "Study Area",
+              "geometry_wkt": "POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))"
+            },
+            "id": "tool_confirm_feature_save_l6vK6nlVhnbjgMZmQJFo",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4541,
+          "output_tokens": 67,
+          "total_tokens": 4608,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"ok\": true, \"id\": 4242}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "confirm_feature_save",
+        "id": "df4f12d4-4ba9-4549-84ba-932b32dd9483",
+        "tool_call_id": "tool_confirm_feature_save_l6vK6nlVhnbjgMZmQJFo",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "OK. I've saved the current map view as a feature named 'Study Area'.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 4508,
+            "total_tokens": 4526,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0013974,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0013974,
+              "upstream_inference_prompt_cost": 0.0013524,
+              "upstream_inference_completions_cost": 4.5e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260714-IhibaG1owRXrspjf1JL4",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-82c9-7011-81d9-dd9b8afffe51-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4508,
+          "output_tokens": 18,
+          "total_tokens": 4526,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb69-7eb9-7ba1-af25-fbbe9b7630b1",
+    "thread_id": "84158c11-675f-4145-80f0-e46954182cbc",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "34037d6e-c7e4-47e4-821b-36ee108f111e"
+  },
+  "created_at": "2026-06-12T10:38:35.279650+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ad-d5ef-63a3-8003-69777e7190d1",
+    "thread_id": "84158c11-675f-4145-80f0-e46954182cbc",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ad-cffb-6bc3-8002-16fb65698ab6",
+    "thread_id": "84158c11-675f-4145-80f0-e46954182cbc",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ad-d5ef-63a3-8003-69777e7190d1",
+  "parent_checkpoint_id": "1f1664ad-cffb-6bc3-8002-16fb65698ab6"
+}

@@ -23,7 +23,9 @@ Run it with::
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -62,12 +64,27 @@ def _ensure_eval_env() -> None:
         )
 
 
+RECORDINGS_DIR = Path(__file__).resolve().parent / "recordings"
+
+
 @pytest.fixture(scope="module")
 async def trajectories(langgraph_server: str) -> dict[str, dict[str, Any]]:
-    """Run every case once against the live server; share the trajectories."""
+    """Run every case once against the live server; share the trajectories.
+
+    With ``GEOGENT_EVAL_RECORD=1``, each raw trajectory is also written to
+    ``recordings/<case_id>.json``; ``test_replay.py`` re-scores committed
+    recordings offline, so scorer and case changes get regression coverage
+    without a key.
+    """
     out: dict[str, dict[str, Any]] = {}
     for case in CASES:
         out[case.id] = await run_case(langgraph_server, case)
+    if os.getenv("GEOGENT_EVAL_RECORD"):
+        RECORDINGS_DIR.mkdir(exist_ok=True)
+        for case_id, state in out.items():
+            path = RECORDINGS_DIR / f"{case_id}.json"
+            path.write_text(json.dumps(state, indent=2, default=str) + "\n")
+        print(f"\n[evals] recorded {len(out)} trajectories to {RECORDINGS_DIR}")
     return out
 
 

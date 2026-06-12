@@ -1,0 +1,186 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Do POLYGON((0 0,0 2,2 2,2 0,0 0)) and POLYGON((1 1,1 3,3 3,3 1,1 1)) intersect?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "95c7c575-e520-416a-962f-f1ffcda8f631"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 60,
+            "prompt_tokens": 4469,
+            "total_tokens": 4529,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3951,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00042393,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00042393,
+              "upstream_inference_prompt_cost": 0.00027393,
+              "upstream_inference_completions_cost": 0.00015
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260696-d4dtBA4j5X5hEKdpbpXf",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-3d06-70f0-b7cb-4ba4701513e8-0",
+        "tool_calls": [
+          {
+            "name": "geometries_intersect",
+            "args": {
+              "b_wkt": "POLYGON((1 1,1 3,3 3,3 1,1 1))",
+              "a_wkt": "POLYGON((0 0,0 2,2 2,2 0,0 0))"
+            },
+            "id": "tool_geometries_intersect_ifIHx4IlQGgIKvW9g0Z4",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4469,
+          "output_tokens": 60,
+          "total_tokens": 4529,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3951
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "true",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geometries_intersect",
+        "id": "8da55ca8-71ad-4ff6-919b-2a5bd1c4b8b1",
+        "tool_call_id": "tool_geometries_intersect_ifIHx4IlQGgIKvW9g0Z4",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "Yes, the two polygons intersect.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 4535,
+            "total_tokens": 4542,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3941,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00031393,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00031393,
+              "upstream_inference_prompt_cost": 0.00029643,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260698-7JNONcngTNwDq6G9CS8W",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb69-427b-70d1-a511-e11372abc93c-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4535,
+          "output_tokens": 7,
+          "total_tokens": 4542,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3941
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb69-3906-79c2-904c-5838aa9a521a",
+    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "dfb23ab1-f095-4807-9c04-e62d036eacf1"
+  },
+  "created_at": "2026-06-12T10:38:18.761446+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ad-3867-6998-8003-98d2dc49e264",
+    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ad-32f8-66d6-8002-86b92b6dc951",
+    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ad-3867-6998-8003-98d2dc49e264",
+  "parent_checkpoint_id": "1f1664ad-32f8-66d6-8002-86b92b6dc951"
+}

@@ -24,6 +24,7 @@ import os
 from collections.abc import Callable, Iterable
 from typing import Any
 
+from agentevals.graph_trajectory.strict import graph_trajectory_strict_match
 from agentevals.trajectory.match import create_trajectory_match_evaluator
 from agentevals.types import GraphTrajectory
 
@@ -185,6 +186,31 @@ def score_trajectory_match(trajectory: dict[str, Any], case: EvalCase) -> ScoreR
         1 if passed else 0,
         f"agentevals superset match {'passed' if passed else 'failed'}: "
         f"required {required}, invoked {invoked}",
+    )
+
+
+def score_graph_steps(trajectory: dict[str, Any], case: EvalCase) -> ScoreResult:
+    """1 iff the reconstructed graph steps strictly match the case's golden ones.
+
+    Backed by agentevals' ``graph_trajectory_strict_match``, which compares the
+    ``steps`` field turn by turn. Only meaningful for cases that pin
+    ``expect.graph_steps`` (recorded from stable runs); callers gate on that.
+    """
+    expected = case.expect.graph_steps
+    if expected is None:
+        return ScoreResult(1, "no graph_steps constraint")
+    actual = extract_graph_trajectory(trajectory)
+    result = graph_trajectory_strict_match(
+        outputs=actual,
+        reference_outputs=GraphTrajectory(inputs=[], results=[], steps=expected),
+    )
+    if isinstance(result, list):
+        result = result[0]
+    passed = bool(result.get("score"))
+    return ScoreResult(
+        1 if passed else 0,
+        f"agentevals strict graph-steps match {'passed' if passed else 'failed'}: "
+        f"expected {expected}, actual {actual['steps']}",
     )
 
 

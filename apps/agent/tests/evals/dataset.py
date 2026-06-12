@@ -58,6 +58,9 @@ class Expectation:
     args: dict[str, list[ArgConstraint]] = field(default_factory=dict)
     max_steps: int | None = None
     final_contains_any: list[str] = field(default_factory=list)
+    # Golden per-turn graph node steps (strict match via agentevals). Opt-in:
+    # only pin these after several recorded runs agree, or the live gate flakes.
+    graph_steps: list[list[str]] | None = None
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> Expectation:
@@ -79,11 +82,25 @@ class Expectation:
                     f"tools_required entries must be a tool name or a list of names, got {req!r}"
                 )
 
+        graph_steps = raw.get("graph_steps")
+        if graph_steps is not None and not (
+            isinstance(graph_steps, list)
+            and all(
+                isinstance(turn, list) and all(isinstance(s, str) for s in turn)
+                for turn in graph_steps
+            )
+        ):
+            raise ValueError(
+                f"graph_steps must be a list of per-turn step lists of node names, "
+                f"got {graph_steps!r}"
+            )
+
         return cls(
             tools_required=tools_required,
             args=args,
             max_steps=raw.get("max_steps"),
             final_contains_any=list(raw.get("final_contains_any") or []),
+            graph_steps=[list(turn) for turn in graph_steps] if graph_steps is not None else None,
         )
 
 

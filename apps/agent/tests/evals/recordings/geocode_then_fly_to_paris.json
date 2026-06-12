@@ -1,0 +1,264 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Fly me to Paris, France.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "32110dff-3f05-4635-bdd2-329f30935d91"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 4426,
+            "total_tokens": 4433,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0013453,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0013453,
+              "upstream_inference_prompt_cost": 0.0013278,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260663-fHGW4rmaQQwTRZa9sliJ",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-bb78-71e2-8aed-c67ee3c3b1a7-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "Paris, France"
+            },
+            "id": "tool_geocode_place_YRWfk3i6tjA0qjQgJ3bc",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4426,
+          "output_tokens": 7,
+          "total_tokens": 4433,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 48.8588897, \"lon\": 2.320041, \"display_name\": \"Paris, \u00cele-de-France, France m\u00e9tropolitaine, France\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "0ce5c508-a814-4658-aaa6-53578ebf5edc",
+        "tool_call_id": "tool_geocode_place_YRWfk3i6tjA0qjQgJ3bc",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 4458,
+            "total_tokens": 4465,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0013549,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0013549,
+              "upstream_inference_prompt_cost": 0.0013374,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260666-I0dTBQPfJ3bwd7SH5FNC",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-c46e-7cb0-bb2c-8928bc04b081-0",
+        "tool_calls": [
+          {
+            "name": "fly_to",
+            "args": {
+              "latitude": 48.8588897,
+              "longitude": 2.320041
+            },
+            "id": "tool_fly_to_Eo2XUAqpNIeJ0cQH4eme",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4458,
+          "output_tokens": 7,
+          "total_tokens": 4465,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"flown_to\": [2.320041, 48.8588897], \"zoom\": 12}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "fly_to",
+        "id": "7534c952-dc44-4b1f-ac15-820a3dcde66a",
+        "tool_call_id": "tool_fly_to_Eo2XUAqpNIeJ0cQH4eme",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "I've flown the map to Paris, France.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 11,
+            "prompt_tokens": 4476,
+            "total_tokens": 4487,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3866,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00032648,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00032648,
+              "upstream_inference_prompt_cost": 0.00029898,
+              "upstream_inference_completions_cost": 2.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781260667-Bu6GEPZmtjnVxAUDyYlS",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebb68-c985-7841-b8fd-ed41c55e6e07-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4476,
+          "output_tokens": 11,
+          "total_tokens": 4487,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 3866
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:51889",
+    "run_id": "019ebb68-b666-7f20-8e4b-b9f30ae99b03",
+    "thread_id": "4e9a1982-0909-47cc-91f9-eec0e98141b9",
+    "source": "loop",
+    "step": 5,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "cf13be88-20d1-47a4-9e01-fa3f18d6bddf"
+  },
+  "created_at": "2026-06-12T10:37:48.189016+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1664ac-14d7-6dd4-8005-5e81364e3e64",
+    "thread_id": "4e9a1982-0909-47cc-91f9-eec0e98141b9",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1664ac-0af9-66cd-8004-7b29384b1916",
+    "thread_id": "4e9a1982-0909-47cc-91f9-eec0e98141b9",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1664ac-14d7-6dd4-8005-5e81364e3e64",
+  "parent_checkpoint_id": "1f1664ac-0af9-66cd-8004-7b29384b1916"
+}
