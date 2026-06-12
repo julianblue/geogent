@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "53295274-4270-4864-a7f2-2d4e53a7a6d8"
+        "id": "a8b2104c-f814-4a62-90a9-893d3b92045d"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 13,
-            "prompt_tokens": 4467,
-            "total_tokens": 4480,
+            "prompt_tokens": 5189,
+            "total_tokens": 5202,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,41 +32,41 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0013726,
+            "cost": 0.0015892,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0013726,
-              "upstream_inference_prompt_cost": 0.0013401,
+              "upstream_inference_cost": 0.0015892,
+              "upstream_inference_prompt_cost": 0.0015567,
               "upstream_inference_completions_cost": 3.25e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260706-7XGX0S0uguS6WEDlLaxA",
-          "service_tier": "provisioned",
+          "id": "gen-1781267507-QwXu66tuooITRTOJATXe",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-626d-7e92-8768-fd07efbd6ef0-0",
+        "id": "lc_run--019ebbd1-281a-72e2-bbff-b7afeb50b132-0",
         "tool_calls": [
           {
             "name": "show_sentinel2_scene",
             "args": {
-              "composite": "ndvi",
-              "field_id": 7
+              "field_id": 7,
+              "composite": "ndvi"
             },
-            "id": "tool_show_sentinel2_scene_0X9sbGXdJqvr8CjSEdMI",
+            "id": "tool_show_sentinel2_scene_oNLjFrIqnJUurgDdtwuA",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4467,
+          "input_tokens": 5189,
           "output_tokens": 13,
-          "total_tokens": 4480,
+          "total_tokens": 5202,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -83,8 +83,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "show_sentinel2_scene",
-        "id": "06c65eeb-346a-46b5-9685-96dcc1f5b394",
-        "tool_call_id": "tool_show_sentinel2_scene_0X9sbGXdJqvr8CjSEdMI",
+        "id": "fa508b04-b4e0-4ff2-92fc-18b7ef3ac93e",
+        "tool_call_id": "tool_show_sentinel2_scene_oNLjFrIqnJUurgDdtwuA",
         "artifact": null,
         "status": "success"
       },
@@ -96,8 +96,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 14,
-            "prompt_tokens": 4546,
-            "total_tokens": 4560,
+            "prompt_tokens": 5268,
+            "total_tokens": 5282,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -107,48 +107,48 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3929,
+              "cached_tokens": 4782,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00033797,
+            "cost": 0.00032426,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00033797,
-              "upstream_inference_prompt_cost": 0.00030297,
+              "upstream_inference_cost": 0.00032426,
+              "upstream_inference_prompt_cost": 0.00028926,
               "upstream_inference_completions_cost": 3.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260708-OSFTBnImCjrW9ezWrNJy",
-          "service_tier": "provisioned",
+          "id": "gen-1781267518-eyNzm8bj75ng5NlPMjv6",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-698f-7901-9f94-d6c5a4891ff1-0",
+        "id": "lc_run--019ebbd1-5317-7400-8cc3-abddff36e6ba-0",
         "tool_calls": [
           {
             "name": "zonal_stats_for_field",
             "args": {
-              "index": "ndvi",
-              "field_id": 7
+              "field_id": 7,
+              "index": "ndvi"
             },
-            "id": "tool_zonal_stats_for_field_ZcOlG1H3JJXkExtL5Vim",
+            "id": "tool_zonal_stats_for_field_162vR1U29rBDajTSs68k",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4546,
+          "input_tokens": 5268,
           "output_tokens": 14,
-          "total_tokens": 4560,
+          "total_tokens": 5282,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3929
+            "cache_read": 4782
           },
           "output_token_details": {
             "audio": 0,
@@ -162,8 +162,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "zonal_stats_for_field",
-        "id": "4797cd9d-aae9-4289-920d-ae07fea2cf10",
-        "tool_call_id": "tool_zonal_stats_for_field_ZcOlG1H3JJXkExtL5Vim",
+        "id": "49d8602a-24f0-4d98-a7a7-4bbcd6aafb46",
+        "tool_call_id": "tool_zonal_stats_for_field_162vR1U29rBDajTSs68k",
         "artifact": null,
         "status": "success"
       },
@@ -175,8 +175,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 43,
-            "prompt_tokens": 4661,
-            "total_tokens": 4704,
+            "prompt_tokens": 5383,
+            "total_tokens": 5426,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -186,50 +186,50 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3858,
+              "cached_tokens": 4704,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00046414,
+            "cost": 0.00045232,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00046414,
-              "upstream_inference_prompt_cost": 0.00035664,
+              "upstream_inference_cost": 0.00045232,
+              "upstream_inference_prompt_cost": 0.00034482,
               "upstream_inference_completions_cost": 0.0001075
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260709-JbDDZ00pBppCVEZQVPFC",
+          "id": "gen-1781267530-HDmlYFtHaE7KGHZlzPX0",
           "service_tier": "provisioned",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-6c6c-7b61-80b4-408cbd011966-0",
+        "id": "lc_run--019ebbd1-814d-7b50-9dd7-496e805cc527-0",
         "tool_calls": [
           {
             "name": "seasonal_index_time_series_for_field",
             "args": {
-              "index": "ndvi",
               "end_date": "2025-09-30",
               "field_id": 7,
-              "start_date": "2025-04-01"
+              "start_date": "2025-04-01",
+              "index": "ndvi"
             },
-            "id": "tool_seasonal_index_time_series_for_field_HnPbo4IhfTM5OKptZlho",
+            "id": "tool_seasonal_index_time_series_for_field_lW3gEEZWFpsepgxbdVQN",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4661,
+          "input_tokens": 5383,
           "output_tokens": 43,
-          "total_tokens": 4704,
+          "total_tokens": 5426,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3858
+            "cache_read": 4704
           },
           "output_token_details": {
             "audio": 0,
@@ -243,21 +243,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "seasonal_index_time_series_for_field",
-        "id": "be23cb0b-1a9e-42e5-80cf-215eceb3ca67",
-        "tool_call_id": "tool_seasonal_index_time_series_for_field_HnPbo4IhfTM5OKptZlho",
+        "id": "5d3fa702-11f0-4a0d-afed-6292cadaeb9b",
+        "tool_call_id": "tool_seasonal_index_time_series_for_field_lW3gEEZWFpsepgxbdVQN",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "I've rendered an NDVI composite for field 7 on the map. The scene is from 2026-05-01 with 4.2% cloud cover.\n\nFor the zonal statistics, the NDVI for field 7 on 2026-05-01 has a mean of 0.63, a minimum of 0.11, and a maximum of 0.92. There were 12034 valid pixels and 321 nodata pixels. The histogram shows the distribution of NDVI values.\n\nThe seasonal NDVI time series for field 7 from 2025-04-01 to 2025-09-30 shows two data points:\n- On 2025-04-12, the mean NDVI was 0.51 with 6.1% cloud cover.\n- On 2025-09-20, the mean NDVI was 0.68 with 3.8% cloud cover.",
+        "content": "I've rendered an NDVI composite for field 7 on the map. The scene is from 2026-05-01 with 4.2% cloud cover.\n\nFor the same field, the zonal statistics for the NDVI composite are:\n*   **Mean NDVI:** 0.63\n*   **Min NDVI:** 0.11\n*   **Max NDVI:** 0.92\n*   **Standard Deviation:** 0.17\n*   **Valid Pixels:** 12034\n\nHere's the seasonal NDVI time series for field 7 between 2025-04-01 and 2025-09-30:\n*   **2025-04-12:** Mean NDVI: 0.51 (cloud cover: 6.1%)\n*   **2025-09-20:** Mean NDVI: 0.68 (cloud cover: 3.8%)",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 225,
-            "prompt_tokens": 4919,
-            "total_tokens": 5144,
+            "completion_tokens": 218,
+            "prompt_tokens": 5641,
+            "total_tokens": 5859,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -267,38 +267,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4573,
+              "cached_tokens": 5425,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00080349,
+            "cost": 0.00077255,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00080349,
-              "upstream_inference_prompt_cost": 0.00024099,
-              "upstream_inference_completions_cost": 0.0005625
+              "upstream_inference_cost": 0.00077255,
+              "upstream_inference_prompt_cost": 0.00022755,
+              "upstream_inference_completions_cost": 0.000545
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260710-LyEicw3JUUHubElMPKmW",
+          "id": "gen-1781267531-fIsshxFKxjMivtC7Jmn8",
           "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-718d-7801-b3f7-108cefbbe0f8-0",
+        "id": "lc_run--019ebbd1-86ec-72f2-9326-5b63e5ec1611-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4919,
-          "output_tokens": 225,
-          "total_tokens": 5144,
+          "input_tokens": 5641,
+          "output_tokens": 218,
+          "total_tokens": 5859,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4573
+            "cache_read": 5425
           },
           "output_token_details": {
             "audio": 0,
@@ -320,27 +320,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51889",
-    "run_id": "019ebb69-6577-7780-96cf-081749858886",
-    "thread_id": "e13b23ca-e548-48ba-b504-fe18ce4970ac",
+    "langgraph_api_url": "http://127.0.0.1:45515",
+    "thread_id": "ec6c9651-89a1-4bb1-a00b-83053051e19c",
+    "run_id": "019ebbd1-4f0d-75e3-8127-dc0c67f78144",
     "source": "loop",
     "step": 7,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "250dc27c-f6c7-4596-89d0-4e440b27509a"
+    "langgraph_request_id": "505a5e60-67f9-400d-aadb-5c5a95346d4a"
   },
-  "created_at": "2026-06-12T10:38:31.808587+00:00",
+  "created_at": "2026-06-12T12:32:13.328642+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1664ad-b4d4-6f4a-8007-6dbe9f9f6a43",
-    "thread_id": "e13b23ca-e548-48ba-b504-fe18ce4970ac",
+    "checkpoint_id": "1f1665ab-d3ea-6a78-8007-3c9928b923b6",
+    "thread_id": "ec6c9651-89a1-4bb1-a00b-83053051e19c",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1664ad-a5dc-636c-8006-0edb97e22899",
-    "thread_id": "e13b23ca-e548-48ba-b504-fe18ce4970ac",
+    "checkpoint_id": "1f1665ab-c211-6a5b-8006-2a0ab66b67b7",
+    "thread_id": "ec6c9651-89a1-4bb1-a00b-83053051e19c",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1664ad-b4d4-6f4a-8007-6dbe9f9f6a43",
-  "parent_checkpoint_id": "1f1664ad-a5dc-636c-8006-0edb97e22899"
+  "checkpoint_id": "1f1665ab-d3ea-6a78-8007-3c9928b923b6",
+  "parent_checkpoint_id": "1f1665ab-c211-6a5b-8006-2a0ab66b67b7"
 }

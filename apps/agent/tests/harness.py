@@ -83,6 +83,47 @@ def build_backend_stub() -> FastAPI:
     def list_features() -> list[dict]:
         return list(state["features"])  # type: ignore[arg-type]
 
+    # Canned EuroCrops-style parcels (Brandenburg/Uckermark flavor) so the
+    # crop-query tools have deterministic data; crop names use the real HCAT
+    # vocabulary the ingest script imports.
+    parcels_fixture = [
+        {"id": 201, "name": "DE-BB DEBBNF0000201", "crop": "winter_common_soft_wheat", "season": "2023"},
+        {"id": 202, "name": "DE-BB DEBBNF0000202", "crop": "winter_common_soft_wheat", "season": "2023"},
+        {"id": 203, "name": "DE-BB DEBBNF0000203", "crop": "winter_rapeseed_rape", "season": "2023"},
+        {"id": 204, "name": "DE-BB DEBBNF0000204", "crop": "winter_barley", "season": "2023"},
+        {"id": 205, "name": "DE-BB DEBBNF0000205", "crop": "pasture_meadow_grassland_grass", "season": "2023"},
+        {"id": 206, "name": "DE-BB DEBBNF0000206", "crop": "green_silo_maize", "season": "2023"},
+        {"id": 207, "name": "DE-BB DEBBNF0000207", "crop": "sugar_beet", "season": "2023"},
+    ]
+
+    @app.get("/api/v1/fields")
+    def list_fields() -> list[dict]:
+        return [{"id": 7, "name": "North Forty", "crop": "corn", "season": "2026"}, *parcels_fixture]
+
+    @app.get("/api/v1/fields/in-bbox")
+    def fields_in_bbox(
+        min_lon: float,
+        min_lat: float,
+        max_lon: float,
+        max_lat: float,
+        crop: str | None = None,
+        limit: int | None = None,
+    ) -> list[dict]:
+        rows = [p for p in parcels_fixture if crop is None or crop.lower() in p["crop"]]
+        return rows[: limit or len(rows)]
+
+    @app.get("/api/v1/fields/crop-stats")
+    def crop_stats(min_lon: float, min_lat: float, max_lon: float, max_lat: float) -> list[dict]:
+        # Ordered by area, dominant crop first — same contract as the backend.
+        return [
+            {"crop": "winter_common_soft_wheat", "parcels": 81, "total_area_ha": 1843.5},
+            {"crop": "pasture_meadow_grassland_grass", "parcels": 147, "total_area_ha": 1210.4},
+            {"crop": "winter_rapeseed_rape", "parcels": 40, "total_area_ha": 612.3},
+            {"crop": "winter_barley", "parcels": 48, "total_area_ha": 588.1},
+            {"crop": "green_silo_maize", "parcels": 10, "total_area_ha": 142.7},
+            {"crop": "sugar_beet", "parcels": 11, "total_area_ha": 95.2},
+        ]
+
     @app.post("/api/v1/analytics/buffer")
     def buffer(payload: dict) -> dict:
         wkt = payload.get("geometry_wkt", "")

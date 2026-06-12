@@ -38,7 +38,14 @@
     max_steps: 8
 
 - id: features_within_viewport
-  input: "What features are in the current map view? List them by name."
+  # "in your answer" matters: the UI-side list_features_in_viewport tool only
+  # acks (names render in the UI, not the transcript), so naming features in
+  # chat needs the backend features_within path the keywords assert on.
+  # gemini-2.5-flash often picks the UI tool anyway and then can't name
+  # anything — tracked as a known weakness; stronger models xpass.
+  xfail: "gemini-2.5-flash prefers the UI listing tool, then can't name features in chat"
+  input: >-
+    What features are in the current map view? Name each one in your answer.
   configurable:
     map_state:
       viewport:
@@ -187,3 +194,38 @@
         name: {equals: "Eiffel buffer"}
     max_steps: 14
     final_contains_any: ["saved", "eiffel buffer", "buffer"]
+
+# --- EuroCrops parcel queries (deterministic backend-stub data, Brandenburg) -
+# The stub serves canned Uckermark-style parcels with real HCAT crop names;
+# locally, ingest the committed sample via scripts/ingest_eurocrops.py for the
+# same shape of answers from the real backend.
+
+- id: crops_grown_in_viewport
+  input: >-
+    What crops are grown in the current map view, and roughly how many hectares
+    of each? Name the dominant crop.
+  configurable:
+    map_state:
+      viewport:
+        longitude: 13.9
+        latitude: 53.3
+        zoom: 11
+        bounds: {west: 13.75, south: 53.20, east: 14.05, north: 53.40}
+  expect:
+    tools_required: [crop_stats_within_bbox]
+    max_steps: 8
+    final_contains_any: ["wheat"]
+
+- id: wheat_parcels_in_viewport
+  input: "Find the wheat parcels in the current map view and list them."
+  configurable:
+    map_state:
+      viewport:
+        longitude: 13.9
+        latitude: 53.3
+        zoom: 11
+        bounds: {west: 13.75, south: 53.20, east: 14.05, north: 53.40}
+  expect:
+    tools_required: [fields_within_bbox]
+    max_steps: 8
+    final_contains_any: ["DEBBNF0000201", "DEBBNF0000202", "wheat"]

@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "1dd6aa82-9623-49f3-9232-7261d3105bee"
+        "id": "d81ad611-f0a7-492d-91c6-6df61da1f49d"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 7,
-            "prompt_tokens": 4442,
-            "total_tokens": 4449,
+            "prompt_tokens": 5164,
+            "total_tokens": 5171,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,47 +28,47 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 0,
+              "cached_tokens": 4801,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0013501,
+            "cost": 0.00027043,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0013501,
-              "upstream_inference_prompt_cost": 0.0013326,
+              "upstream_inference_cost": 0.00027043,
+              "upstream_inference_prompt_cost": 0.00025293,
               "upstream_inference_completions_cost": 1.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260716-9DNfaflxdh8qOsx2ipNQ",
-          "service_tier": "default",
+          "id": "gen-1781267538-UAZrdLpxlFLfNIGQyayY",
+          "service_tier": "provisioned",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-8933-7951-91a5-e506ff891ee6-0",
+        "id": "lc_run--019ebbd1-a0f8-7a83-b7a4-98f3909f265a-0",
         "tool_calls": [
           {
             "name": "geocode_place",
             "args": {
               "query": "Eiffel Tower"
             },
-            "id": "tool_geocode_place_FGyvAw188RVACUeX6IvA",
+            "id": "tool_geocode_place_rEIQ7et8CdcmFrrSX4Bc",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4442,
+          "input_tokens": 5164,
           "output_tokens": 7,
-          "total_tokens": 4449,
+          "total_tokens": 5171,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 0
+            "cache_read": 4801
           },
           "output_token_details": {
             "audio": 0,
@@ -82,8 +82,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "geocode_place",
-        "id": "4a5da74d-0431-451c-8445-097b093b42be",
-        "tool_call_id": "tool_geocode_place_FGyvAw188RVACUeX6IvA",
+        "id": "76ecf238-b978-41ed-9d38-c0b915bc0271",
+        "tool_call_id": "tool_geocode_place_rEIQ7et8CdcmFrrSX4Bc",
         "artifact": null,
         "status": "success"
       },
@@ -95,8 +95,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 34,
-            "prompt_tokens": 4508,
-            "total_tokens": 4542,
+            "prompt_tokens": 5230,
+            "total_tokens": 5264,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -106,48 +106,48 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3921,
+              "cached_tokens": 4773,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00037873,
+            "cost": 0.00036529,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00037873,
-              "upstream_inference_prompt_cost": 0.00029373,
+              "upstream_inference_cost": 0.00036529,
+              "upstream_inference_prompt_cost": 0.00028029,
               "upstream_inference_completions_cost": 8.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260717-Ab51xKXUKuiQ97fHsuZW",
-          "service_tier": "default",
+          "id": "gen-1781267539-vDKPi39RjXYkSZSqr8Oz",
+          "service_tier": "provisioned",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-8d05-7f73-b769-5602250b170e-0",
+        "id": "lc_run--019ebbd1-a47b-7f20-8685-57ed4a5f6c20-0",
         "tool_calls": [
           {
             "name": "buffer_geometry",
             "args": {
-              "geometry_wkt": "POINT(2.2945006 48.8582599)",
-              "distance_m": 500
+              "distance_m": 500,
+              "geometry_wkt": "POINT(2.2945006 48.8582599)"
             },
-            "id": "tool_buffer_geometry_ceyNjaifut0fhxd2Nkt3",
+            "id": "tool_buffer_geometry_Nvn0nArgi2rC9r5F1rko",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4508,
+          "input_tokens": 5230,
           "output_tokens": 34,
-          "total_tokens": 4542,
+          "total_tokens": 5264,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3921
+            "cache_read": 4773
           },
           "output_token_details": {
             "audio": 0,
@@ -161,8 +161,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "buffer_geometry",
-        "id": "a8666bc6-2211-4773-82ff-3372ee3518d2",
-        "tool_call_id": "tool_buffer_geometry_ceyNjaifut0fhxd2Nkt3",
+        "id": "6ba7475d-d6d1-4b73-9d7e-daca9f49a397",
+        "tool_call_id": "tool_buffer_geometry_Nvn0nArgi2rC9r5F1rko",
         "artifact": null,
         "status": "success"
       },
@@ -173,9 +173,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 270,
-            "prompt_tokens": 4580,
-            "total_tokens": 4850,
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -185,117 +185,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3912,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00099276,
+            "cost": 0,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00099276,
-              "upstream_inference_prompt_cost": 0.00031776,
-              "upstream_inference_completions_cost": 0.000675
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260718-TYycmW5jHJ9ayGnsrhoX",
+          "id": "gen-1781267540-V8ojh0dkJeMDqw1AY2fh",
           "service_tier": "default",
-          "finish_reason": "tool_calls",
+          "finish_reason": "error",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-9055-7c82-a907-6b824f5d193b-0",
-        "tool_calls": [
-          {
-            "name": "confirm_feature_save",
-            "args": {
-              "geometry_wkt": "POLYGON ((2.288411912030613 48.858259900000005, 2.2884720000000003 48.85379, 2.2945006 48.853299999999995, 2.3005292 48.85379, 2.3005894 48.858259900000005, 2.3005292 48.86273, 2.2945006 48.86322, 2.2884720000000003 48.86273, 2.288411912030613 48.858259900000005))",
-              "name": "Eiffel buffer"
-            },
-            "id": "tool_confirm_feature_save_7s9gR3efUUv3JE7LpukD",
-            "type": "tool_call"
-          }
-        ],
-        "invalid_tool_calls": [],
-        "usage_metadata": {
-          "input_tokens": 4580,
-          "output_tokens": 270,
-          "total_tokens": 4850,
-          "input_token_details": {
-            "audio": 0,
-            "cache_read": 3912
-          },
-          "output_token_details": {
-            "audio": 0,
-            "reasoning": 0
-          }
-        }
-      },
-      {
-        "content": "{\"ok\": true, \"id\": 4242}",
-        "additional_kwargs": {},
-        "response_metadata": {},
-        "type": "tool",
-        "name": "confirm_feature_save",
-        "id": "bfbda4b2-8e66-4017-a627-eb866d1964b1",
-        "tool_call_id": "tool_confirm_feature_save_7s9gR3efUUv3JE7LpukD",
-        "artifact": null,
-        "status": "success"
-      },
-      {
-        "content": "I've saved a 500-meter buffer around the Eiffel Tower as a new feature named 'Eiffel buffer'. It has been assigned ID 4242.",
-        "additional_kwargs": {
-          "refusal": null
-        },
-        "response_metadata": {
-          "token_usage": {
-            "completion_tokens": 37,
-            "prompt_tokens": 4859,
-            "total_tokens": 4896,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": null,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": null,
-              "image_tokens": 0
-            },
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 4728,
-              "cache_write_tokens": 0,
-              "video_tokens": 0
-            },
-            "cost": 0.00027364,
-            "is_byok": false,
-            "cost_details": {
-              "upstream_inference_cost": 0.00027364,
-              "upstream_inference_prompt_cost": 0.00018114,
-              "upstream_inference_completions_cost": 9.25e-05
-            }
-          },
-          "model_provider": "openai",
-          "model_name": "google/gemini-2.5-flash",
-          "system_fingerprint": null,
-          "id": "gen-1781260721-cpV5YyQ4FK1Bg6MnYH9y",
-          "service_tier": "default",
-          "finish_reason": "stop",
-          "logprobs": null
-        },
-        "type": "ai",
-        "name": null,
-        "id": "lc_run--019ebb69-9df3-7822-9e2a-36323d91e2eb-0",
+        "id": "lc_run--019ebbd1-a83d-7a43-b6f8-cdda5de5262a-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4859,
-          "output_tokens": 37,
-          "total_tokens": 4896,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "total_tokens": 0,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4728
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -317,27 +238,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51889",
-    "run_id": "019ebb69-99e2-7233-b275-62db3109011e",
-    "thread_id": "7daafbaa-03c2-4210-bf5b-49f605d6855c",
+    "langgraph_api_url": "http://127.0.0.1:45515",
+    "thread_id": "67433200-d7ce-4315-9239-9b3efd175d2c",
+    "run_id": "019ebbd1-9d07-73d0-87db-c62f5f48f22e",
     "source": "loop",
-    "step": 7,
+    "step": 5,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "ac89a39d-dd9a-4c2c-9a05-9928e3ef5806"
+    "langgraph_request_id": "40d7b7a0-6be8-47e7-b5aa-ecfb4305cf4b"
   },
-  "created_at": "2026-06-12T10:38:43.772307+00:00",
+  "created_at": "2026-06-12T12:37:43.043238+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1664ae-26ed-6416-8007-5fa02b07a599",
-    "thread_id": "7daafbaa-03c2-4210-bf5b-49f605d6855c",
+    "checkpoint_id": "1f1665b8-1c51-6f07-8005-35fa4c9c6602",
+    "thread_id": "67433200-d7ce-4315-9239-9b3efd175d2c",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1664ae-1248-6000-8006-e02a388301ef",
-    "thread_id": "7daafbaa-03c2-4210-bf5b-49f605d6855c",
+    "checkpoint_id": "1f1665ac-1360-6b9e-8004-5d1c2276db54",
+    "thread_id": "67433200-d7ce-4315-9239-9b3efd175d2c",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1664ae-26ed-6416-8007-5fa02b07a599",
-  "parent_checkpoint_id": "1f1664ae-1248-6000-8006-e02a388301ef"
+  "checkpoint_id": "1f1665b8-1c51-6f07-8005-35fa4c9c6602",
+  "parent_checkpoint_id": "1f1665ac-1360-6b9e-8004-5d1c2276db54"
 }

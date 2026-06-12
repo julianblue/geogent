@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from geogent_backend.api.deps import DbSession, get_current_user
-from geogent_backend.schemas.field import FieldCreate, FieldRead, FieldUpdate
+from geogent_backend.schemas.field import CropStat, FieldCreate, FieldRead, FieldUpdate
 from geogent_backend.services.field_service import FieldService
 
 # Unlike /features (GET is open for the agent), every field route is auth-gated.
@@ -21,8 +21,25 @@ async def fields_in_bbox(
     min_lat: float = Query(..., ge=-90, le=90),
     max_lon: float = Query(..., ge=-180, le=180),
     max_lat: float = Query(..., ge=-90, le=90),
+    crop: str | None = Query(None, max_length=255, description="case-insensitive substring"),
+    limit: int | None = Query(None, ge=1, le=1000),
 ) -> list[FieldRead]:
-    return await FieldService(session).fields_in_bbox(min_lon, min_lat, max_lon, max_lat)
+    return await FieldService(session).fields_in_bbox(
+        min_lon, min_lat, max_lon, max_lat, crop=crop, limit=limit
+    )
+
+
+# Declared before /{field_id} for the same reason as /in-bbox.
+@router.get("/crop-stats", response_model=list[CropStat])
+async def crop_stats(
+    session: DbSession,
+    min_lon: float = Query(..., ge=-180, le=180),
+    min_lat: float = Query(..., ge=-90, le=90),
+    max_lon: float = Query(..., ge=-180, le=180),
+    max_lat: float = Query(..., ge=-90, le=90),
+) -> list[CropStat]:
+    """Per-crop parcel count + hectares for fields overlapping the bbox."""
+    return await FieldService(session).crop_stats(min_lon, min_lat, max_lon, max_lat)
 
 
 @router.post("", response_model=FieldRead, status_code=201)

@@ -2,12 +2,12 @@
   "values": {
     "messages": [
       {
-        "content": "Buffer POINT(-122.42 37.77) by 1000 meters and show me the resulting geometry.",
+        "content": "Find the wheat parcels in the current map view and list them.",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "3e40194e-79d7-429a-992a-384c2bd8c74b"
+        "id": "35efae9d-3d58-4923-bd4b-c1584901ff14"
       },
       {
         "content": "",
@@ -16,9 +16,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 26,
-            "prompt_tokens": 5171,
-            "total_tokens": 5197,
+            "completion_tokens": 23,
+            "prompt_tokens": 5263,
+            "total_tokens": 5286,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,41 +32,44 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0016163,
+            "cost": 0.0016364,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0016163,
-              "upstream_inference_prompt_cost": 0.0015513,
-              "upstream_inference_completions_cost": 6.5e-05
+              "upstream_inference_cost": 0.0016364,
+              "upstream_inference_prompt_cost": 0.0015789,
+              "upstream_inference_completions_cost": 5.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267476-1ohlOzSrUePL30zJXHNn",
-          "service_tier": "provisioned",
+          "id": "gen-1781267867-Li91pbB0A8lBWN8N2oWJ",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-af17-7603-92aa-5688ef49ed08-0",
+        "id": "lc_run--019ebbd6-a7e6-71e3-995c-e268a78633e6-0",
         "tool_calls": [
           {
-            "name": "buffer_geometry",
+            "name": "fields_within_bbox",
             "args": {
-              "distance_m": 1000,
-              "geometry_wkt": "POINT(-122.42 37.77)"
+              "max_lon": 14.05,
+              "min_lat": 53.2,
+              "crop": "wheat",
+              "max_lat": 53.4,
+              "min_lon": 13.75
             },
-            "id": "tool_buffer_geometry_Kg1uMGl2sNBuZK4DEaqO",
+            "id": "tool_fields_within_bbox_ocmWGhnbGKFpugBsjDlg",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5171,
-          "output_tokens": 26,
-          "total_tokens": 5197,
+          "input_tokens": 5263,
+          "output_tokens": 23,
+          "total_tokens": 5286,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -78,26 +81,26 @@
         }
       },
       {
-        "content": "BUFFERED(POINT(-122.42 37.77), 1000.0m)",
+        "content": "[{\"id\": 201, \"name\": \"DE-BB DEBBNF0000201\", \"crop\": \"winter_common_soft_wheat\", \"season\": \"2023\"}, {\"id\": 202, \"name\": \"DE-BB DEBBNF0000202\", \"crop\": \"winter_common_soft_wheat\", \"season\": \"2023\"}]",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "tool",
-        "name": "buffer_geometry",
-        "id": "837dcc99-9f55-457d-81b8-258a12963ea7",
-        "tool_call_id": "tool_buffer_geometry_Kg1uMGl2sNBuZK4DEaqO",
+        "name": "fields_within_bbox",
+        "id": "c08cced5-a691-4fb8-8be2-251c54e7ccbc",
+        "tool_call_id": "tool_fields_within_bbox_ocmWGhnbGKFpugBsjDlg",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "The buffered geometry is BUFFERED(POINT(-122.42 37.77), 1000.0m).",
+        "content": "I found two wheat parcels in the current map view: \"DE-BB DEBBNF0000201\" and \"DE-BB DEBBNF0000202\". They are both winter common soft wheat from the 2023 season.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 31,
-            "prompt_tokens": 5228,
-            "total_tokens": 5259,
+            "completion_tokens": 60,
+            "prompt_tokens": 5352,
+            "total_tokens": 5412,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -107,38 +110,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4787,
+              "cached_tokens": 4772,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00035341,
+            "cost": 0.00046716,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00035341,
-              "upstream_inference_prompt_cost": 0.00027591,
-              "upstream_inference_completions_cost": 7.75e-05
+              "upstream_inference_cost": 0.00046716,
+              "upstream_inference_prompt_cost": 0.00031716,
+              "upstream_inference_completions_cost": 0.00015
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267477-a5ZeLWB1ZtnEQrVeoFtF",
+          "id": "gen-1781267868-AY3RezIzzB78jKJlumSG",
           "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-b230-7342-8ab7-8563498fd363-0",
+        "id": "lc_run--019ebbd6-ab75-7d41-8209-165c1fc64988-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5228,
-          "output_tokens": 31,
-          "total_tokens": 5259,
+          "input_tokens": 5352,
+          "output_tokens": 60,
+          "total_tokens": 5412,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4787
+            "cache_read": 4772
           },
           "output_token_details": {
             "audio": 0,
@@ -151,6 +154,19 @@
   "next": [],
   "tasks": [],
   "metadata": {
+    "map_state": {
+      "viewport": {
+        "longitude": 13.9,
+        "latitude": 53.3,
+        "zoom": 11,
+        "bounds": {
+          "west": 13.75,
+          "south": 53.2,
+          "east": 14.05,
+          "north": 53.4
+        }
+      }
+    },
     "graph_id": "geogent",
     "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
     "user_id": "",
@@ -161,26 +177,26 @@
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
     "langgraph_api_url": "http://127.0.0.1:45515",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
-    "run_id": "019ebbd0-ab29-7560-b25a-cbcb1bafaa69",
+    "thread_id": "44a57691-d4bf-4f2d-90c1-08ac303ec4a5",
+    "run_id": "019ebbd6-a3f1-7390-b1e0-d228e7cac65e",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "0ddbd693-fdaa-4106-8b43-b54195be915a"
+    "langgraph_request_id": "efecf14b-6839-4434-8245-507cc6ef7848"
   },
-  "created_at": "2026-06-12T12:31:17.882373+00:00",
+  "created_at": "2026-06-12T12:37:49.420383+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1665a9-c323-6c96-8003-2c5df341803d",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
+    "checkpoint_id": "1f1665b8-5923-6212-8003-c148f049e7c2",
+    "thread_id": "44a57691-d4bf-4f2d-90c1-08ac303ec4a5",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1665a9-bab5-6134-8002-30f612dd4273",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
+    "checkpoint_id": "1f1665b8-503a-67e4-8002-7de9ea07f902",
+    "thread_id": "44a57691-d4bf-4f2d-90c1-08ac303ec4a5",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1665a9-c323-6c96-8003-2c5df341803d",
-  "parent_checkpoint_id": "1f1665a9-bab5-6134-8002-30f612dd4273"
+  "checkpoint_id": "1f1665b8-5923-6212-8003-c148f049e7c2",
+  "parent_checkpoint_id": "1f1665b8-503a-67e4-8002-7de9ea07f902"
 }

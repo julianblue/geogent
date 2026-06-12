@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "95c7c575-e520-416a-962f-f1ffcda8f631"
+        "id": "b3f40299-744f-4b86-b2bc-42fcaab30475"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 60,
-            "prompt_tokens": 4469,
-            "total_tokens": 4529,
+            "prompt_tokens": 5191,
+            "total_tokens": 5251,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,48 +28,48 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3951,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00042393,
+            "cost": 0.0017073,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00042393,
-              "upstream_inference_prompt_cost": 0.00027393,
+              "upstream_inference_cost": 0.0017073,
+              "upstream_inference_prompt_cost": 0.0015573,
               "upstream_inference_completions_cost": 0.00015
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260696-d4dtBA4j5X5hEKdpbpXf",
-          "service_tier": "provisioned",
+          "id": "gen-1781267499-KrqrqgjbGe7R4ycFtSYz",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-3d06-70f0-b7cb-4ba4701513e8-0",
+        "id": "lc_run--019ebbd1-0948-7522-8ab0-5ceab8289d8f-0",
         "tool_calls": [
           {
             "name": "geometries_intersect",
             "args": {
-              "b_wkt": "POLYGON((1 1,1 3,3 3,3 1,1 1))",
-              "a_wkt": "POLYGON((0 0,0 2,2 2,2 0,0 0))"
+              "a_wkt": "POLYGON((0 0,0 2,2 2,2 0,0 0))",
+              "b_wkt": "POLYGON((1 1,1 3,3 3,3 1,1 1))"
             },
-            "id": "tool_geometries_intersect_ifIHx4IlQGgIKvW9g0Z4",
+            "id": "tool_geometries_intersect_FzGtEgTNGKwaT3pXdDIJ",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4469,
+          "input_tokens": 5191,
           "output_tokens": 60,
-          "total_tokens": 4529,
+          "total_tokens": 5251,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3951
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -83,8 +83,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "geometries_intersect",
-        "id": "8da55ca8-71ad-4ff6-919b-2a5bd1c4b8b1",
-        "tool_call_id": "tool_geometries_intersect_ifIHx4IlQGgIKvW9g0Z4",
+        "id": "de9769ae-213e-4e78-91ef-45439bc41aa0",
+        "tool_call_id": "tool_geometries_intersect_FzGtEgTNGKwaT3pXdDIJ",
         "artifact": null,
         "status": "success"
       },
@@ -96,8 +96,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 7,
-            "prompt_tokens": 4535,
-            "total_tokens": 4542,
+            "prompt_tokens": 5257,
+            "total_tokens": 5264,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -107,38 +107,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3941,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00031393,
+            "cost": 0.0015946,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00031393,
-              "upstream_inference_prompt_cost": 0.00029643,
+              "upstream_inference_cost": 0.0015946,
+              "upstream_inference_prompt_cost": 0.0015771,
               "upstream_inference_completions_cost": 1.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260698-7JNONcngTNwDq6G9CS8W",
-          "service_tier": "provisioned",
+          "id": "gen-1781267500-X5uOl7InouGTdApoJJGT",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-427b-70d1-a511-e11372abc93c-0",
+        "id": "lc_run--019ebbd1-0c69-74d1-8e2f-dd36d8d698a0-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4535,
+          "input_tokens": 5257,
           "output_tokens": 7,
-          "total_tokens": 4542,
+          "total_tokens": 5264,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3941
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -160,27 +160,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51889",
-    "run_id": "019ebb69-3906-79c2-904c-5838aa9a521a",
-    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "langgraph_api_url": "http://127.0.0.1:45515",
+    "thread_id": "72120226-2a67-467f-9426-8dca35d8eb5b",
+    "run_id": "019ebbd1-0554-7d71-bde4-555639cb179a",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "dfb23ab1-f095-4807-9c04-e62d036eacf1"
+    "langgraph_request_id": "d1f9a6a1-b901-4c70-a26f-1c53e2368b3d"
   },
-  "created_at": "2026-06-12T10:38:18.761446+00:00",
+  "created_at": "2026-06-12T12:31:43.437175+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1664ad-3867-6998-8003-98d2dc49e264",
-    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "checkpoint_id": "1f1665aa-b6d9-670d-8003-4fab1c236689",
+    "thread_id": "72120226-2a67-467f-9426-8dca35d8eb5b",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1664ad-32f8-66d6-8002-86b92b6dc951",
-    "thread_id": "879bfbbd-d8f7-4dee-962e-aa11747e084b",
+    "checkpoint_id": "1f1665aa-96f1-693a-8002-6a7a2d9785f4",
+    "thread_id": "72120226-2a67-467f-9426-8dca35d8eb5b",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1664ad-3867-6998-8003-98d2dc49e264",
-  "parent_checkpoint_id": "1f1664ad-32f8-66d6-8002-86b92b6dc951"
+  "checkpoint_id": "1f1665aa-b6d9-670d-8003-4fab1c236689",
+  "parent_checkpoint_id": "1f1665aa-96f1-693a-8002-6a7a2d9785f4"
 }

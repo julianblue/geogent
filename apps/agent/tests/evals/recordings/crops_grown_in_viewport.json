@@ -2,12 +2,12 @@
   "values": {
     "messages": [
       {
-        "content": "Buffer the current view by 500 meters and add it as an overlay.",
+        "content": "What crops are grown in the current map view, and roughly how many hectares of each? Name the dominant crop.",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "b89c17c3-3f60-4bf3-a225-3144ff9dab4d"
+        "id": "912bf745-dfad-4173-b92a-a81a3a8c786d"
       },
       {
         "content": "",
@@ -16,9 +16,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 68,
-            "prompt_tokens": 5267,
-            "total_tokens": 5335,
+            "completion_tokens": 23,
+            "prompt_tokens": 5273,
+            "total_tokens": 5296,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,41 +32,43 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0017501,
+            "cost": 0.0016394,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0017501,
-              "upstream_inference_prompt_cost": 0.0015801,
-              "upstream_inference_completions_cost": 0.00017
+              "upstream_inference_cost": 0.0016394,
+              "upstream_inference_prompt_cost": 0.0015819,
+              "upstream_inference_completions_cost": 5.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267471-Itmvj5YjbpJaBlS81yIP",
-          "service_tier": "provisioned",
+          "id": "gen-1781267864-7it2vKfDgJWlCrJrgNIh",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-99a9-76b0-a21f-19e4ef041faa-0",
+        "id": "lc_run--019ebbd6-9a1f-7e43-a2b2-f04d67a0921b-0",
         "tool_calls": [
           {
-            "name": "add_buffer_layer",
+            "name": "crop_stats_within_bbox",
             "args": {
-              "geometry_wkt": "POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))",
-              "distance_meters": 500
+              "max_lat": 53.4,
+              "min_lon": 13.75,
+              "max_lon": 14.05,
+              "min_lat": 53.2
             },
-            "id": "tool_add_buffer_layer_uKboXddmGX2Azg6OcyBt",
+            "id": "tool_crop_stats_within_bbox_pmnbZshj9RYrlNDKdzYH",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5267,
-          "output_tokens": 68,
-          "total_tokens": 5335,
+          "input_tokens": 5273,
+          "output_tokens": 23,
+          "total_tokens": 5296,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -78,26 +80,26 @@
         }
       },
       {
-        "content": "{\"queued_overlay\": true, \"distance_m\": 500.0, \"geometry_wkt\": \"POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))\"}",
+        "content": "[{\"crop\": \"winter_common_soft_wheat\", \"parcels\": 81, \"total_area_ha\": 1843.5}, {\"crop\": \"pasture_meadow_grassland_grass\", \"parcels\": 147, \"total_area_ha\": 1210.4}, {\"crop\": \"winter_rapeseed_rape\", \"parcels\": 40, \"total_area_ha\": 612.3}, {\"crop\": \"winter_barley\", \"parcels\": 48, \"total_area_ha\": 588.1}, {\"crop\": \"green_silo_maize\", \"parcels\": 10, \"total_area_ha\": 142.7}, {\"crop\": \"sugar_beet\", \"parcels\": 11, \"total_area_ha\": 95.2}]",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "tool",
-        "name": "add_buffer_layer",
-        "id": "eb4c195d-6a4a-427e-b34c-e1a99a28624d",
-        "tool_call_id": "tool_add_buffer_layer_uKboXddmGX2Azg6OcyBt",
+        "name": "crop_stats_within_bbox",
+        "id": "3d6715c0-1ef1-4157-afbe-5883f75ca043",
+        "tool_call_id": "tool_crop_stats_within_bbox_pmnbZshj9RYrlNDKdzYH",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "I've added a 500-meter buffer around the current viewport as an overlay on the map.",
+        "content": "In the current map view, the following crops are grown:\n\n*   **Winter Common Soft Wheat**: 81 parcels, totaling approximately 1843.5 hectares.\n*   **Pasture/Meadow/Grassland Grass**: 147 parcels, totaling approximately 1210.4 hectares.\n*   **Winter Rapeseed/Rape**: 40 parcels, totaling approximately 612.3 hectares.\n*   **Winter Barley**: 48 parcels, totaling approximately 588.1 hectares.\n*   **Green Silo Maize**: 10 parcels, totaling approximately 142.7 hectares.\n*   **Sugar Beet**: 11 parcels, totaling approximately 95.2 hectares.\n\nThe dominant crop in this area is Winter Common Soft Wheat.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 23,
+            "completion_tokens": 174,
             "prompt_tokens": 5407,
-            "total_tokens": 5430,
+            "total_tokens": 5581,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -107,38 +109,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4816,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00037928,
+            "cost": 0.0020571,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00037928,
-              "upstream_inference_prompt_cost": 0.00032178,
-              "upstream_inference_completions_cost": 5.75e-05
+              "upstream_inference_cost": 0.0020571,
+              "upstream_inference_prompt_cost": 0.0016221,
+              "upstream_inference_completions_cost": 0.000435
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267471-G1KIwjqRiccDoDyRHhHk",
+          "id": "gen-1781267865-wqORtdZvEAzOheCA5E9o",
           "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-9e33-7d00-a2c9-2a3621daa646-0",
+        "id": "lc_run--019ebbd6-9e2a-7cb0-9f11-ba4b0da1fa64-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
           "input_tokens": 5407,
-          "output_tokens": 23,
-          "total_tokens": 5430,
+          "output_tokens": 174,
+          "total_tokens": 5581,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4816
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -153,14 +155,14 @@
   "metadata": {
     "map_state": {
       "viewport": {
-        "longitude": 2.349,
-        "latitude": 48.864,
-        "zoom": 12,
+        "longitude": 13.9,
+        "latitude": 53.3,
+        "zoom": 11,
         "bounds": {
-          "west": 2.2,
-          "south": 48.8,
-          "east": 2.5,
-          "north": 48.93
+          "west": 13.75,
+          "south": 53.2,
+          "east": 14.05,
+          "north": 53.4
         }
       }
     },
@@ -174,26 +176,26 @@
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
     "langgraph_api_url": "http://127.0.0.1:45515",
-    "thread_id": "ddd58953-1f05-451e-94b6-6583da7d1e14",
-    "run_id": "019ebbd0-95b7-78d1-89ac-75545402beff",
+    "thread_id": "2fb63ace-99cb-4a1b-8d6b-b2ff3a50a57f",
+    "run_id": "019ebbd6-9631-7681-96ae-33c4a2f1f7c7",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "e8c6a6dd-58f6-4819-b651-1eea82a9d178"
+    "langgraph_request_id": "b78d52d3-9bc8-44de-a5d5-7c1391095a0f"
   },
-  "created_at": "2026-06-12T12:31:12.696868+00:00",
+  "created_at": "2026-06-12T12:37:46.568272+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1665a9-91af-6dde-8003-a79e19fb060e",
-    "thread_id": "ddd58953-1f05-451e-94b6-6583da7d1e14",
+    "checkpoint_id": "1f1665b8-3def-6f8d-8003-e1035a810173",
+    "thread_id": "2fb63ace-99cb-4a1b-8d6b-b2ff3a50a57f",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1665a9-89e6-6097-8002-fb915986d048",
-    "thread_id": "ddd58953-1f05-451e-94b6-6583da7d1e14",
+    "checkpoint_id": "1f1665b8-2fcc-63a1-8002-8bff0cc217ce",
+    "thread_id": "2fb63ace-99cb-4a1b-8d6b-b2ff3a50a57f",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1665a9-91af-6dde-8003-a79e19fb060e",
-  "parent_checkpoint_id": "1f1665a9-89e6-6097-8002-fb915986d048"
+  "checkpoint_id": "1f1665b8-3def-6f8d-8003-e1035a810173",
+  "parent_checkpoint_id": "1f1665b8-2fcc-63a1-8002-8bff0cc217ce"
 }

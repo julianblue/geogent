@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "bc5081d0-da51-4fa5-8354-35e133973668"
+        "id": "962d5be8-66a4-49cf-b007-630c5c6f4029"
       },
       {
         "content": "",
@@ -17,8 +17,86 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 7,
-            "prompt_tokens": 4437,
-            "total_tokens": 4444,
+            "prompt_tokens": 5159,
+            "total_tokens": 5166,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4800,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0002692,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0002692,
+              "upstream_inference_prompt_cost": 0.0002517,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781267479-PUVPBLC4Bb8Aro2PqIsM",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ebbd0-b994-76c0-92ca-75e820342a7f-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "Paris, France"
+            },
+            "id": "tool_geocode_place_cayBCYp7SsyeEMFX4rya",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 5159,
+          "output_tokens": 7,
+          "total_tokens": 5166,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 4800
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 48.8534951, \"lon\": 2.3483915, \"display_name\": \"Paris, \u00cele-de-France, France m\u00e9tropolitaine, France\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "ad19a304-dd0a-4c61-ba40-e81544b494ee",
+        "tool_call_id": "tool_geocode_place_cayBCYp7SsyeEMFX4rya",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 5191,
+            "total_tokens": 5198,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,121 +110,43 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0013486,
+            "cost": 0.0015748,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0013486,
-              "upstream_inference_prompt_cost": 0.0013311,
+              "upstream_inference_cost": 0.0015748,
+              "upstream_inference_prompt_cost": 0.0015573,
               "upstream_inference_completions_cost": 1.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260679-hUBUbSqzASvKoOTxOS8z",
+          "id": "gen-1781267479-EhFdG7XZtlVeIXSmLqz5",
           "service_tier": "provisioned",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb68-f8ef-7171-8632-dc9ced811722-0",
-        "tool_calls": [
-          {
-            "name": "geocode_place",
-            "args": {
-              "query": "Paris, France"
-            },
-            "id": "tool_geocode_place_3YPVHyxLT1yebu3djt4D",
-            "type": "tool_call"
-          }
-        ],
-        "invalid_tool_calls": [],
-        "usage_metadata": {
-          "input_tokens": 4437,
-          "output_tokens": 7,
-          "total_tokens": 4444,
-          "input_token_details": {
-            "audio": 0,
-            "cache_read": 0
-          },
-          "output_token_details": {
-            "audio": 0,
-            "reasoning": 0
-          }
-        }
-      },
-      {
-        "content": "{\"lat\": 48.8588897, \"lon\": 2.320041, \"display_name\": \"Paris, \u00cele-de-France, France m\u00e9tropolitaine, France\"}",
-        "additional_kwargs": {},
-        "response_metadata": {},
-        "type": "tool",
-        "name": "geocode_place",
-        "id": "84b076e1-6071-47e7-9256-24868d9a1af6",
-        "tool_call_id": "tool_geocode_place_3YPVHyxLT1yebu3djt4D",
-        "artifact": null,
-        "status": "success"
-      },
-      {
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        },
-        "response_metadata": {
-          "token_usage": {
-            "completion_tokens": 7,
-            "prompt_tokens": 4469,
-            "total_tokens": 4476,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": null,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": null,
-              "image_tokens": 0
-            },
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 3914,
-              "cache_write_tokens": 0,
-              "video_tokens": 0
-            },
-            "cost": 0.00030142,
-            "is_byok": false,
-            "cost_details": {
-              "upstream_inference_cost": 0.00030142,
-              "upstream_inference_prompt_cost": 0.00028392,
-              "upstream_inference_completions_cost": 1.75e-05
-            }
-          },
-          "model_provider": "openai",
-          "model_name": "google/gemini-2.5-flash",
-          "system_fingerprint": null,
-          "id": "gen-1781260680-7j6aHGhLVP0w5keQyS0G",
-          "service_tier": "default",
-          "finish_reason": "tool_calls",
-          "logprobs": null
-        },
-        "type": "ai",
-        "name": null,
-        "id": "lc_run--019ebb68-fb6c-7f10-96b0-e2ecc5cec594-0",
+        "id": "lc_run--019ebbd0-bd58-7021-b660-664e483dfdb0-0",
         "tool_calls": [
           {
             "name": "geocode_place",
             "args": {
               "query": "New York City"
             },
-            "id": "tool_geocode_place_m97cyc6twJ68p9A5ovMD",
+            "id": "tool_geocode_place_yRjd77aM0dKpvtFsSih4",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4469,
+          "input_tokens": 5191,
           "output_tokens": 7,
-          "total_tokens": 4476,
+          "total_tokens": 5198,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3914
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -160,8 +160,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "geocode_place",
-        "id": "93220b60-f1a4-4ec1-b81a-e51717f3afa3",
-        "tool_call_id": "tool_geocode_place_m97cyc6twJ68p9A5ovMD",
+        "id": "546eaccf-7663-4b56-8b36-2d8a70af8536",
+        "tool_call_id": "tool_geocode_place_yRjd77aM0dKpvtFsSih4",
         "artifact": null,
         "status": "success"
       },
@@ -172,9 +172,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 57,
-            "prompt_tokens": 4491,
-            "total_tokens": 4548,
+            "completion_tokens": 58,
+            "prompt_tokens": 5213,
+            "total_tokens": 5271,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -184,48 +184,48 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3880,
+              "cached_tokens": 4729,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0004422,
+            "cost": 0.00043207,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0004422,
-              "upstream_inference_prompt_cost": 0.0002997,
-              "upstream_inference_completions_cost": 0.0001425
+              "upstream_inference_cost": 0.00043207,
+              "upstream_inference_prompt_cost": 0.00028707,
+              "upstream_inference_completions_cost": 0.000145
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260680-xM5boRZPSaofuGXUbd6A",
+          "id": "gen-1781267480-dRQVegQMmHEvvAfvRY1R",
           "service_tier": "provisioned",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb68-fdf3-70a1-b521-edd470b740ac-0",
+        "id": "lc_run--019ebbd0-c0f5-7153-a385-83a5a0901402-0",
         "tool_calls": [
           {
             "name": "distance_between",
             "args": {
               "b_wkt": "POINT(-74.0060152 40.7127281)",
-              "a_wkt": "POINT(2.320041 48.8588897)"
+              "a_wkt": "POINT(2.3483915 48.8534951)"
             },
-            "id": "tool_distance_between_lFLjQhYLJY6FpIX6OaYR",
+            "id": "tool_distance_between_yL7aUPSFmBB4T9H899S9",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4491,
-          "output_tokens": 57,
-          "total_tokens": 4548,
+          "input_tokens": 5213,
+          "output_tokens": 58,
+          "total_tokens": 5271,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3880
+            "cache_read": 4729
           },
           "output_token_details": {
             "audio": 0,
@@ -239,21 +239,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "distance_between",
-        "id": "80bc53c9-4071-41a5-b91f-a60d9d9eac5b",
-        "tool_call_id": "tool_distance_between_lFLjQhYLJY6FpIX6OaYR",
+        "id": "636387de-ba16-4df9-a32c-1bcfe42ee3bd",
+        "tool_call_id": "tool_distance_between_yL7aUPSFmBB4T9H899S9",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "The distance from Paris, France to New York City is 4123456.7 meters.",
+        "content": "The distance between Paris, France and New York City is approximately 4123.46 kilometers.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 23,
-            "prompt_tokens": 4561,
-            "total_tokens": 4584,
+            "completion_tokens": 22,
+            "prompt_tokens": 5284,
+            "total_tokens": 5306,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -263,38 +263,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 3873,
+              "cached_tokens": 4721,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00038009,
+            "cost": 0.00036553,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00038009,
-              "upstream_inference_prompt_cost": 0.00032259,
-              "upstream_inference_completions_cost": 5.75e-05
+              "upstream_inference_cost": 0.00036553,
+              "upstream_inference_prompt_cost": 0.00031053,
+              "upstream_inference_completions_cost": 5.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781260681-UKAZwsExO4XMrVlohHRd",
-          "service_tier": "default",
+          "id": "gen-1781267481-aeCPcvz0IE3ASFuyLGmz",
+          "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebb69-00e2-7062-93f9-f088fd8b9fe2-0",
+        "id": "lc_run--019ebbd0-c4c6-7fa3-bc29-525e5729c4de-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 4561,
-          "output_tokens": 23,
-          "total_tokens": 4584,
+          "input_tokens": 5284,
+          "output_tokens": 22,
+          "total_tokens": 5306,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 3873
+            "cache_read": 4721
           },
           "output_token_details": {
             "audio": 0,
@@ -316,27 +316,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51889",
-    "run_id": "019ebb68-f4f9-7c62-ac18-4c20ff37874c",
-    "thread_id": "71e91726-c5b5-462d-a889-a18e55c7c868",
+    "langgraph_api_url": "http://127.0.0.1:45515",
+    "thread_id": "2bfeb56e-7b18-46a1-b6c5-b72fa62af6d9",
+    "run_id": "019ebbd0-b5a5-74b1-ae56-9adb53863ba6",
     "source": "loop",
     "step": 7,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "28e01ca7-defd-4111-9cd9-265df64487e4"
+    "langgraph_request_id": "38e6b5a2-bbf6-4a5f-bfa3-31fa7224042e"
   },
-  "created_at": "2026-06-12T10:38:01.972067+00:00",
+  "created_at": "2026-06-12T12:31:22.520190+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1664ac-9849-6e3e-8007-111f3bedcdff",
-    "thread_id": "71e91726-c5b5-462d-a889-a18e55c7c868",
+    "checkpoint_id": "1f1665a9-ef5e-6951-8007-b9d7634ed682",
+    "thread_id": "2bfeb56e-7b18-46a1-b6c5-b72fa62af6d9",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1664ac-92c4-62f4-8006-e95280c81dd4",
-    "thread_id": "71e91726-c5b5-462d-a889-a18e55c7c868",
+    "checkpoint_id": "1f1665a9-e805-6571-8006-b349ff9a038c",
+    "thread_id": "2bfeb56e-7b18-46a1-b6c5-b72fa62af6d9",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1664ac-9849-6e3e-8007-111f3bedcdff",
-  "parent_checkpoint_id": "1f1664ac-92c4-62f4-8006-e95280c81dd4"
+  "checkpoint_id": "1f1665a9-ef5e-6951-8007-b9d7634ed682",
+  "parent_checkpoint_id": "1f1665a9-e805-6571-8006-b349ff9a038c"
 }
