@@ -41,9 +41,8 @@
   # "in your answer" matters: the UI-side list_features_in_viewport tool only
   # acks (names render in the UI, not the transcript), so naming features in
   # chat needs the backend features_within path the keywords assert on.
-  # gemini-2.5-flash often picks the UI tool anyway and then can't name
-  # anything — tracked as a known weakness; stronger models xpass.
-  xfail: "gemini-2.5-flash prefers the UI listing tool, then can't name features in chat"
+  # gemini-2.5-flash used to pick the UI tool anyway (was xfail); fixed by the
+  # display-only tool contracts + the UI-routing rule in the system prompt.
   input: >-
     What features are in the current map view? Name each one in your answer.
   configurable:
@@ -177,10 +176,9 @@
 
 - id: buffer_then_save_eiffel
   # Hardest chain (geocode -> buffer -> confirm_feature_save, with an interrupt).
-  # gemini-2.5-flash is flaky here: it often buffers then drops the save step,
-  # ending with an empty message. Tracked as a known weakness rather than a
-  # red CI gate; stronger models complete it (it then xpasses).
-  xfail: "gemini-2.5-flash flaky on the 3-tool save chain"
+  # gemini-2.5-flash used to drop the save step (was xfail); fixed by the
+  # multi-step completion rule in the system prompt. Re-add xfail if it
+  # re-flakes — and re-measure with experiment.py --repetitions first.
   input: >-
     Save a 500-meter buffer around the Eiffel Tower as a new feature named
     'Eiffel buffer'.

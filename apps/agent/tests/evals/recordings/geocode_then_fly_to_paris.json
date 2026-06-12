@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "ae97ec2c-1601-40c9-871e-0866a43f8321"
+        "id": "55191dee-13b9-4c8d-962a-69fe571a3b4d"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 7,
-            "prompt_tokens": 5148,
-            "total_tokens": 5155,
+            "prompt_tokens": 5442,
+            "total_tokens": 5449,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,47 +28,47 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4798,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00026644,
+            "cost": 0.0016501,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00026644,
-              "upstream_inference_prompt_cost": 0.00024894,
+              "upstream_inference_cost": 0.0016501,
+              "upstream_inference_prompt_cost": 0.0016326,
               "upstream_inference_completions_cost": 1.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267464-lgpWAdfqyWizfbc0za2l",
+          "id": "gen-1781273198-ZtXwPfHtOxIl3J9urUYB",
           "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-7e64-7df1-ba49-75d85ecde62a-0",
+        "id": "lc_run--019ebc27-fe56-7790-8db3-c9ebb35cf4f4-0",
         "tool_calls": [
           {
             "name": "geocode_place",
             "args": {
               "query": "Paris, France"
             },
-            "id": "tool_geocode_place_RIzNOEQ4738CPJy3Mhu8",
+            "id": "tool_geocode_place_XWv61calXoDo8VG9lD4d",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5148,
+          "input_tokens": 5442,
           "output_tokens": 7,
-          "total_tokens": 5155,
+          "total_tokens": 5449,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4798
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -82,8 +82,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "geocode_place",
-        "id": "bb959000-41ce-4cdf-8872-4eb7aafa554c",
-        "tool_call_id": "tool_geocode_place_RIzNOEQ4738CPJy3Mhu8",
+        "id": "b088c87c-85b2-4f52-b2ef-27e8b8f8418d",
+        "tool_call_id": "tool_geocode_place_XWv61calXoDo8VG9lD4d",
         "artifact": null,
         "status": "success"
       },
@@ -95,8 +95,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 7,
-            "prompt_tokens": 5180,
-            "total_tokens": 5187,
+            "prompt_tokens": 5474,
+            "total_tokens": 5481,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -106,29 +106,29 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4763,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00028549,
+            "cost": 0.0016597,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00028549,
-              "upstream_inference_prompt_cost": 0.00026799,
+              "upstream_inference_cost": 0.0016597,
+              "upstream_inference_prompt_cost": 0.0016422,
               "upstream_inference_completions_cost": 1.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267468-4rgDOT5Dvo6H0dVdz9iy",
-          "service_tier": "provisioned",
+          "id": "gen-1781273200-7s0p7ydlgelkm81LZvoS",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-8f5e-7841-8da0-d21bea02b604-0",
+        "id": "lc_run--019ebc28-0808-78e2-94ca-df4a9b7d421b-0",
         "tool_calls": [
           {
             "name": "fly_to",
@@ -136,18 +136,18 @@
               "latitude": 48.8534951,
               "longitude": 2.3483915
             },
-            "id": "tool_fly_to_Rs6c2nwHOkySmSaYapGd",
+            "id": "tool_fly_to_EvIjOQRhZKQUldl1cKqq",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5180,
+          "input_tokens": 5474,
           "output_tokens": 7,
-          "total_tokens": 5187,
+          "total_tokens": 5481,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4763
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -161,8 +161,8 @@
         "response_metadata": {},
         "type": "tool",
         "name": "fly_to",
-        "id": "b6dfc04f-d37b-44b3-bdeb-acf80fc717da",
-        "tool_call_id": "tool_fly_to_Rs6c2nwHOkySmSaYapGd",
+        "id": "dcf21cac-d5fa-4033-b4dd-8b8c1d386d00",
+        "tool_call_id": "tool_fly_to_EvIjOQRhZKQUldl1cKqq",
         "artifact": null,
         "status": "success"
       },
@@ -174,8 +174,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 11,
-            "prompt_tokens": 5198,
-            "total_tokens": 5209,
+            "prompt_tokens": 5492,
+            "total_tokens": 5503,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -185,38 +185,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4713,
+              "cached_tokens": 4773,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00031439,
+            "cost": 0.00038639,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00031439,
-              "upstream_inference_prompt_cost": 0.00028689,
+              "upstream_inference_cost": 0.00038639,
+              "upstream_inference_prompt_cost": 0.00035889,
               "upstream_inference_completions_cost": 2.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267469-YosQYmB9DrAyzRLR0JaX",
+          "id": "gen-1781273204-9GffLZa6oIS5VgTn7N7R",
           "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-9296-7b12-890f-989a57123427-0",
+        "id": "lc_run--019ebc28-17ca-7fb1-9b68-47d296e6b39b-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5198,
+          "input_tokens": 5492,
           "output_tokens": 11,
-          "total_tokens": 5209,
+          "total_tokens": 5503,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4713
+            "cache_read": 4773
           },
           "output_token_details": {
             "audio": 0,
@@ -238,27 +238,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:45515",
-    "thread_id": "c3a1601f-a502-4483-bf47-eba1576fdddc",
-    "run_id": "019ebbd0-7783-7be0-8c23-72c01b1080ee",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "1dc4a580-645d-4762-ae0c-075b170db576",
+    "run_id": "019ebc27-f8a8-72f3-a0ab-8a6366fc2b2d",
     "source": "loop",
     "step": 5,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "0482e27a-0449-474e-aaef-f9ecadc088b3"
+    "langgraph_request_id": "b9554072-db72-4c0a-aa1b-9cdf312c7737"
   },
-  "created_at": "2026-06-12T12:31:09.706584+00:00",
+  "created_at": "2026-06-12T14:06:45.572887+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1665a9-752b-65d7-8005-538e196c8f69",
-    "thread_id": "c3a1601f-a502-4483-bf47-eba1576fdddc",
+    "checkpoint_id": "1f16667f-22a7-6342-8005-74c2680327db",
+    "thread_id": "1dc4a580-645d-4762-ae0c-075b170db576",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1665a9-6d86-6fcf-8004-75efd48179f3",
-    "thread_id": "c3a1601f-a502-4483-bf47-eba1576fdddc",
+    "checkpoint_id": "1f16667f-19a7-6e4a-8004-ce0048abef01",
+    "thread_id": "1dc4a580-645d-4762-ae0c-075b170db576",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1665a9-752b-65d7-8005-538e196c8f69",
-  "parent_checkpoint_id": "1f1665a9-6d86-6fcf-8004-75efd48179f3"
+  "checkpoint_id": "1f16667f-22a7-6342-8005-74c2680327db",
+  "parent_checkpoint_id": "1f16667f-19a7-6e4a-8004-ce0048abef01"
 }

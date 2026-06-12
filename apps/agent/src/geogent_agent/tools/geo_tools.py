@@ -205,9 +205,13 @@ async def geometries_intersect(a_wkt: str, b_wkt: str) -> bool:
 
 @tool
 async def features_within(geometry_wkt: str) -> list[dict]:
-    """Features whose geometry is fully inside the given WKT search area.
+    """Features whose geometry is fully inside the given WKT search area —
+    returned TO YOU, so you can name, count, or reason about them in chat.
 
-    Returns a list of ``{id, name}`` references; use ``list_features`` for full
+    This is the right tool whenever the user asks what features are in an
+    area / the current view: build the WKT polygon from the viewport bounds.
+    (`list_features_in_viewport` is display-only and returns no data.) Returns
+    a list of ``{id, name}`` references; use ``list_features`` for full
     geometries and properties.
 
     Args:

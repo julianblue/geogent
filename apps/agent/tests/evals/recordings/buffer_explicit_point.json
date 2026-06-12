@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "3e40194e-79d7-429a-992a-384c2bd8c74b"
+        "id": "5fb2ef8e-8275-4c7c-ad25-49534fdd0587"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 26,
-            "prompt_tokens": 5171,
-            "total_tokens": 5197,
+            "prompt_tokens": 5465,
+            "total_tokens": 5491,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,41 +32,41 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0016163,
+            "cost": 0.0017045,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0016163,
-              "upstream_inference_prompt_cost": 0.0015513,
+              "upstream_inference_cost": 0.0017045,
+              "upstream_inference_prompt_cost": 0.0016395,
               "upstream_inference_completions_cost": 6.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267476-1ohlOzSrUePL30zJXHNn",
-          "service_tier": "provisioned",
+          "id": "gen-1781273212-6ELHMTICRsLflxnBoqvx",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-af17-7603-92aa-5688ef49ed08-0",
+        "id": "lc_run--019ebc28-3628-7462-b9c4-675b028637c2-0",
         "tool_calls": [
           {
             "name": "buffer_geometry",
             "args": {
-              "distance_m": 1000,
-              "geometry_wkt": "POINT(-122.42 37.77)"
+              "geometry_wkt": "POINT(-122.42 37.77)",
+              "distance_m": 1000
             },
-            "id": "tool_buffer_geometry_Kg1uMGl2sNBuZK4DEaqO",
+            "id": "tool_buffer_geometry_cY6VUiPXSpyNB899XxM2",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5171,
+          "input_tokens": 5465,
           "output_tokens": 26,
-          "total_tokens": 5197,
+          "total_tokens": 5491,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -83,21 +83,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "buffer_geometry",
-        "id": "837dcc99-9f55-457d-81b8-258a12963ea7",
-        "tool_call_id": "tool_buffer_geometry_Kg1uMGl2sNBuZK4DEaqO",
+        "id": "470193d5-510e-45b2-86a0-99b9940d5f1f",
+        "tool_call_id": "tool_buffer_geometry_cY6VUiPXSpyNB899XxM2",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "The buffered geometry is BUFFERED(POINT(-122.42 37.77), 1000.0m).",
+        "content": "The buffer of POINT(-122.42 37.77) by 1000 meters is BUFFERED(POINT(-122.42 37.77), 1000.0m).",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 31,
-            "prompt_tokens": 5228,
-            "total_tokens": 5259,
+            "completion_tokens": 53,
+            "prompt_tokens": 5522,
+            "total_tokens": 5575,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -107,38 +107,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4787,
+              "cached_tokens": 4844,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00035341,
+            "cost": 0.00048122,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00035341,
-              "upstream_inference_prompt_cost": 0.00027591,
-              "upstream_inference_completions_cost": 7.75e-05
+              "upstream_inference_cost": 0.00048122,
+              "upstream_inference_prompt_cost": 0.00034872,
+              "upstream_inference_completions_cost": 0.0001325
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781267477-a5ZeLWB1ZtnEQrVeoFtF",
+          "id": "gen-1781273220-miSgn5nUxSiLtWB4fmfe",
           "service_tier": "provisioned",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebbd0-b230-7342-8ab7-8563498fd363-0",
+        "id": "lc_run--019ebc28-5363-7c52-bfcf-e937879587a8-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5228,
-          "output_tokens": 31,
-          "total_tokens": 5259,
+          "input_tokens": 5522,
+          "output_tokens": 53,
+          "total_tokens": 5575,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4787
+            "cache_read": 4844
           },
           "output_token_details": {
             "audio": 0,
@@ -160,27 +160,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:45515",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
-    "run_id": "019ebbd0-ab29-7560-b25a-cbcb1bafaa69",
+    "langgraph_api_url": "http://127.0.0.1:51783",
+    "thread_id": "5fee6876-c6df-4bc9-a68f-3f4c0c65317e",
+    "run_id": "019ebc28-3243-7053-9046-ec5205ae332a",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "0ddbd693-fdaa-4106-8b43-b54195be915a"
+    "langgraph_request_id": "a7ee06bc-3260-48bb-bb05-a2b32d89ba52"
   },
-  "created_at": "2026-06-12T12:31:17.882373+00:00",
+  "created_at": "2026-06-12T14:07:00.730276+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f1665a9-c323-6c96-8003-2c5df341803d",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
+    "checkpoint_id": "1f16667f-b334-68c9-8003-790a864e95e0",
+    "thread_id": "5fee6876-c6df-4bc9-a68f-3f4c0c65317e",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f1665a9-bab5-6134-8002-30f612dd4273",
-    "thread_id": "0e975b63-3494-4ddf-9e17-befbb4f66cc4",
+    "checkpoint_id": "1f16667f-ab2d-6320-8002-13c0d748cab6",
+    "thread_id": "5fee6876-c6df-4bc9-a68f-3f4c0c65317e",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f1665a9-c323-6c96-8003-2c5df341803d",
-  "parent_checkpoint_id": "1f1665a9-bab5-6134-8002-30f612dd4273"
+  "checkpoint_id": "1f16667f-b334-68c9-8003-790a864e95e0",
+  "parent_checkpoint_id": "1f16667f-ab2d-6320-8002-13c0d748cab6"
 }
