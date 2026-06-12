@@ -50,9 +50,13 @@ def test_evaluator_emits_every_scorer_plus_gating() -> None:
 
 
 def test_evaluator_gating_tolerates_xfail_cases() -> None:
-    # A failing trajectory for the known-weak save chain: scorers fail but
-    # gating_ok stays 1, mirroring the live suite's xfail behavior.
-    ex = _example_for("buffer_then_save_eiffel")
+    # An xfail-marked case with a failing trajectory: scorers fail but
+    # gating_ok stays 1, mirroring the live suite's xfail behavior. The xfail
+    # is injected here so the test doesn't depend on the live dataset
+    # currently containing a known-weak case.
+    raw = dict(next(c for c in load_raw_cases() if c["id"] == "buffer_then_save_eiffel"))
+    raw["xfail"] = "injected: known-weak case for gating test"
+    ex = case_to_example(DEFAULT_DATASET, raw)
     feedback = make_evaluator()(
         inputs=ex["inputs"],
         outputs={"trajectory": _load("paris_fly_to_bad.json")},
