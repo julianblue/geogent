@@ -87,18 +87,41 @@ def build_backend_stub() -> FastAPI:
     # crop-query tools have deterministic data; crop names use the real HCAT
     # vocabulary the ingest script imports.
     parcels_fixture = [
-        {"id": 201, "name": "DE-BB DEBBNF0000201", "crop": "winter_common_soft_wheat", "season": "2023"},
-        {"id": 202, "name": "DE-BB DEBBNF0000202", "crop": "winter_common_soft_wheat", "season": "2023"},
-        {"id": 203, "name": "DE-BB DEBBNF0000203", "crop": "winter_rapeseed_rape", "season": "2023"},
+        {
+            "id": 201,
+            "name": "DE-BB DEBBNF0000201",
+            "crop": "winter_common_soft_wheat",
+            "season": "2023",
+        },
+        {
+            "id": 202,
+            "name": "DE-BB DEBBNF0000202",
+            "crop": "winter_common_soft_wheat",
+            "season": "2023",
+        },
+        {
+            "id": 203,
+            "name": "DE-BB DEBBNF0000203",
+            "crop": "winter_rapeseed_rape",
+            "season": "2023",
+        },
         {"id": 204, "name": "DE-BB DEBBNF0000204", "crop": "winter_barley", "season": "2023"},
-        {"id": 205, "name": "DE-BB DEBBNF0000205", "crop": "pasture_meadow_grassland_grass", "season": "2023"},
+        {
+            "id": 205,
+            "name": "DE-BB DEBBNF0000205",
+            "crop": "pasture_meadow_grassland_grass",
+            "season": "2023",
+        },
         {"id": 206, "name": "DE-BB DEBBNF0000206", "crop": "green_silo_maize", "season": "2023"},
         {"id": 207, "name": "DE-BB DEBBNF0000207", "crop": "sugar_beet", "season": "2023"},
     ]
 
     @app.get("/api/v1/fields")
     def list_fields() -> list[dict]:
-        return [{"id": 7, "name": "North Forty", "crop": "corn", "season": "2026"}, *parcels_fixture]
+        return [
+            {"id": 7, "name": "North Forty", "crop": "corn", "season": "2026"},
+            *parcels_fixture,
+        ]
 
     @app.get("/api/v1/fields/in-bbox")
     def fields_in_bbox(

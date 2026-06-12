@@ -49,8 +49,7 @@ async def list_fields() -> list[dict] | dict:
     if len(fields) <= _LIST_FIELDS_CAP:
         return fields
     compact = [
-        {k: f.get(k) for k in ("id", "name", "crop", "season")}
-        for f in fields[:_LIST_FIELDS_CAP]
+        {k: f.get(k) for k in ("id", "name", "crop", "season")} for f in fields[:_LIST_FIELDS_CAP]
     ]
     return {
         "truncated": True,

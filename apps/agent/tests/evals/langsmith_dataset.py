@@ -90,9 +90,7 @@ def sync_cases(
     if not client.has_dataset(dataset_name=dataset_name):
         client.create_dataset(dataset_name, description=DATASET_DESCRIPTION)
 
-    desired = {
-        str(ex["id"]): ex for ex in (case_to_example(dataset_name, c) for c in raw_cases)
-    }
+    desired = {str(ex["id"]): ex for ex in (case_to_example(dataset_name, c) for c in raw_cases)}
     existing = {str(ex.id): ex for ex in client.list_examples(dataset_name=dataset_name)}
 
     to_create = [ex for ex_id, ex in desired.items() if ex_id not in existing]
@@ -100,10 +98,7 @@ def sync_cases(
         ex
         for ex_id, ex in desired.items()
         if ex_id in existing
-        and (
-            existing[ex_id].inputs != ex["inputs"]
-            or existing[ex_id].outputs != ex["outputs"]
-        )
+        and (existing[ex_id].inputs != ex["inputs"] or existing[ex_id].outputs != ex["outputs"])
     ]
     to_delete = [ex_id for ex_id in existing if ex_id not in desired]
 
@@ -126,9 +121,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default=DEFAULT_DATASET, help="LangSmith dataset name")
     parser.add_argument("--cases", type=Path, default=None, help="case YAML (default core.yaml)")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="validate and report; push nothing"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="validate and report; push nothing")
     args = parser.parse_args(argv)
 
     raw_cases = load_raw_cases(args.cases)
@@ -143,10 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     from langsmith import Client
 
     summary = sync_cases(Client(), args.dataset, raw_cases)
-    print(
-        f"[sync] dataset {args.dataset!r}: "
-        + ", ".join(f"{k}={v}" for k, v in summary.items())
-    )
+    print(f"[sync] dataset {args.dataset!r}: " + ", ".join(f"{k}={v}" for k, v in summary.items()))
     return 0
 
 

@@ -44,7 +44,14 @@ def test_evaluator_emits_every_scorer_plus_gating() -> None:
         reference_outputs=ex["outputs"],
     )
     by_key = {f["key"]: f for f in feedback}
-    assert set(by_key) == {"tool_selection", "args", "length", "final", "trajectory_match", "gating_ok"}
+    assert set(by_key) == {
+        "tool_selection",
+        "args",
+        "length",
+        "final",
+        "trajectory_match",
+        "gating_ok",
+    }
     assert all(f["score"] == 1 for f in feedback), by_key
     assert by_key["gating_ok"]["comment"] == "PASS"
 

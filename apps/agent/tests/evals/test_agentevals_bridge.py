@@ -52,7 +52,14 @@ PARIS_CASE = CASES["geocode_then_fly_to_paris"]
 
 def test_to_openai_messages_roles_and_tool_calls() -> None:
     messages = to_openai_messages(_load("paris_fly_to.json"))
-    assert [m["role"] for m in messages] == ["user", "assistant", "tool", "assistant", "tool", "assistant"]
+    assert [m["role"] for m in messages] == [
+        "user",
+        "assistant",
+        "tool",
+        "assistant",
+        "tool",
+        "assistant",
+    ]
     calls = [c for m in messages for c in m.get("tool_calls") or []]
     assert [c["function"]["name"] for c in calls] == ["geocode_place", "fly_to"]
     args = json.loads(calls[1]["function"]["arguments"])
@@ -77,7 +84,14 @@ def test_to_openai_messages_backfills_missing_ids() -> None:
 
 
 def test_to_openai_messages_flattens_content_parts() -> None:
-    traj = _traj([{"type": "ai", "content": [{"type": "text", "text": "hello "}, {"type": "text", "text": "world"}]}])
+    traj = _traj(
+        [
+            {
+                "type": "ai",
+                "content": [{"type": "text", "text": "hello "}, {"type": "text", "text": "world"}],
+            }
+        ]
+    )
     assert to_openai_messages(traj)[0]["content"] == "hello world"
 
 

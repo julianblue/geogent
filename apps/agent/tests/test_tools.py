@@ -335,8 +335,16 @@ async def test_seasonal_time_series_raises_on_failed_job(monkeypatch: pytest.Mon
 
 @pytest.mark.asyncio
 async def test_list_fields_truncates_large_collections(monkeypatch: pytest.MonkeyPatch) -> None:
-    many = [{"id": i, "name": f"DE-BB {i}", "crop": "winter_rye", "season": "2023",
-             "geometry": {"type": "Polygon", "coordinates": []}} for i in range(120)]
+    many = [
+        {
+            "id": i,
+            "name": f"DE-BB {i}",
+            "crop": "winter_rye",
+            "season": "2023",
+            "geometry": {"type": "Polygon", "coordinates": []},
+        }
+        for i in range(120)
+    ]
 
     def handler(request: httpx.Request, captured: dict) -> httpx.Response:
         return httpx.Response(200, json=many)
@@ -361,23 +369,38 @@ async def test_fields_within_bbox_forwards_params_and_compacts(
         captured["params"] = dict(request.url.params)
         return httpx.Response(
             200,
-            json=[{
-                "id": 201, "name": "DE-BB X", "crop": "winter_common_soft_wheat",
-                "season": "2023", "geometry": {"type": "Polygon", "coordinates": []},
-                "created_at": "2026-01-01T00:00:00Z",
-            }],
+            json=[
+                {
+                    "id": 201,
+                    "name": "DE-BB X",
+                    "crop": "winter_common_soft_wheat",
+                    "season": "2023",
+                    "geometry": {"type": "Polygon", "coordinates": []},
+                    "created_at": "2026-01-01T00:00:00Z",
+                }
+            ],
         )
 
     captured = _install_mock_backend(monkeypatch, handler)
     result = await fields_within_bbox.ainvoke(
-        {"min_lon": 13.75, "min_lat": 53.2, "max_lon": 14.05, "max_lat": 53.4,
-         "crop": "wheat", "limit": 10}
+        {
+            "min_lon": 13.75,
+            "min_lat": 53.2,
+            "max_lon": 14.05,
+            "max_lat": 53.4,
+            "crop": "wheat",
+            "limit": 10,
+        }
     )
 
     assert captured["path"] == "/api/v1/fields/in-bbox"
     assert captured["params"] == {
-        "min_lon": "13.75", "min_lat": "53.2", "max_lon": "14.05", "max_lat": "53.4",
-        "crop": "wheat", "limit": "10",
+        "min_lon": "13.75",
+        "min_lat": "53.2",
+        "max_lon": "14.05",
+        "max_lat": "53.4",
+        "crop": "wheat",
+        "limit": "10",
     }
     assert result == [
         {"id": 201, "name": "DE-BB X", "crop": "winter_common_soft_wheat", "season": "2023"}

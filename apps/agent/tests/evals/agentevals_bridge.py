@@ -158,14 +158,17 @@ def build_reference_trajectory(case: EvalCase, invoked: Iterable[str]) -> list[d
                 "role": "assistant",
                 "content": "",
                 "tool_calls": [
-                    {"type": "function", "id": f"ref_{i}", "function": {"name": n, "arguments": "{}"}}
+                    {
+                        "type": "function",
+                        "id": f"ref_{i}",
+                        "function": {"name": n, "arguments": "{}"},
+                    }
                     for i, n in enumerate(names)
                 ],
             }
         )
         messages.extend(
-            {"role": "tool", "content": "ok", "tool_call_id": f"ref_{i}"}
-            for i in range(len(names))
+            {"role": "tool", "content": "ok", "tool_call_id": f"ref_{i}"} for i in range(len(names))
         )
     messages.append({"role": "assistant", "content": "Done."})
     return messages
