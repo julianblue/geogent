@@ -17,12 +17,12 @@ function fakeThread(overrides: Partial<Thread> = {}): Thread {
   } as Thread;
 }
 
-function makeClient(threads: ReturnType<typeof vi.fn>) {
+function makeClient(threads: ReturnType<typeof vi.fn>, owner = "1") {
   const search = vi.fn(async () => threads());
   const create = vi.fn(async () => fakeThread({ thread_id: "new-thread" }));
   const update = vi.fn(async () => undefined);
   const del = vi.fn(async () => undefined);
-  const get = vi.fn(async () => fakeThread({ thread_id: "t1" }));
+  const get = vi.fn(async () => fakeThread({ thread_id: "t1", metadata: { owner } }));
   const client = { threads: { search, create, update, delete: del, get } } as unknown as Client;
   return { client, search, create, update, del, get };
 }
@@ -71,6 +71,39 @@ describe("createLangGraphThreadListAdapter", () => {
     expect(update).toHaveBeenNthCalledWith(2, "a", { metadata: { archived: true } });
     expect(update).toHaveBeenNthCalledWith(3, "a", { metadata: { archived: false } });
     expect(del).toHaveBeenCalledWith("a");
+  });
+
+  it("fails closed on mutate/fetch when the thread is owned by someone else", async () => {
+    const { client, update, del } = makeClient(
+      vi.fn(() => []),
+      "other-user",
+    );
+    const adapter = createLangGraphThreadListAdapter({ client, userId: "1" });
+
+    await expect(adapter.fetch("a")).rejects.toThrow(/not owned/);
+    await expect(adapter.rename("a", "x")).rejects.toThrow(/not owned/);
+    await expect(adapter.archive("a")).rejects.toThrow(/not owned/);
+    await expect(adapter.delete("a")).rejects.toThrow(/not owned/);
+    expect(update).not.toHaveBeenCalled();
+    expect(del).not.toHaveBeenCalled();
+  });
+
+  it("fetch() returns mapped metadata for an owned thread", async () => {
+    const { client, get } = makeClient(
+      vi.fn(() => []),
+      "1",
+    );
+    get.mockResolvedValueOnce(
+      fakeThread({ thread_id: "a", metadata: { owner: "1", title: "Owned" } }),
+    );
+    const adapter = createLangGraphThreadListAdapter({ client, userId: "1" });
+
+    await expect(adapter.fetch("a")).resolves.toEqual({
+      status: "regular",
+      remoteId: "a",
+      externalId: "a",
+      title: "Owned",
+    });
   });
 
   it("treats blank/non-string titles as untitled", async () => {
