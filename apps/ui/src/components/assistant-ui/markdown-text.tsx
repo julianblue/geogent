@@ -5,6 +5,11 @@ import "@assistant-ui/react-markdown/styles/dot.css";
 import {
   type CodeHeaderProps,
   MarkdownTextPrimitive,
+  // The `unstable_` prefix flags a potential API rename, not an unstable
+  // implementation. The function strips the internal HAST `node` prop from
+  // each component's props (preventing React DOM warnings) and wraps them in
+  // React.memo with node-based comparison. No stable public replacement exists
+  // in 0.14.x — revisit when upgrading @assistant-ui/react-markdown.
   unstable_memoizeMarkdownComponents as memoizeMarkdownComponents,
   useIsMarkdownCodeBlock,
 } from "@assistant-ui/react-markdown";

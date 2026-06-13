@@ -68,7 +68,14 @@ export function AssistantPanel() {
             <ThreadListSidebar />
           </div>
           <div className="min-h-0 flex-1 overflow-hidden">
-            <Thread />
+            <Thread
+              welcome={
+                <p>
+                  Hi! Ask me to fly to a place, buffer the visible area, or list features in view.
+                  I&apos;ll always confirm before writing to the database.
+                </p>
+              }
+            />
           </div>
         </div>
       ) : (
