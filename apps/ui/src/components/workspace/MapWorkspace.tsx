@@ -11,10 +11,10 @@ import { AssistantPanel } from "@/components/workspace/AssistantPanel";
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
 import { WidgetInstanceProvider, InsightsWorkspace } from "@/components/assistant/widgets";
 
-export function MapWorkspace() {
+export function MapWorkspace({ userId }: { userId: string }) {
   return (
     <MapStateProvider>
-      <RuntimeProvider>
+      <RuntimeProvider userId={userId}>
         {/* Interrupt handlers must live inside RuntimeProvider so they can
             subscribe to the LangGraph thread state, but outside the visible
             layout so they render nothing. */}

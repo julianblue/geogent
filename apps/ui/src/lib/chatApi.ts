@@ -7,7 +7,7 @@ import type {
 
 const ASSISTANT_ID = process.env.NEXT_PUBLIC_LANGGRAPH_GRAPH_ID ?? "geogent";
 
-function createClient(): Client {
+export function createClient(): Client {
   const apiUrl =
     typeof window === "undefined"
       ? (process.env.LANGGRAPH_URL ?? "http://localhost:2024")
@@ -17,6 +17,41 @@ function createClient(): Client {
 
 export async function createThread() {
   return createClient().threads.create();
+}
+
+/**
+ * Derive a short, human-readable thread title from the first user turn. Used to
+ * label freshly-created conversations in the thread-list sidebar (#20) without
+ * waiting on a server-side title model. Returns `null` when there is no usable
+ * text (e.g. the first turn is tool-only).
+ */
+export function deriveThreadTitle(messages: LangChainMessage[], maxLength = 60): string | null {
+  const firstHuman = messages.find((m) => m.type === "human");
+  const source = firstHuman ?? messages[0];
+  if (!source) return null;
+
+  const { content } = source;
+  let text = "";
+  if (typeof content === "string") {
+    text = content;
+  } else if (Array.isArray(content)) {
+    text = content
+      .map((part) => (typeof part === "object" && part && "text" in part ? String(part.text) : ""))
+      .join(" ");
+  }
+
+  text = text.replace(/\s+/g, " ").trim();
+  if (!text) return null;
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1).trimEnd()}…` : text;
+}
+
+/**
+ * Persist a thread title into LangGraph thread metadata. Thread metadata is
+ * patched (merged) server-side, so this preserves the `owner` tag set at
+ * creation time.
+ */
+export async function setThreadTitle(threadId: string, title: string): Promise<void> {
+  await createClient().threads.update(threadId, { metadata: { title } });
 }
 
 export async function getThreadState(
