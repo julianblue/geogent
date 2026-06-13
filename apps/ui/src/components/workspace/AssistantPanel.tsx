@@ -13,6 +13,7 @@ import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboar
 import { ZonalStatsTool } from "@/components/assistant/tools/agriculture/ZonalStatsTool";
 import { IndexTimeSeriesTool } from "@/components/assistant/tools/agriculture/IndexTimeSeriesTool";
 import { Sentinel2SceneWidgetTool } from "@/components/assistant/tools/agriculture/Sentinel2SceneWidgetTool";
+import { ThreadListSidebar } from "@/components/workspace/ThreadListSidebar";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 
 export function AssistantPanel() {
@@ -62,15 +63,20 @@ export function AssistantPanel() {
       <Sentinel2SceneWidgetTool />
 
       {expanded ? (
-        <div className="min-h-0 flex-1 overflow-hidden">
-          <Thread
-            welcome={
-              <p>
-                Hi! Ask me to fly to a place, buffer the visible area, or list features in view.
-                I&apos;ll always confirm before writing to the database.
-              </p>
-            }
-          />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex max-h-64 shrink-0 flex-col border-b border-border p-2">
+            <ThreadListSidebar />
+          </div>
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <Thread
+              welcome={
+                <p>
+                  Hi! Ask me to fly to a place, buffer the visible area, or list features in view.
+                  I&apos;ll always confirm before writing to the database.
+                </p>
+              }
+            />
+          </div>
         </div>
       ) : (
         <div
