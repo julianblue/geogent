@@ -11,7 +11,7 @@ import {
   getCheckpointId,
   getThreadState,
   sendMessage,
-  setThreadTitle,
+  setInitialThreadTitle,
 } from "@/lib/chatApi";
 import { createLangGraphThreadListAdapter } from "@/lib/threadListAdapter";
 
@@ -68,11 +68,17 @@ export function RuntimeProvider({
       const { externalId } = await initialize();
       if (!externalId) throw new Error("Thread not found");
       // Label new conversations from their first user turn so the sidebar shows
-      // something meaningful before the user renames anything.
+      // something meaningful before the user renames anything. Mark the thread
+      // only once we actually have a usable title, so a tool-only first turn
+      // doesn't permanently suppress titling; setInitialThreadTitle no-ops when
+      // the thread already has a title, so this never overwrites an older,
+      // already-named conversation.
       if (!titledThreadIds.current.has(externalId)) {
-        titledThreadIds.current.add(externalId);
         const title = deriveThreadTitle(messages);
-        if (title) void setThreadTitle(externalId, title).catch(() => {});
+        if (title) {
+          titledThreadIds.current.add(externalId);
+          void setInitialThreadTitle(externalId, title).catch(() => {});
+        }
       }
       yield* sendMessage({
         threadId: externalId,

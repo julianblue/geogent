@@ -46,12 +46,19 @@ export function deriveThreadTitle(messages: LangChainMessage[], maxLength = 60):
 }
 
 /**
- * Persist a thread title into LangGraph thread metadata. Thread metadata is
- * patched (merged) server-side, so this preserves the `owner` tag set at
- * creation time.
+ * Persist an auto-derived title for a freshly-created conversation — but only
+ * when the thread has no title yet. This makes the call safe to fire on any
+ * first-seen thread: switching back to an older, already-named conversation and
+ * sending a message will not clobber its existing (user-provided or previously
+ * derived) title. Thread metadata is patched server-side, so the `owner` tag is
+ * preserved.
  */
-export async function setThreadTitle(threadId: string, title: string): Promise<void> {
-  await createClient().threads.update(threadId, { metadata: { title } });
+export async function setInitialThreadTitle(threadId: string, title: string): Promise<void> {
+  const client = createClient();
+  const thread = await client.threads.get(threadId);
+  const existing = thread.metadata?.title;
+  if (typeof existing === "string" && existing.length > 0) return;
+  await client.threads.update(threadId, { metadata: { title } });
 }
 
 export async function getThreadState(

@@ -86,7 +86,7 @@ function ThreadListItem() {
           <Button
             variant="ghost"
             size="icon"
-            className="mr-1 h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100"
+            className="mr-1 h-6 w-6 shrink-0 opacity-0 focus-visible:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
             aria-label="Conversation options"
           >
             <MoreHorizontal className="h-4 w-4" />
