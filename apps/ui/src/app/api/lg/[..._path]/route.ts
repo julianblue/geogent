@@ -42,13 +42,19 @@ function withOwner(bodyText: string | undefined, userId: string): string {
  * treated as not-owned — fail closed.
  */
 async function ownsThread(threadId: string, userId: string): Promise<boolean> {
-  const res = await fetch(`${LANGGRAPH_URL}/threads/${encodeURIComponent(threadId)}`, {
-    method: "GET",
-    headers: apiKeyHeader(),
-  });
-  if (!res.ok) return false;
-  const thread = (await res.json()) as { metadata?: Record<string, unknown> };
-  return thread.metadata?.[OWNER_KEY] === userId;
+  try {
+    const res = await fetch(`${LANGGRAPH_URL}/threads/${encodeURIComponent(threadId)}`, {
+      method: "GET",
+      headers: apiKeyHeader(),
+    });
+    if (!res.ok) return false;
+    const thread = (await res.json()) as { metadata?: Record<string, unknown> };
+    return thread.metadata?.[OWNER_KEY] === userId;
+  } catch {
+    // Network error / invalid JSON: fail closed rather than letting the
+    // exception bubble to a 502 that leaks upstream availability.
+    return false;
+  }
 }
 
 async function handle(req: NextRequest, method: string) {

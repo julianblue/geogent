@@ -109,6 +109,16 @@ describe("/api/lg proxy authorization", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("fails closed with 404 when the ownership check itself errors", async () => {
+    getSession.mockResolvedValue({ user: { id: 7 } });
+    fetchMock.mockRejectedValueOnce(new Error("network down"));
+
+    const res = await GET(req("/api/lg/threads/t1/runs"));
+
+    expect(res.status).toBe(404);
+    expect(fetchMock).toHaveBeenCalledTimes(1); // ownership check only, no forward
+  });
+
   it("passes through non-thread routes for authenticated users", async () => {
     getSession.mockResolvedValue({ user: { id: 1 } });
     fetchMock.mockResolvedValueOnce(new Response("ok", { status: 200 }));
