@@ -5,6 +5,7 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useLangGraphRuntime, type LangChainMessage } from "@assistant-ui/react-langgraph";
 
 import { useMapState } from "@/components/map/MapStateProvider";
+import { useActiveThread } from "@/components/workspace/ActiveThreadProvider";
 import {
   createClient,
   deriveThreadTitle,
@@ -23,6 +24,7 @@ export function RuntimeProvider({
   children: React.ReactNode;
 }) {
   const { viewport, features, selectedIds, fields, selectedFieldId, layers } = useMapState();
+  const { setActiveThreadId } = useActiveThread();
   // Snapshot the latest map state into a ref so the async stream callback
   // always reads the freshest value without recreating the runtime on every
   // viewport tick.
@@ -67,6 +69,9 @@ export function RuntimeProvider({
     stream: async function* (messages, { initialize, ...config }) {
       const { externalId } = await initialize();
       if (!externalId) throw new Error("Thread not found");
+      // Mark this thread active so ThreadSnapshotSync persists to the right
+      // conversation (covers freshly-created threads, which never hit `load`).
+      setActiveThreadId(externalId);
       // Label new conversations from their first user turn so the sidebar shows
       // something meaningful before the user renames anything. Mark the thread
       // only once we actually have a usable title, so a tool-only first turn
@@ -88,6 +93,8 @@ export function RuntimeProvider({
       });
     },
     load: async (externalId) => {
+      // Opening/switching to a thread — drive the snapshot restore from here.
+      setActiveThreadId(externalId);
       const state = await getThreadState(externalId);
       return {
         messages: (state.values as { messages?: LangChainMessage[] } | undefined)?.messages ?? [],
