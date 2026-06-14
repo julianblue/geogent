@@ -65,25 +65,85 @@ export function buildSnapshot(input: SnapshotInput): WorkspaceSnapshot {
 /**
  * Coerce raw thread metadata into a snapshot, tolerating older/garbage shapes
  * by returning `null` (a clean reset) rather than throwing into the restore
- * path. Unknown future versions are also rejected.
+ * path. Unknown future versions are also rejected. Individual fields are
+ * sanitized to known-safe shapes so a garbled metadata blob can't feed a
+ * non-numeric camera into `map.jumpTo` or a non-object into the layer loop.
  */
 export function parseSnapshot(raw: unknown): WorkspaceSnapshot | null {
   if (!raw || typeof raw !== "object") return null;
-  const s = raw as Partial<WorkspaceSnapshot>;
+  const s = raw as Record<string, unknown>;
   if (s.v !== 1) return null;
-  const ws = s.workspace ?? { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null };
+  const ws = (s.workspace ?? {}) as Record<string, unknown>;
   return {
     v: 1,
-    viewport: s.viewport ?? null,
-    layers: Array.isArray(s.layers) ? s.layers : [],
-    sentinel2Scene: s.sentinel2Scene ?? null,
-    selectedFieldId: typeof s.selectedFieldId === "number" ? s.selectedFieldId : null,
+    viewport: parseViewport(s.viewport),
+    layers: parseLayers(s.layers),
+    sentinel2Scene: parseScene(s.sentinel2Scene),
+    selectedFieldId:
+      typeof s.selectedFieldId === "number" && Number.isFinite(s.selectedFieldId)
+        ? s.selectedFieldId
+        : null,
     workspace: {
-      openWidgetIds: Array.isArray(ws.openWidgetIds) ? ws.openWidgetIds : [],
-      pinnedWidgetIds: Array.isArray(ws.pinnedWidgetIds) ? ws.pinnedWidgetIds : [],
+      openWidgetIds: parseIds(ws.openWidgetIds),
+      pinnedWidgetIds: parseIds(ws.pinnedWidgetIds),
       activeWidgetId: typeof ws.activeWidgetId === "string" ? ws.activeWidgetId : null,
     },
   };
+}
+
+function parseViewport(raw: unknown): WorkspaceSnapshot["viewport"] {
+  if (!raw || typeof raw !== "object") return null;
+  const v = raw as Record<string, unknown>;
+  const { longitude, latitude, zoom } = v;
+  if (
+    typeof longitude === "number" &&
+    Number.isFinite(longitude) &&
+    typeof latitude === "number" &&
+    Number.isFinite(latitude) &&
+    typeof zoom === "number" &&
+    Number.isFinite(zoom)
+  ) {
+    return { longitude, latitude, zoom };
+  }
+  return null;
+}
+
+function parseLayers(raw: unknown): MapLayer[] {
+  if (!Array.isArray(raw)) return [];
+  const out: MapLayer[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const l = item as Record<string, unknown>;
+    if (typeof l.id !== "string" || typeof l.label !== "string") continue;
+    const layer: MapLayer = { id: l.id, label: l.label, visible: l.visible !== false };
+    if (typeof l.opacity === "number" && Number.isFinite(l.opacity)) layer.opacity = l.opacity;
+    const src = l.source;
+    if (
+      src &&
+      typeof src === "object" &&
+      (src as Record<string, unknown>).kind === "buffer" &&
+      typeof (src as Record<string, unknown>).wkt === "string"
+    ) {
+      layer.source = { kind: "buffer", wkt: (src as Record<string, unknown>).wkt as string };
+    }
+    out.push(layer);
+  }
+  return out;
+}
+
+function parseScene(raw: unknown): Sentinel2Scene | null {
+  if (!raw || typeof raw !== "object") return null;
+  const s = raw as Record<string, unknown>;
+  // Minimal shape guard — keep a scene only if it carries the two fields the
+  // overlay actually reads (a STAC item + a composite id).
+  if (typeof s.compositeId === "string" && s.item && typeof s.item === "object") {
+    return raw as Sentinel2Scene;
+  }
+  return null;
+}
+
+function parseIds(raw: unknown): string[] {
+  return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
 }
 
 /** Stable structural compare so we skip redundant metadata writes. */

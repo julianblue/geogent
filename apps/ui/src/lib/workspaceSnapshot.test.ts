@@ -71,6 +71,43 @@ describe("parseSnapshot", () => {
       workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
     });
   });
+
+  it("rejects a non-numeric/garbled viewport rather than feeding it to jumpTo", () => {
+    expect(
+      parseSnapshot({ v: 1, viewport: { longitude: "x", latitude: 1, zoom: 2 } })?.viewport,
+    ).toBeNull();
+    expect(parseSnapshot({ v: 1, viewport: { longitude: 1, latitude: 2 } })?.viewport).toBeNull();
+    expect(
+      parseSnapshot({ v: 1, viewport: { longitude: 1, latitude: 2, zoom: 3 } })?.viewport,
+    ).toEqual({ longitude: 1, latitude: 2, zoom: 3 });
+  });
+
+  it("drops malformed layer entries and non-string widget ids", () => {
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        null,
+        "nope",
+        { id: 5, label: "bad-id" },
+        { id: "ok", label: "Good", visible: false, opacity: 0.5 },
+        { id: "buf", label: "Buffer", source: { kind: "buffer", wkt: "POLYGON((0 0))" } },
+        { id: "buf2", label: "Bad src", source: { kind: "other" } },
+      ],
+      workspace: { openWidgetIds: ["a", 2, null, "b"], pinnedWidgetIds: [], activeWidgetId: 7 },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "ok", label: "Good", visible: false, opacity: 0.5 },
+      {
+        id: "buf",
+        label: "Buffer",
+        visible: true,
+        source: { kind: "buffer", wkt: "POLYGON((0 0))" },
+      },
+      { id: "buf2", label: "Bad src", visible: true },
+    ]);
+    expect(parsed?.workspace.openWidgetIds).toEqual(["a", "b"]);
+    expect(parsed?.workspace.activeWidgetId).toBeNull();
+  });
 });
 
 describe("snapshotsEqual", () => {

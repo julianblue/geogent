@@ -110,8 +110,22 @@ export function ThreadSnapshotSync() {
       }
 
       // Seed the dedupe baseline so the persist effect doesn't immediately
-      // write the just-restored snapshot back.
-      lastPersistedRef.current = snapshot;
+      // write the just-restored state back. When there was no snapshot we seed
+      // the *applied* (emptied) state rather than null — otherwise the persist
+      // effect would treat the reset as a change and stamp this thread with the
+      // previous thread's leftover viewport (which restore intentionally
+      // doesn't move when there's nothing to restore).
+      lastPersistedRef.current =
+        snapshot ??
+        buildSnapshot({
+          viewport,
+          layers: nextLayers,
+          sentinel2Scene: null,
+          selectedFieldId: null,
+          openWidgetIds: [],
+          pinnedWidgetIds: [],
+          activeWidgetId: null,
+        });
       restoringRef.current = false;
     })();
 
