@@ -134,6 +134,17 @@ remains the documented escape hatch behind the same service interface.
 - *Rejected for v1:* a standing Dask/worker cluster (premature; always-on cost).
 - *Trigger to revisit:* AOIs beyond single-farm scale, or cube builds that
   exceed the job's memory/time budget.
+- *Validated:* the M1 spike (`apps/backend/spikes/cube_zones/`) builds a real
+  season-long field cube in **0.85 MB** in-process — Dask would be pure overhead
+  at this scale.
+
+> **Spike correction to sequencing (see `spikes/cube_zones/DECISION.md`):** the
+> cross-grid **reprojection** step originally scheduled for M2 is load-bearing
+> for **M1** — without it the spike dropped 20 of 40 scenes (half the season) on
+> MGRS-tile/orbit grid mismatch, silently truncating the time span. stackstac's
+> native `epsg=/resolution=/bounds=` reprojection moves into M1; M2 terrain
+> co-registration then reuses the same primitive. M1 also needs per-pixel SCL
+> cloud masking (clouds left in a pixel's series fake temporal instability).
 
 ### D3 — Storage: object storage (MinIO dev / S3 prod)  ✅
 

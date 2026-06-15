@@ -44,20 +44,29 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 - [ ] Add `xarray`/`stackstac`/`rioxarray` deps + MinIO to the compose stack.
 - [ ] `artifacts` registry (table + service): id, type, recipe_hash, status,
       storage_uris, summary, provenance.
-- [ ] `geo/cube.py` — build a `(x, y, time, band)` cube from a STAC manifest,
-      SCL cloud-masked; `indices.py` applied over the time dim.
+- [ ] `geo/cube.py` — build a `(x, y, time, band)` cube from a STAC manifest;
+      `indices.py` applied over the time dim.
+- [ ] **Reproject every scene onto one canonical grid** (stackstac
+      `epsg=/resolution=/bounds=`, or `WarpedVRT`). **Load-bearing, not M2:** the
+      spike dropped 20/40 scenes — half the season — on grid mismatch when this
+      step was absent. See `apps/backend/spikes/cube_zones/DECISION.md`.
+- [ ] **Per-pixel SCL cloud masking** (drop classes 3/8/9/10/11), resampled to
+      the 10 m grid — without it, residual cloud/shadow inflates temporal CV and
+      fakes "instability".
 - [ ] `temporal_features` — per-pixel productivity (mean/integral) + stability
       (CV) → **stability COG** artifact.
 - [ ] Agent primitives `build_cube`, `temporal_features` (handles in/out).
 - [ ] UI: `LayerSource` arm for a single-band index COG + continuous colormap;
       persisted in the thread snapshot (#20).
 - **Ships:** the first per-pixel product ("field memory"), no clustering risk.
+- **De-risked by** `apps/backend/spikes/cube_zones/` (cube builds in-process at
+      0.85 MB/field; real within-field structure to cluster).
 
 ### M2 — Terrain fusion
 - [ ] `geo/terrain.py` — DEM provider (Copernicus GLO-30 via STAC) + derivatives
-      (slope/aspect/TWI/curvature), co-registered to the cube grid.
-- [ ] Generic "align layer to cube grid" resampling step — also **unblocks NBR**
-      (20 m SWIR → 10 m).
+      (slope/aspect/TWI/curvature), co-registered to the cube grid (**reuses the
+      M1 reprojection primitive**).
+- [ ] The same align-to-grid step also **unblocks NBR** (20 m SWIR → 10 m).
 - [ ] Agent primitive `terrain_derive`.
 
 ### M3 — Management zones + explanation
