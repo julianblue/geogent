@@ -50,6 +50,41 @@ def test_duplicate_ids_rejected(tmp_path: Path) -> None:
         load_cases(p)
 
 
+def test_tools_forbidden_round_trips(tmp_path: Path) -> None:
+    p = tmp_path / "forbidden.yaml"
+    p.write_text(
+        textwrap.dedent(
+            """
+            - id: guardrail
+              input: name the features in view
+              expect:
+                tools_required: [features_within]
+                tools_forbidden: [list_features_in_viewport]
+            """
+        )
+    )
+    case = load_cases(p)[0]
+    assert case.expect.tools_forbidden == ["list_features_in_viewport"]
+    # Default is an empty list when omitted.
+    assert load_cases()[0].expect.tools_forbidden == []
+
+
+def test_bad_tools_forbidden_rejected(tmp_path: Path) -> None:
+    p = tmp_path / "bad_forbidden.yaml"
+    p.write_text(
+        textwrap.dedent(
+            """
+            - id: a
+              input: hi
+              expect:
+                tools_forbidden: not_a_list
+            """
+        )
+    )
+    with pytest.raises(ValueError, match="tools_forbidden must be a list"):
+        load_cases(p)
+
+
 def test_bad_arg_constraint_rejected(tmp_path: Path) -> None:
     p = tmp_path / "bad.yaml"
     p.write_text(

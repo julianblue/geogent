@@ -57,9 +57,12 @@ def test_trimmed_window_starts_on_human_and_pairs_tools() -> None:
             assert m.tool_call_id in open_tool_call_ids, "orphaned ToolMessage in trimmed window"
 
 
-def test_single_oversized_turn_falls_back_to_original() -> None:
-    # The most recent (and only) turn alone exceeds the budget: rather than
-    # return an empty/invalid window, keep the original so the user's request
-    # still reaches the model.
-    msgs = _turn(0, big=True)
-    assert trim_history(msgs, 100) == msgs
+def test_single_oversized_turn_falls_back_to_last_turn() -> None:
+    # The most recent turn alone exceeds the budget. The fallback keeps only the
+    # suffix from the last human message — NOT the full history — so an oversized
+    # turn doesn't re-stack older turns on top of itself.
+    msgs = [*_turn(0, big=True), *_turn(1, big=True)]
+    trimmed = trim_history(msgs, 100)
+    assert trimmed == msgs[4:]  # only the second (last) turn
+    assert isinstance(trimmed[0], HumanMessage)
+    assert len(trimmed) < len(msgs)

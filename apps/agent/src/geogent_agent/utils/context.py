@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from langchain_core.messages import AnyMessage, trim_messages
+from langchain_core.messages import AnyMessage, HumanMessage, trim_messages
 
 
 def approx_token_count(messages: Sequence[AnyMessage]) -> int:
@@ -41,10 +41,14 @@ def trim_history(messages: Sequence[AnyMessage], max_tokens: int) -> list[AnyMes
     """Trim conversation history to roughly ``max_tokens`` (heuristic) tokens.
 
     Keeps the most recent messages, anchored to start on a human turn so tool
-    call/result pairs stay intact. ``max_tokens <= 0`` disables trimming. If even
-    the latest turn exceeds the budget (a single huge tool result), the original
-    history is returned unchanged rather than an empty/invalid window — better to
-    send a large turn than to drop the user's actual request.
+    call/result pairs stay intact. ``max_tokens <= 0`` disables trimming.
+
+    If even the latest turn exceeds the budget (a single huge tool result),
+    ``trim_messages`` yields nothing; we then fall back to the *smallest* valid
+    window — the suffix from the last human message — rather than the full
+    history. Returning everything would defeat cost control and make a
+    provider context-limit error more likely by stacking older turns on top of
+    the oversized one. We never drop the user's current request.
     """
     msgs = list(messages)
     if max_tokens <= 0 or not msgs:
@@ -61,4 +65,12 @@ def trim_history(messages: Sequence[AnyMessage], max_tokens: int) -> list[AnyMes
         include_system=False,
         allow_partial=False,
     )
-    return trimmed or msgs
+    if trimmed:
+        return trimmed
+
+    # Budget can't fit even the latest turn: keep just that turn (suffix from the
+    # last human message), which is the minimal structurally-valid window.
+    for i in range(len(msgs) - 1, -1, -1):
+        if isinstance(msgs[i], HumanMessage):
+            return msgs[i:]
+    return msgs
