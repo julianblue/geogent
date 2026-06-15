@@ -77,6 +77,27 @@ async def test_isochrone_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.asyncio
+async def test_isochrone_keyless_self_host_omits_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A self-hosted (non-public) base URL with no key must still work, without
+    # an Authorization header.
+    monkeypatch.setenv("ORS_API_KEY", "")
+    monkeypatch.setenv("ORS_BASE_URL", "http://ors.internal:8080")
+    get_settings.cache_clear()
+
+    def handler(req: httpx.Request, captured: dict) -> httpx.Response:
+        captured["auth"] = req.headers.get("Authorization")
+        captured["url"] = str(req.url)
+        return httpx.Response(200, json={"type": "FeatureCollection", "features": []})
+
+    captured = _mock(monkeypatch, handler)
+    result = await routing.isochrone(2.29, 48.85, [600], "driving")
+
+    assert captured["auth"] is None
+    assert captured["url"].startswith("http://ors.internal:8080/v2/isochrones/")
+    assert result["type"] == "FeatureCollection"
+
+
+@pytest.mark.asyncio
 async def test_isochrone_sends_key_and_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ORS_API_KEY", "test-key")
     get_settings.cache_clear()

@@ -121,6 +121,15 @@ async def test_isochrone_converts_minutes_to_seconds(
 
 
 @pytest.mark.asyncio
+async def test_isochrone_rejects_nonpositive_range(client: AsyncClient) -> None:
+    r = await client.post(
+        "/api/v1/routing/isochrone",
+        json={"longitude": 2.29, "latitude": 48.85, "range_minutes": [0, 10]},
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_isochrone_unconfigured_is_503(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:

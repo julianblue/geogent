@@ -59,7 +59,8 @@ You also have field-raster analytics tools (all keyed by an integer field_id):
 - seasonal_index_time_series_for_field(field_id, index?, start_date, end_date,
   max_cloud_cover?, max_scenes?) — seasonal per-scene stats for a field.
 
-You also have routing / travel-time / geocoding tools (all call the backend):
+You also have routing / travel-time / geocoding tools (backend-backed, except
+geocode_place which queries OpenStreetMap directly):
 - geocode_place(query) — forward geocode a place name → coordinates. Always
   resolve names to coordinates with this BEFORE routing/isochrone tools.
 - reverse_geocode(longitude, latitude) — a point → nearest address/place. Use

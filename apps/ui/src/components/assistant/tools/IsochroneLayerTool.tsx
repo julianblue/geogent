@@ -44,7 +44,15 @@ export function IsochroneLayerTool() {
           profile: profile ?? "driving",
         }),
       });
-      if (!res.ok) throw new Error(`Isochrone failed: ${res.status}`);
+      if (!res.ok) {
+        // Surface the backend's `detail` — notably the 503 explaining that ORS
+        // isn't configured — so the error chip shows the configuration hint.
+        const detail = await res
+          .json()
+          .then((b) => (b as { detail?: string }).detail)
+          .catch(() => undefined);
+        throw new Error(detail ?? `Isochrone failed: ${res.status}`);
+      }
       const data = (await res.json()) as { geojson: GeoJSON.FeatureCollection };
       const layerId = `isochrone-${Date.now()}`;
       addIsochroneOverlay(mapRef.current, layerId, data.geojson);

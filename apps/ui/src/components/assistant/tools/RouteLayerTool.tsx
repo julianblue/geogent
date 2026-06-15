@@ -42,7 +42,15 @@ export function RouteLayerTool() {
           profile: profile ?? "driving",
         }),
       });
-      if (!res.ok) throw new Error(`Routing failed: ${res.status}`);
+      if (!res.ok) {
+        // Surface the backend's `detail` (e.g. "No route found…") so the error
+        // chip is actionable rather than just a status code.
+        const detail = await res
+          .json()
+          .then((b) => (b as { detail?: string }).detail)
+          .catch(() => undefined);
+        throw new Error(detail ?? `Routing failed: ${res.status}`);
+      }
       const data = (await res.json()) as {
         geometry: GeoJSON.Geometry;
         distance_m: number;

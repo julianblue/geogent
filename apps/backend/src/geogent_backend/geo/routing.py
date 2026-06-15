@@ -33,6 +33,10 @@ _ORS_PROFILE = {
     "cycling": "cycling-regular",
 }
 
+# The hosted OpenRouteService API requires a key; a self-hosted instance
+# (any other base URL) may be keyless. Used to decide whether to 503.
+_PUBLIC_ORS_HOST = "api.openrouteservice.org"
+
 
 class RoutingError(Exception):
     """A routing/geocoding provider request failed or returned no result."""
@@ -127,17 +131,21 @@ async def isochrone(
     ORS key is configured.
     """
     settings = get_settings()
-    if not settings.ors_api_key:
+    base = settings.ors_base_url.rstrip("/")
+    # The hosted ORS API needs a key; a self-hosted base URL may be keyless.
+    if not settings.ors_api_key and _PUBLIC_ORS_HOST in base:
         raise IsochroneUnavailableError(
             "Isochrones require an OpenRouteService key. Set ORS_API_KEY "
             "(or point ORS_BASE_URL at a keyless self-hosted instance)."
         )
-    base = settings.ors_base_url.rstrip("/")
     ors_profile = _ORS_PROFILE[profile]
+    headers = {"Accept": "application/json"}
+    if settings.ors_api_key:
+        headers["Authorization"] = settings.ors_api_key
     async with httpx.AsyncClient(timeout=settings.routing_timeout_seconds) as client:
         resp = await client.post(
             f"{base}/v2/isochrones/{ors_profile}",
-            headers={"Authorization": settings.ors_api_key, "Accept": "application/json"},
+            headers=headers,
             json={
                 "locations": [[longitude, latitude]],
                 "range": range_seconds,

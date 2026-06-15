@@ -50,9 +50,9 @@ class MatrixResponse(BaseModel):
 class IsochroneRequest(BaseModel):
     longitude: float = Field(..., ge=-180, le=180)
     latitude: float = Field(..., ge=-90, le=90)
-    range_minutes: Annotated[list[float], Field(min_length=1, max_length=10)] = Field(
-        ..., description="Time budgets in minutes, e.g. [5, 10, 15]."
-    )
+    range_minutes: Annotated[
+        list[Annotated[float, Field(gt=0)]], Field(min_length=1, max_length=10)
+    ] = Field(..., description="Time budgets in minutes (> 0), e.g. [5, 10, 15].")
     profile: Profile = "driving"
 
 
