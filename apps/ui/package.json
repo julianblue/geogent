@@ -17,6 +17,7 @@
     "@assistant-ui/react": "^0.14.0",
     "@assistant-ui/react-langgraph": "^0.14.0",
     "@assistant-ui/react-markdown": "^0.14.0",
+    "@deck.gl/aggregation-layers": "^9.3.2",
     "@deck.gl/core": "^9.3.2",
     "@deck.gl/geo-layers": "^9.3.2",
     "@deck.gl/layers": "^9.3.2",

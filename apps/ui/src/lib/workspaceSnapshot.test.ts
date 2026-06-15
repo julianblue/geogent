@@ -134,6 +134,42 @@ describe("parseSnapshot", () => {
       { id: "route-bad", label: "No geom", visible: true },
     ]);
   });
+
+  it("restores aggregation layer sources and rejects malformed points (#57)", () => {
+    const agg = {
+      kind: "aggregation",
+      aggKind: "heatmap",
+      weightBy: "area",
+      radius: 50,
+      points: [
+        [2.35, 48.86, 1],
+        [2.13, 48.8, 3.5],
+      ],
+    };
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        { id: "agg-1", label: "Heatmap", source: agg },
+        // Bad point shape → source dropped, layer kept.
+        {
+          id: "agg-bad",
+          label: "Bad pts",
+          source: {
+            kind: "aggregation",
+            aggKind: "hexagon",
+            weightBy: "count",
+            radius: 1000,
+            points: [[1, 2]],
+          },
+        },
+      ],
+      workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "agg-1", label: "Heatmap", visible: true, source: agg },
+      { id: "agg-bad", label: "Bad pts", visible: true },
+    ]);
+  });
 });
 
 describe("snapshotsEqual", () => {

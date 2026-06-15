@@ -128,6 +128,22 @@ function isFeatureCollection(v: unknown): v is GeoJSON.FeatureCollection {
   );
 }
 
+function isAggregationSource(src: Record<string, unknown>): boolean {
+  return (
+    (src.aggKind === "heatmap" || src.aggKind === "hexagon") &&
+    (src.weightBy === "count" || src.weightBy === "area") &&
+    typeof src.radius === "number" &&
+    Number.isFinite(src.radius) &&
+    Array.isArray(src.points) &&
+    src.points.every(
+      (p) =>
+        Array.isArray(p) &&
+        p.length === 3 &&
+        p.every((n) => typeof n === "number" && Number.isFinite(n)),
+    )
+  );
+}
+
 function parseLayers(raw: unknown): MapLayer[] {
   if (!Array.isArray(raw)) return [];
   const out: MapLayer[] = [];
@@ -148,6 +164,14 @@ function parseLayers(raw: unknown): MapLayer[] {
         layer.source = { kind: "route", geometry: src.geometry };
       } else if (src.kind === "isochrone" && isFeatureCollection(src.data)) {
         layer.source = { kind: "isochrone", data: src.data };
+      } else if (src.kind === "aggregation" && isAggregationSource(src)) {
+        layer.source = {
+          kind: "aggregation",
+          aggKind: src.aggKind as "heatmap" | "hexagon",
+          weightBy: src.weightBy as "count" | "area",
+          points: src.points as [number, number, number][],
+          radius: src.radius as number,
+        };
       }
     }
     out.push(layer);
