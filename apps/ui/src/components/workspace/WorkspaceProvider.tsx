@@ -16,6 +16,12 @@ type WorkspaceContextValue = {
   unpinWidget: (id: WidgetId) => void;
   isOpen: (id: WidgetId) => boolean;
   isPinned: (id: WidgetId) => boolean;
+  /** Replace open/pinned/active state wholesale (restore a thread snapshot, #20). */
+  restore: (state: {
+    openWidgetIds: WidgetId[];
+    pinnedWidgetIds: WidgetId[];
+    activeWidgetId: WidgetId | null;
+  }) => void;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -63,6 +69,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const isOpen = useCallback((id: WidgetId) => openWidgetIds.includes(id), [openWidgetIds]);
   const isPinned = useCallback((id: WidgetId) => pinnedWidgetIds.includes(id), [pinnedWidgetIds]);
 
+  const restore = useCallback(
+    (state: {
+      openWidgetIds: WidgetId[];
+      pinnedWidgetIds: WidgetId[];
+      activeWidgetId: WidgetId | null;
+    }) => {
+      setOpenWidgetIds(state.openWidgetIds);
+      setPinnedWidgetIds(state.pinnedWidgetIds);
+      setActiveWidgetId(state.activeWidgetId);
+    },
+    [],
+  );
+
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       openWidgetIds,
@@ -75,6 +94,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       unpinWidget,
       isOpen,
       isPinned,
+      restore,
     }),
     [
       openWidgetIds,
@@ -87,6 +107,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       unpinWidget,
       isOpen,
       isPinned,
+      restore,
     ],
   );
 

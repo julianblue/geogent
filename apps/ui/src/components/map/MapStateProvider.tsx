@@ -38,12 +38,23 @@ export type MapField = {
   geometry: GeoJSON.Geometry;
 };
 
+/**
+ * How to recreate an imperative overlay for a layer when restoring a thread
+ * snapshot (#20). Buffer overlays are drawn in the tool's `execute`, which does
+ * not re-run on transcript replay, so the geometry has to ride along in the
+ * snapshot to be repainted. (The Sentinel-2 overlay is data-driven via
+ * `sentinel2Scene`, so it needs no source here.)
+ */
+export type LayerSource = { kind: "buffer"; wkt: string };
+
 export type MapLayer = {
   id: string;
   label: string;
   visible: boolean;
   /** 0..1; defaults to 1 when omitted. */
   opacity?: number;
+  /** Present for agent-created overlays that can be rebuilt from geometry. */
+  source?: LayerSource;
 };
 
 /**
@@ -77,6 +88,8 @@ type MapStateContextValue = {
   layers: MapLayer[];
   upsertLayer: (layer: MapLayer) => void;
   removeLayer: (id: string) => void;
+  /** Replace the whole layer list at once (used to restore a thread snapshot). */
+  replaceLayers: (layers: MapLayer[]) => void;
   setLayerVisibility: (id: string, visible: boolean) => void;
   setLayerOpacity: (id: string, opacity: number) => void;
   /** Reorder a layer relative to its neighbours (affects map z-order). */
@@ -147,6 +160,8 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
     setLayers((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
+  const replaceLayers = useCallback((next: MapLayer[]) => setLayers(next), []);
+
   const setLayerVisibility = useCallback((id: string, visible: boolean) => {
     setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, visible } : l)));
   }, []);
@@ -188,6 +203,7 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      replaceLayers,
       setLayerVisibility,
       setLayerOpacity,
       moveLayer,
@@ -209,6 +225,7 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       layers,
       upsertLayer,
       removeLayer,
+      replaceLayers,
       setLayerVisibility,
       setLayerOpacity,
       moveLayer,

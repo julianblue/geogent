@@ -40,7 +40,15 @@ export function BufferLayerTool() {
       const data = (await res.json()) as { buffered_wkt: string };
       const layerId = `buffer-${Date.now()}`;
       addBufferOverlay(mapRef.current, layerId, data.buffered_wkt);
-      upsertLayer({ id: layerId, label: `Buffer ${distance_meters} m`, visible: true, opacity: 1 });
+      upsertLayer({
+        id: layerId,
+        label: `Buffer ${distance_meters} m`,
+        visible: true,
+        opacity: 1,
+        // Carry the geometry so the overlay can be repainted when a thread is
+        // reopened (#20) — `execute` doesn't re-run on transcript replay.
+        source: { kind: "buffer", wkt: data.buffered_wkt },
+      });
       return { buffered_wkt: data.buffered_wkt, distance_m: distance_meters, layer_id: layerId };
     },
     render: function BufferRender({
