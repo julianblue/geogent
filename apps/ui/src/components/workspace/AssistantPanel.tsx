@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Thread } from "@/components/assistant/Thread";
 import { FlyToTool } from "@/components/assistant/tools/FlyToTool";
 import { BufferLayerTool } from "@/components/assistant/tools/BufferLayerTool";
+import { RouteLayerTool } from "@/components/assistant/tools/RouteLayerTool";
+import { IsochroneLayerTool } from "@/components/assistant/tools/IsochroneLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
 import { ConfirmFeatureSaveTool } from "@/components/assistant/tools/ConfirmFeatureSaveTool";
 import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboardTool";
@@ -55,6 +57,8 @@ export function AssistantPanel() {
 
       <FlyToTool />
       <BufferLayerTool />
+      <RouteLayerTool />
+      <IsochroneLayerTool />
       <FeaturesInViewportTool />
       <ConfirmFeatureSaveTool />
       <RenderDashboardTool />

@@ -54,6 +54,69 @@ def add_buffer_layer(distance_meters: float, geometry_wkt: str | None = None) ->
 
 
 @tool
+def add_route_layer(
+    origin_lon: float,
+    origin_lat: float,
+    dest_lon: float,
+    dest_lat: float,
+    profile: Literal["driving", "walking", "cycling"] = "driving",
+    label: str | None = None,
+) -> dict:
+    """Draw a route between two WGS84 points as a line overlay on the user's map.
+
+    The browser computes the route (server-side routing) and renders the line —
+    you don't need to pass geometry. It returns only an acknowledgement, so to
+    REASON about distance/duration, also call the server-side ``route_between``.
+
+    Args:
+        origin_lon: Origin longitude (degrees).
+        origin_lat: Origin latitude (degrees).
+        dest_lon: Destination longitude (degrees).
+        dest_lat: Destination latitude (degrees).
+        profile: Travel mode — ``driving`` (default), ``walking``, or ``cycling``.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_route": True,
+        "origin": [origin_lon, origin_lat],
+        "destination": [dest_lon, dest_lat],
+        "profile": profile,
+        "label": label,
+    }
+
+
+@tool
+def add_isochrone_layer(
+    longitude: float,
+    latitude: float,
+    range_minutes: list[float] | None = None,
+    profile: Literal["driving", "walking", "cycling"] = "driving",
+    label: str | None = None,
+) -> dict:
+    """Draw reachability ("N-minute") polygons around a point on the user's map.
+
+    The browser computes the isochrone (server-side) and renders the polygon(s);
+    you don't pass geometry. Returns only an acknowledgement — call
+    ``isochrone_for`` if you need the polygons returned to you. Requires an
+    OpenRouteService key on the backend.
+
+    Args:
+        longitude: Center longitude (degrees).
+        latitude: Center latitude (degrees).
+        range_minutes: Time budgets in minutes (default ``[10]``).
+        profile: Travel mode — ``driving`` (default), ``walking``, or ``cycling``.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_isochrone": True,
+        "center": [longitude, latitude],
+        "range_minutes": range_minutes or [10],
+        "profile": profile,
+        "label": label,
+    }
+
+
+@tool
 def list_features_in_viewport() -> dict:
     """Display-only: open an interactive feature-list panel in the user's UI.
 

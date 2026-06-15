@@ -117,14 +117,15 @@ function parseLayers(raw: unknown): MapLayer[] {
     if (typeof l.id !== "string" || typeof l.label !== "string") continue;
     const layer: MapLayer = { id: l.id, label: l.label, visible: l.visible !== false };
     if (typeof l.opacity === "number" && Number.isFinite(l.opacity)) layer.opacity = l.opacity;
-    const src = l.source;
-    if (
-      src &&
-      typeof src === "object" &&
-      (src as Record<string, unknown>).kind === "buffer" &&
-      typeof (src as Record<string, unknown>).wkt === "string"
-    ) {
-      layer.source = { kind: "buffer", wkt: (src as Record<string, unknown>).wkt as string };
+    const src = l.source as Record<string, unknown> | undefined | null;
+    if (src && typeof src === "object") {
+      if (src.kind === "buffer" && typeof src.wkt === "string") {
+        layer.source = { kind: "buffer", wkt: src.wkt };
+      } else if (src.kind === "route" && src.geometry && typeof src.geometry === "object") {
+        layer.source = { kind: "route", geometry: src.geometry as GeoJSON.Geometry };
+      } else if (src.kind === "isochrone" && src.data && typeof src.data === "object") {
+        layer.source = { kind: "isochrone", data: src.data as GeoJSON.FeatureCollection };
+      }
     }
     out.push(layer);
   }

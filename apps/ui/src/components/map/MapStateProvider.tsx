@@ -45,7 +45,10 @@ export type MapField = {
  * snapshot to be repainted. (The Sentinel-2 overlay is data-driven via
  * `sentinel2Scene`, so it needs no source here.)
  */
-export type LayerSource = { kind: "buffer"; wkt: string };
+export type LayerSource =
+  | { kind: "buffer"; wkt: string }
+  | { kind: "route"; geometry: GeoJSON.Geometry }
+  | { kind: "isochrone"; data: GeoJSON.FeatureCollection };
 
 export type MapLayer = {
   id: string;
