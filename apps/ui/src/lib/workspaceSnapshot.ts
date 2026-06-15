@@ -135,6 +135,7 @@ function isAggregationSource(src: Record<string, unknown>): boolean {
     typeof src.radius === "number" &&
     Number.isFinite(src.radius) &&
     Array.isArray(src.points) &&
+    src.points.length > 0 &&
     src.points.every(
       (p) =>
         Array.isArray(p) &&

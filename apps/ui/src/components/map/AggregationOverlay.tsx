@@ -51,8 +51,8 @@ export function AggregationOverlay() {
 
   useEffect(() => {
     if (!overlay) return;
-    // Bottom layer = first; later layers paint on top. Mirror Layer Manager
-    // order so reorder/visibility behaves like the other overlays.
+    // deck paints layers in array order (first = bottom); we pass them in
+    // Layer Manager order so stacking matches the other overlays.
     const deckLayers = aggLayers.filter((l) => l.visible).map((l) => buildDeckLayer(l, l.source));
     overlay.setProps({ layers: deckLayers });
   }, [overlay, aggLayers]);

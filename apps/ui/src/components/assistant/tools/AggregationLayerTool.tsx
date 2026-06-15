@@ -73,6 +73,11 @@ export function AggregationLayerTool() {
         );
       }
 
+      // Note: these bin points ride along in the per-thread snapshot (#20) so
+      // the surface repaints on reopen. For very large feature sets that grows
+      // thread metadata; acceptable for the current map-scoped feature/field
+      // counts. Revisit (cap/sample) if we aggregate thousands of points.
+      //
       // Heatmap radius is in pixels; hexbin radius is in meters — pick a sane
       // default per kind when the agent doesn't specify one.
       const resolvedRadius = radius ?? (kind === "heatmap" ? 50 : 1000);
