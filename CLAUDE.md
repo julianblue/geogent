@@ -3,6 +3,20 @@
 Polyglot monorepo: `apps/backend` (FastAPI + PostGIS), `apps/agent` (LangGraph
 agent, Python 3.12 + uv), `apps/ui` (Next.js + pnpm).
 
+**Start here:** [`CONTEXT.md`](./CONTEXT.md) — product vision, cross-app
+architecture, and the load-bearing design principles (read it before any
+non-trivial change).
+
+**App guides** — each app has its own `CLAUDE.md` with architecture,
+conventions, and gotchas (auto-loaded when you work in that subtree):
+
+- [`apps/backend/CLAUDE.md`](./apps/backend/CLAUDE.md) — FastAPI + PostGIS, the
+  `/api/v1` layers, auth-gating, provider modules, no-DB testing.
+- [`apps/agent/CLAUDE.md`](./apps/agent/CLAUDE.md) — LangGraph graph, the tool
+  families + invariants, the eval harness.
+- [`apps/ui/CLAUDE.md`](./apps/ui/CLAUDE.md) — assistant-ui ↔ LangGraph bridge,
+  map state/overlays, widget framework, per-thread snapshots.
+
 ## CI — run these before every push
 
 CI (`.github/workflows/ci.yml`) gates PRs with exactly these commands. The one
