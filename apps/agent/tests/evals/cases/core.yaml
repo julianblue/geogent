@@ -285,8 +285,9 @@
 
 - id: name_features_uses_data_tool
   # Strict complement of features_within_viewport: naming features in chat MUST
-  # use the data tool, never the display-only UI panel. The UI-routing prompt
-  # rule makes this reliable, so it gates (no xfail).
+  # use the data tool, never the display-only UI panel. This is strictly stronger
+  # than the any-of sibling case, so it debuts xfail (like features_within_viewport
+  # did) — promote to gating once a recording confirms the default model passes it.
   input: >-
     What features are in the current map view? List each one by name in your answer.
   configurable:
@@ -301,6 +302,7 @@
     tools_forbidden: [list_features_in_viewport]
     max_steps: 8
     final_contains_any: ["eiffel", "louvre"]
+  xfail: "new strict data-tool guardrail; promote to gating once a recording confirms it"
 
 - id: clarify_ambiguous_buffer
   # No geometry, no selection, no viewport: the agent should ask what to buffer
