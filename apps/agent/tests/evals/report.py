@@ -25,11 +25,13 @@ from tests.evals.scorers import (
     score_argument_correctness,
     score_final_answer,
     score_tool_selection,
+    score_tools_forbidden,
     score_trajectory_length,
 )
 
 SCORER_NAMES = (
     "tool_selection",
+    "tools_forbidden",
     "args",
     "length",
     "final",
@@ -77,6 +79,10 @@ def score_case(
         "final": score_final_answer(trajectory, e.final_contains_any),
         "trajectory_match": score_trajectory_match(trajectory, case),
     }
+    # Only scored when a case sets it, so cases without a guardrail keep their
+    # original scorer set (and the "fails every scorer" fixtures stay all-zero).
+    if e.tools_forbidden:
+        scores["tools_forbidden"] = score_tools_forbidden(trajectory, e.tools_forbidden)
     if e.graph_steps is not None:
         scores["graph_steps"] = score_graph_steps(trajectory, case)
     # The judge covers exactly the gap the deterministic final check leaves:

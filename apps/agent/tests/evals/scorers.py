@@ -104,6 +104,27 @@ def score_tool_selection(
     return ScoreResult(1, f"tool requirements met: {required}")
 
 
+def score_tools_forbidden(
+    trajectory: dict[str, Any], tools_forbidden: Iterable[str]
+) -> ScoreResult:
+    """1 iff none of the forbidden tools were invoked.
+
+    The guardrail complement of ``score_tool_selection``: asserts the agent did
+    NOT reach for a tool it shouldn't have — e.g. used the data-returning
+    ``features_within`` rather than the display-only ``list_features_in_viewport``,
+    or asked for clarification on an ambiguous request instead of acting on a
+    guess.
+    """
+    forbidden = set(tools_forbidden)
+    if not forbidden:
+        return ScoreResult(1, "no forbidden tools")
+    invoked = set(tool_names(trajectory))
+    used = sorted(forbidden & invoked)
+    if used:
+        return ScoreResult(0, f"invoked forbidden tool(s) {used}")
+    return ScoreResult(1, f"avoided forbidden tools: {sorted(forbidden)}")
+
+
 def _check_constraint(value: Any, c: ArgConstraint) -> tuple[bool, str]:
     if c.between is not None:
         lo, hi = c.between

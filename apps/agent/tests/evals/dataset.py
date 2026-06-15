@@ -54,6 +54,8 @@ ToolRequirement = str | list[str]
 @dataclass(frozen=True)
 class Expectation:
     tools_required: list[ToolRequirement] = field(default_factory=list)
+    # Tools the agent must NOT invoke (guardrail / clarification cases).
+    tools_forbidden: list[str] = field(default_factory=list)
     # tool name -> list of per-arg constraints
     args: dict[str, list[ArgConstraint]] = field(default_factory=dict)
     max_steps: int | None = None
@@ -82,6 +84,15 @@ class Expectation:
                     f"tools_required entries must be a tool name or a list of names, got {req!r}"
                 )
 
+        tools_forbidden_raw = raw.get("tools_forbidden") or []
+        if not (
+            isinstance(tools_forbidden_raw, list)
+            and all(isinstance(t, str) for t in tools_forbidden_raw)
+        ):
+            raise ValueError(
+                f"tools_forbidden must be a list of tool names, got {tools_forbidden_raw!r}"
+            )
+
         graph_steps = raw.get("graph_steps")
         if graph_steps is not None and not (
             isinstance(graph_steps, list)
@@ -97,6 +108,7 @@ class Expectation:
 
         return cls(
             tools_required=tools_required,
+            tools_forbidden=list(tools_forbidden_raw),
             args=args,
             max_steps=raw.get("max_steps"),
             final_contains_any=list(raw.get("final_contains_any") or []),
