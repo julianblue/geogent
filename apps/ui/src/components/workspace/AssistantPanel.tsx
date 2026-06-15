@@ -9,6 +9,7 @@ import { FlyToTool } from "@/components/assistant/tools/FlyToTool";
 import { BufferLayerTool } from "@/components/assistant/tools/BufferLayerTool";
 import { RouteLayerTool } from "@/components/assistant/tools/RouteLayerTool";
 import { IsochroneLayerTool } from "@/components/assistant/tools/IsochroneLayerTool";
+import { AggregationLayerTool } from "@/components/assistant/tools/AggregationLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
 import { ConfirmFeatureSaveTool } from "@/components/assistant/tools/ConfirmFeatureSaveTool";
 import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboardTool";
@@ -59,6 +60,7 @@ export function AssistantPanel() {
       <BufferLayerTool />
       <RouteLayerTool />
       <IsochroneLayerTool />
+      <AggregationLayerTool />
       <FeaturesInViewportTool />
       <ConfirmFeatureSaveTool />
       <RenderDashboardTool />

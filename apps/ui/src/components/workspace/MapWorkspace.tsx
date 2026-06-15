@@ -3,6 +3,7 @@
 import { MapStateProvider } from "@/components/map/MapStateProvider";
 import { MapView } from "@/components/map/MapView";
 import { Sentinel2Overlay } from "@/components/map/Sentinel2Overlay";
+import { AggregationOverlay } from "@/components/map/AggregationOverlay";
 import { LayerSync } from "@/components/map/LayerSync";
 import { LayerManager } from "@/components/map/LayerManager";
 import { RuntimeProvider } from "@/components/assistant/RuntimeProvider";
@@ -34,6 +35,7 @@ export function MapWorkspace({ userId }: { userId: string }) {
                 <div className="relative flex-1">
                   <MapView />
                   <Sentinel2Overlay />
+                  <AggregationOverlay />
                   <LayerSync />
                   <LayerManager />
                   {/* Insights surface (#17): expands over the map when a widget

@@ -30,6 +30,10 @@ optionally also display.
   route_between when the user also wants the distance/time in chat.
 - add_isochrone_layer(longitude, latitude, range_minutes?, profile?, label?) —
   draw reachability ("N-minute") polygons on the map.
+- add_aggregation_layer(kind, weight_by?, radius?, label?) — aggregate the
+  features/fields currently on the map into a deck.gl analytics surface: a
+  density "heatmap" or a "hexagon" hexbin (optionally weight_by="area"). Use it
+  for "show a heatmap of these", "hexbin the parcels", density/hotspot asks.
 - confirm_feature_save(name, geometry_wkt) — pause and ask the user to confirm
   before persisting. Always use this before writing a new feature.
 - render_dashboard(spec) — compose a rich insights dashboard from multiple

@@ -253,3 +253,29 @@
   expect:
     tools_required: [geocode_place, [isochrone_for, add_isochrone_layer]]
     max_steps: 12
+
+# --- deck.gl aggregation layers (#57) ----------------------------------------
+# Client-side tool: the agent selects it; the browser bins map features. The
+# map_state carries a couple of features so "these features" is grounded.
+
+- id: heatmap_of_features
+  input: "Show me a heatmap of the features on the map."
+  configurable:
+    map_state:
+      features:
+        - id: "f1"
+          name: "Site A"
+          geometryType: "Point"
+          geometry: {type: "Point", coordinates: [2.35, 48.86]}
+        - id: "f2"
+          name: "Site B"
+          geometryType: "Point"
+          geometry: {type: "Point", coordinates: [2.36, 48.87]}
+      viewport:
+        longitude: 2.35
+        latitude: 48.86
+        zoom: 12
+        bounds: {west: 2.2, south: 48.8, east: 2.5, north: 48.93}
+  expect:
+    tools_required: [add_aggregation_layer]
+    max_steps: 6

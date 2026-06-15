@@ -117,6 +117,39 @@ def add_isochrone_layer(
 
 
 @tool
+def add_aggregation_layer(
+    kind: Literal["heatmap", "hexagon"],
+    weight_by: Literal["count", "area"] = "count",
+    radius: float | None = None,
+    label: str | None = None,
+) -> dict:
+    """Aggregate the current feature/field set into an analytics surface on the map.
+
+    The browser bins the features/fields currently on the map (their centroids)
+    into a deck.gl ``heatmap`` (density) or ``hexagon`` (hexbin) layer and renders
+    it with a legend. Returns only an acknowledgement — it reads no data back to
+    you. Use it when the user wants to see density/hotspots or a binned summary
+    of the features already on the map (e.g. "show a heatmap of these",
+    "hexbin the parcels by area").
+
+    Args:
+        kind: ``heatmap`` for a smooth density surface, ``hexagon`` for hexbins.
+        weight_by: Weight each feature by ``count`` (1 each, default) or by its
+            polygon ``area``.
+        radius: Optional — heatmap radius in pixels, or hexbin cell radius in
+            meters. The UI picks a sensible default per kind when omitted.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_aggregation": True,
+        "kind": kind,
+        "weight_by": weight_by,
+        "radius": radius,
+        "label": label,
+    }
+
+
+@tool
 def list_features_in_viewport() -> dict:
     """Display-only: open an interactive feature-list panel in the user's UI.
 

@@ -36,3 +36,32 @@ export function wktPolygonToGeoJSON(wkt: string): GeoJSON.Polygon | null {
   if (!coords) return null;
   return { type: "Polygon", coordinates: [coords] };
 }
+
+/**
+ * Representative [lon, lat] point for a GeoJSON geometry — the mean of all its
+ * vertex coordinates. Good enough to drop a feature/field into an aggregation
+ * bin (#57); not a true area centroid. Returns `null` for empty/unsupported
+ * geometries (e.g. GeometryCollection).
+ */
+export function geometryCentroid(geometry: GeoJSON.Geometry): [number, number] | null {
+  let sumLon = 0;
+  let sumLat = 0;
+  let count = 0;
+  const visit = (coords: unknown): void => {
+    if (
+      Array.isArray(coords) &&
+      coords.length >= 2 &&
+      typeof coords[0] === "number" &&
+      typeof coords[1] === "number"
+    ) {
+      sumLon += coords[0];
+      sumLat += coords[1];
+      count += 1;
+      return;
+    }
+    if (Array.isArray(coords)) for (const c of coords) visit(c);
+  };
+  if ("coordinates" in geometry) visit(geometry.coordinates);
+  if (count === 0) return null;
+  return [sumLon / count, sumLat / count];
+}

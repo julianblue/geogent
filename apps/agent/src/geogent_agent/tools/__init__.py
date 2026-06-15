@@ -1,4 +1,5 @@
 from geogent_agent.tools.frontend_actions import (
+    add_aggregation_layer,
     add_buffer_layer,
     add_isochrone_layer,
     add_route_layer,
@@ -58,6 +59,7 @@ TOOLS = [
     add_buffer_layer,
     add_route_layer,
     add_isochrone_layer,
+    add_aggregation_layer,
     list_features_in_viewport,
     confirm_feature_save,
     show_sentinel2_scene,
@@ -66,6 +68,7 @@ TOOLS = [
 
 __all__ = [
     "TOOLS",
+    "add_aggregation_layer",
     "add_buffer_layer",
     "add_isochrone_layer",
     "add_route_layer",

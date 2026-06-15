@@ -6,6 +6,11 @@ import type { MapRef } from "react-map-gl/maplibre";
 
 import type { Sentinel2Item } from "@/lib/sentinel2";
 import type { CompositeId } from "@/lib/sentinel2-presets";
+import type {
+  AggregationKind,
+  AggregationPoint,
+  AggregationWeightBy,
+} from "@/components/map/aggregation";
 
 export type Viewport = {
   longitude: number;
@@ -48,7 +53,16 @@ export type MapField = {
 export type LayerSource =
   | { kind: "buffer"; wkt: string }
   | { kind: "route"; geometry: GeoJSON.Geometry }
-  | { kind: "isochrone"; data: GeoJSON.FeatureCollection };
+  | { kind: "isochrone"; data: GeoJSON.FeatureCollection }
+  | {
+      // deck.gl aggregation layer (#57). The binned points ride along so the
+      // surface can be rebuilt by AggregationOverlay on thread reopen.
+      kind: "aggregation";
+      aggKind: AggregationKind;
+      weightBy: AggregationWeightBy;
+      points: AggregationPoint[];
+      radius: number;
+    };
 
 export type MapLayer = {
   id: string;
