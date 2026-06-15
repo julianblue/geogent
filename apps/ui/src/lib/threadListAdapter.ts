@@ -43,10 +43,10 @@ export function createLangGraphThreadListAdapter(options: {
   const ownerScope = { [OWNER_KEY]: userId };
 
   // Fail closed: read the thread and confirm the current user owns it before
-  // any mutate/fetch. This guards against the UI acting on a thread id that
-  // isn't the user's. Note this is a client-side guard only — `/api/lg` is an
-  // open proxy with no per-user auth, so real isolation must live server-side
-  // (tracked separately). It still blocks accidental cross-thread operations.
+  // any mutate/fetch. Real isolation is now enforced server-side in the `/api/lg`
+  // proxy (it stamps `owner` on create, constrains search to the session user,
+  // and gates `/threads/{id}` on ownership); this client-side check is
+  // defense-in-depth that also blocks accidental cross-thread operations.
   async function getOwnedThread(remoteId: string): Promise<Thread> {
     const thread = await client.threads.get(remoteId);
     if (thread.metadata?.[OWNER_KEY] !== userId) {
