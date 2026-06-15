@@ -108,6 +108,32 @@ describe("parseSnapshot", () => {
     expect(parsed?.workspace.openWidgetIds).toEqual(["a", "b"]);
     expect(parsed?.workspace.activeWidgetId).toBeNull();
   });
+
+  it("restores route and isochrone layer sources (#55)", () => {
+    const line: GeoJSON.Geometry = {
+      type: "LineString",
+      coordinates: [
+        [2.35, 48.86],
+        [2.13, 48.8],
+      ],
+    };
+    const fc: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        { id: "route-1", label: "Route", source: { kind: "route", geometry: line } },
+        { id: "iso-1", label: "Isochrone", source: { kind: "isochrone", data: fc } },
+        { id: "route-bad", label: "No geom", source: { kind: "route" } },
+      ],
+      workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "route-1", label: "Route", visible: true, source: { kind: "route", geometry: line } },
+      { id: "iso-1", label: "Isochrone", visible: true, source: { kind: "isochrone", data: fc } },
+      // Missing geometry → source dropped, layer kept.
+      { id: "route-bad", label: "No geom", visible: true },
+    ]);
+  });
 });
 
 describe("snapshotsEqual", () => {

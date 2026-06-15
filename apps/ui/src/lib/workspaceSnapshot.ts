@@ -108,6 +108,26 @@ function parseViewport(raw: unknown): WorkspaceSnapshot["viewport"] {
   return null;
 }
 
+function isGeoJsonGeometry(v: unknown): v is GeoJSON.Geometry {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    !Array.isArray(v) &&
+    typeof (v as Record<string, unknown>).type === "string" &&
+    "coordinates" in (v as object)
+  );
+}
+
+function isFeatureCollection(v: unknown): v is GeoJSON.FeatureCollection {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>).type === "FeatureCollection" &&
+    Array.isArray((v as Record<string, unknown>).features)
+  );
+}
+
 function parseLayers(raw: unknown): MapLayer[] {
   if (!Array.isArray(raw)) return [];
   const out: MapLayer[] = [];
@@ -117,14 +137,18 @@ function parseLayers(raw: unknown): MapLayer[] {
     if (typeof l.id !== "string" || typeof l.label !== "string") continue;
     const layer: MapLayer = { id: l.id, label: l.label, visible: l.visible !== false };
     if (typeof l.opacity === "number" && Number.isFinite(l.opacity)) layer.opacity = l.opacity;
-    const src = l.source;
-    if (
-      src &&
-      typeof src === "object" &&
-      (src as Record<string, unknown>).kind === "buffer" &&
-      typeof (src as Record<string, unknown>).wkt === "string"
-    ) {
-      layer.source = { kind: "buffer", wkt: (src as Record<string, unknown>).wkt as string };
+    const src = l.source as Record<string, unknown> | undefined | null;
+    if (src && typeof src === "object") {
+      // Validate the geometry shape before keeping a source: corrupt or
+      // cross-version metadata must not feed invalid GeoJSON into MapLibre's
+      // addSource during restore (which would throw and break hydration).
+      if (src.kind === "buffer" && typeof src.wkt === "string") {
+        layer.source = { kind: "buffer", wkt: src.wkt };
+      } else if (src.kind === "route" && isGeoJsonGeometry(src.geometry)) {
+        layer.source = { kind: "route", geometry: src.geometry };
+      } else if (src.kind === "isochrone" && isFeatureCollection(src.data)) {
+        layer.source = { kind: "isochrone", data: src.data };
+      }
     }
     out.push(layer);
   }

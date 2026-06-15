@@ -1,5 +1,7 @@
 from geogent_agent.tools.frontend_actions import (
     add_buffer_layer,
+    add_isochrone_layer,
+    add_route_layer,
     confirm_feature_save,
     fly_to,
     list_features_in_viewport,
@@ -20,6 +22,12 @@ from geogent_agent.tools.geo_tools import (
     zonal_stats_for_field,
 )
 from geogent_agent.tools.osm_tools import geocode_place
+from geogent_agent.tools.routing_tools import (
+    isochrone_for,
+    reverse_geocode,
+    route_between,
+    travel_time_matrix,
+)
 from geogent_agent.tools.stac_tools import (
     stac_get_item,
     stac_list_collections,
@@ -39,11 +47,17 @@ TOOLS = [
     zonal_stats_for_field,
     seasonal_index_time_series_for_field,
     geocode_place,
+    reverse_geocode,
+    route_between,
+    travel_time_matrix,
+    isochrone_for,
     stac_list_collections,
     stac_search,
     stac_get_item,
     fly_to,
     add_buffer_layer,
+    add_route_layer,
+    add_isochrone_layer,
     list_features_in_viewport,
     confirm_feature_save,
     show_sentinel2_scene,
@@ -53,6 +67,8 @@ TOOLS = [
 __all__ = [
     "TOOLS",
     "add_buffer_layer",
+    "add_isochrone_layer",
+    "add_route_layer",
     "area_of",
     "buffer_geometry",
     "confirm_feature_save",
@@ -63,14 +79,18 @@ __all__ = [
     "fly_to",
     "geocode_place",
     "geometries_intersect",
+    "isochrone_for",
     "list_features",
     "list_features_in_viewport",
     "list_fields",
     "render_dashboard",
+    "reverse_geocode",
+    "route_between",
     "seasonal_index_time_series_for_field",
     "show_sentinel2_scene",
     "stac_get_item",
     "stac_list_collections",
     "stac_search",
+    "travel_time_matrix",
     "zonal_stats_for_field",
 ]

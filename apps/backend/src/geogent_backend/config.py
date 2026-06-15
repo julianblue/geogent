@@ -51,6 +51,35 @@ class Settings(BaseSettings):
     raster_max_scenes: int = Field(default=60)
     raster_job_concurrency: int = Field(default=4)
 
+    # --- Routing / geocoding providers (#55) ---------------------------------
+    # All pluggable + self-hostable via env. Defaults point at the public OSM
+    # demo services; respect their usage policies and swap to a self-hosted
+    # instance for anything beyond light/interactive use.
+    osrm_base_url: str = Field(
+        default="https://router.project-osrm.org",
+        description="OSRM routing server (route + table). The public demo serves "
+        "the 'driving' profile only; self-host for walking/cycling.",
+    )
+    nominatim_base_url: str = Field(
+        default="https://nominatim.openstreetmap.org",
+        description="Nominatim geocoder base URL (forward + reverse).",
+    )
+    geocoder_user_agent: str = Field(
+        default="geogent-backend/0.5 (+https://github.com/julianblue/geogent)",
+        description="User-Agent sent to Nominatim, as its usage policy requires.",
+    )
+    ors_base_url: str = Field(
+        default="https://api.openrouteservice.org",
+        description="OpenRouteService base URL — used for isochrones, which OSRM "
+        "cannot compute natively.",
+    )
+    ors_api_key: str | None = Field(
+        default=None,
+        description="OpenRouteService API key. Isochrone requests return 503 "
+        "until this is set (or ORS_BASE_URL points at a keyless self-host).",
+    )
+    routing_timeout_seconds: float = Field(default=30.0)
+
     @model_validator(mode="after")
     def _reject_weak_jwt_secret_outside_development(self) -> "Settings":
         if self.app_env != "development" and self.jwt_secret_key in _DEV_JWT_DEFAULTS:
