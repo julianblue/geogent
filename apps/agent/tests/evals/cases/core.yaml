@@ -279,3 +279,71 @@
   expect:
     tools_required: [add_aggregation_layer]
     max_steps: 6
+
+# --- guardrails / clarification (tools_forbidden) ----------------------------
+# Exercise the UI-vs-data tool contract and "ask, don't guess" behaviour.
+
+- id: name_features_uses_data_tool
+  # Strict complement of features_within_viewport: naming features in chat MUST
+  # use the data tool, never the display-only UI panel. This is strictly stronger
+  # than the any-of sibling case, so it debuts xfail (like features_within_viewport
+  # did) — promote to gating once a recording confirms the default model passes it.
+  input: >-
+    What features are in the current map view? List each one by name in your answer.
+  configurable:
+    map_state:
+      viewport:
+        longitude: 2.349
+        latitude: 48.864
+        zoom: 12
+        bounds: {west: 2.2, south: 48.8, east: 2.5, north: 48.93}
+  expect:
+    tools_required: [features_within]
+    tools_forbidden: [list_features_in_viewport]
+    max_steps: 8
+    final_contains_any: ["eiffel", "louvre"]
+  xfail: "new strict data-tool guardrail; promote to gating once a recording confirms it"
+
+- id: clarify_ambiguous_buffer
+  # No geometry, no selection, no viewport: the agent should ask what to buffer
+  # rather than guess. New behaviour assertion — xfail until validated/recorded.
+  input: "Add a buffer around it."
+  configurable: {}
+  expect:
+    tools_forbidden: [buffer_geometry, add_buffer_layer]
+    max_steps: 1
+    final_contains_any: ["?"]
+  xfail: "new clarification case; not yet validated against the default eval model"
+
+# --- multi-step agriculture (long-context stress) ----------------------------
+
+- id: field_health_multistep
+  # Resolve selected field -> render scene -> zonal stats -> seasonal series.
+  # A long, multi-tool trajectory that exercises the context-trimming path.
+  input: >-
+    Give me a full health check on the selected field: show the NDVI scene, the
+    zonal stats, and the seasonal NDVI trend.
+  configurable:
+    map_state:
+      selected_field: {id: 4, name: "North field", crop: "winter_common_soft_wheat"}
+      viewport:
+        longitude: 13.9
+        latitude: 53.3
+        zoom: 13
+        bounds: {west: 13.85, south: 53.27, east: 13.95, north: 53.33}
+  expect:
+    tools_required:
+      - [show_sentinel2_scene, zonal_stats_for_field]
+      - [zonal_stats_for_field, seasonal_index_time_series_for_field]
+    max_steps: 12
+  xfail: "new multi-step case; not yet validated against the default eval model"
+
+# --- routing: travel-time matrix ---------------------------------------------
+
+- id: travel_time_matrix_three_cities
+  input: "Build a driving travel-time matrix between Paris, Lyon, and Marseille."
+  configurable: {}
+  expect:
+    tools_required: [geocode_place, travel_time_matrix]
+    max_steps: 12
+  xfail: "new matrix case; not yet validated against the default eval model"

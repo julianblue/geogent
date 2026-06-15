@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     # always available independently of this value.
     agent_architecture: str = Field(default="langgraph_react")
 
+    # Conversation context budget (#agent-quality). Before each model call the
+    # graph trims older history to roughly this many tokens (a deterministic
+    # ~4-chars/token heuristic), keeping the system prompt and the most recent
+    # turns. Bounds token cost/latency on long threads. Set <= 0 to disable.
+    agent_max_history_tokens: int = Field(default=12000)
+
     # Amazon Bedrock. Credentials are resolved via the standard boto3
     # chain (env vars, shared config, instance/task role) — not stored here.
     bedrock_model_id: str = Field(default="us.anthropic.claude-sonnet-4-5-20250929-v1:0")

@@ -5,10 +5,12 @@ from typing import Any
 from langchain_core.messages import SystemMessage
 from langchain_core.runnables import RunnableConfig
 
+from geogent_agent.config import get_settings
 from geogent_agent.models import get_chat_model
 from geogent_agent.prompts import SYSTEM_PROMPT
 from geogent_agent.state import GraphState
 from geogent_agent.tools import TOOLS
+from geogent_agent.utils.context import trim_history
 from geogent_agent.utils.tracing import build_tracing_config
 
 
@@ -46,6 +48,9 @@ async def agent_node(state: GraphState, config: RunnableConfig | None = None) ->
     if map_state:
         system_content += _format_map_state(map_state)
 
-    messages = [SystemMessage(content=system_content), *state["messages"]]
+    # Bound history growth on long threads (the system prompt is added fresh
+    # each turn, so it's excluded from the trimmed window).
+    history = trim_history(state["messages"], get_settings().agent_max_history_tokens)
+    messages = [SystemMessage(content=system_content), *history]
     response = await model.ainvoke(messages)
     return {"messages": [response]}

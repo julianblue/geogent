@@ -21,6 +21,7 @@ from tests.evals.scorers import (
     score_argument_correctness,
     score_final_answer,
     score_tool_selection,
+    score_tools_forbidden,
     score_trajectory_length,
     tool_names,
 )
@@ -87,6 +88,26 @@ def test_tool_selection_any_of_group() -> None:
 
 def test_tool_selection_empty_is_pass() -> None:
     assert score_tool_selection(_traj([]), []).score == 1
+
+
+# --- forbidden tools (guardrail) ---------------------------------------------
+
+
+def test_tools_forbidden_empty_is_pass() -> None:
+    traj = _traj([_ai([{"name": "list_features_in_viewport", "args": {}}])])
+    assert score_tools_forbidden(traj, []).score == 1
+
+
+def test_tools_forbidden_passes_when_avoided() -> None:
+    traj = _traj([_ai([{"name": "features_within", "args": {}}])])
+    assert score_tools_forbidden(traj, ["list_features_in_viewport"]).score == 1
+
+
+def test_tools_forbidden_fails_when_invoked() -> None:
+    traj = _traj([_ai([{"name": "list_features_in_viewport", "args": {}}])])
+    result = score_tools_forbidden(traj, ["list_features_in_viewport"])
+    assert result.score == 0
+    assert "list_features_in_viewport" in result.reason
 
 
 # --- argument correctness ----------------------------------------------------
