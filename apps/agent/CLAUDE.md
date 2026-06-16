@@ -19,6 +19,15 @@ exceptions are formatted back to the LLM as `tool` messages
 payload** instead of crashing the run. `nodes/agent_node.py` binds `TOOLS` and
 the system prompt to the model.
 
+**Context control (`utils/context.py`).** Before each model call, `agent_node`
+bounds history to `AGENT_MAX_HISTORY_TOKENS` (deterministic ~4-chars/token
+trim, anchored on a human turn so tool-call pairs stay intact). With
+`AGENT_HISTORY_SUMMARIZE` on (default), dropped turns are folded into a running
+`summary` in `GraphState` (incremental — only newly-dropped turns are
+summarized, via one extra model call) rather than discarded. **`messages` is
+never pruned** — the UI renders the transcript from it — so trimming only shapes
+what the model receives. Keep this property if you touch the node or state.
+
 ## Tools (`tools/`) — the core of the app
 
 The `TOOLS` list in `tools/__init__.py` is the registry. Two families:
