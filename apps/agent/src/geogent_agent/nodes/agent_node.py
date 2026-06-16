@@ -1,5 +1,6 @@
 import json
 from datetime import UTC, datetime
+from functools import partial
 from typing import Any
 
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
@@ -26,14 +27,21 @@ _SUMMARY_INSTRUCTION = (
 )
 
 
-async def _summarize_history(prior_summary: str, new_messages: list[AnyMessage]) -> str:
+async def _summarize_history(
+    prior_summary: str, new_messages: list[AnyMessage], configurable: dict
+) -> str:
     """Default summarizer: fold newly-dropped turns into the running summary.
 
-    Uses the chat model WITHOUT tools (we want prose, not tool calls). Kept
-    incremental — only the new messages plus the prior summary are sent."""
+    Uses the chat model WITHOUT tools (we want prose, not tool calls) but with
+    the same tracing config as the main call, so summary calls are visible in
+    LangSmith. Kept incremental — only the new messages plus the prior summary
+    are sent."""
     rendered = render_messages(new_messages)
     prior_block = f"Summary so far:\n{prior_summary}\n\n" if prior_summary else ""
-    response = await get_chat_model().ainvoke(
+    model = get_chat_model().with_config(
+        **build_tracing_config(configurable, architecture="summarizer")
+    )
+    response = await model.ainvoke(
         [
             SystemMessage(content=_SUMMARY_INSTRUCTION),
             HumanMessage(content=f"{prior_block}New turns to fold in:\n{rendered}"),
@@ -89,7 +97,7 @@ async def agent_node(state: GraphState, config: RunnableConfig | None = None) ->
             state.get("summary", ""),
             state.get("summarized_count", 0),
             budget,
-            _summarize_history,
+            partial(_summarize_history, configurable=configurable),
         )
         update["summary"] = summary
         update["summarized_count"] = summarized_count
