@@ -138,12 +138,30 @@ async def test_summarize_folds_new_messages_and_advances_watermark() -> None:
 
 
 @pytest.mark.asyncio
-async def test_summarize_failure_keeps_unsummarized_verbatim() -> None:
+async def test_summarize_failure_falls_back_to_bounded_trim() -> None:
     async def boom(prior: str, new: list[AnyMessage]) -> str:
         raise RuntimeError("model down")
 
     msgs = [m for i in range(30) for m in _turn(i, big=True)]
-    kept, summary, count = await summarize_and_partition(msgs, "prev", 4, 6000, boom)
-    # Degrade safely: summary/watermark unchanged, nothing un-summarized is lost.
+    budget = 6000
+    kept, summary, count = await summarize_and_partition(msgs, "prev", 4, budget, boom)
+    # Degrade safely: summary/watermark unchanged (next turn retries) and the
+    # fallback is budget-bounded (drop-only trim of the unsummarized tail), not
+    # the full tail — so it can't blow the provider context limit.
     assert (summary, count) == ("prev", 4)
-    assert kept == msgs[4:]
+    assert kept == trim_history(msgs[4:], budget)
+    assert approx_token_count(kept) <= budget
+    assert len(kept) < len(msgs[4:])
+
+
+@pytest.mark.asyncio
+async def test_partition_ignores_already_summarized_prefix_in_budget() -> None:
+    # Full history is over budget, but the unsummarized tail fits: the
+    # already-summarized prefix must not count, so no further split happens.
+    msgs = [m for i in range(10) for m in _turn(i, big=True)]
+    assert approx_token_count(msgs) > 6000  # full history is over budget
+    summarized = 24  # 6 turns already folded into the summary
+    assert approx_token_count(msgs[summarized:]) <= 6000  # tail fits
+    split, kept = partition_history(msgs, summarized, 6000)
+    assert split == summarized  # no extra trimming/summarization
+    assert kept == msgs[summarized:]

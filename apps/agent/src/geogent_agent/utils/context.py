@@ -114,13 +114,18 @@ def partition_history(
     boundary (so ``kept`` is valid for tool-calling) and never moves backwards
     below ``summarized_count`` — once a message is summarized it stays summarized,
     so the model never sees a turn that's also folded into the summary.
+
+    The budget applies only to the **unsummarized tail** (``messages[floor:]``) —
+    the already-summarized prefix is never sent, so counting it would cause
+    needless extra trimming/summarization once the watermark grows.
     """
     msgs = list(messages)
     floor = max(0, min(summarized_count, len(msgs)))
-    if max_tokens <= 0 or approx_token_count(msgs) <= max_tokens:
-        return floor, msgs[floor:]
-    kept = trim_history(msgs, max_tokens)
-    split = max(len(msgs) - len(kept), floor)
+    tail = msgs[floor:]  # the only messages eligible to be sent verbatim
+    if max_tokens <= 0 or approx_token_count(tail) <= max_tokens:
+        return floor, tail
+    kept = trim_history(tail, max_tokens)
+    split = floor + (len(tail) - len(kept))
     return split, msgs[split:]
 
 
@@ -135,9 +140,10 @@ async def summarize_and_partition(
 
     Folds any newly-dropped messages into the running summary via ``summarizer``
     and returns the verbatim suffix to send. If the summarizer raises, we degrade
-    gracefully: keep everything not already summarized verbatim and leave the
-    summary/watermark untouched, so a flaky summarizer never loses context or
-    fails the turn.
+    gracefully to a **budget-bounded drop-only trim** of the unsummarized tail
+    (not the full tail — that could blow the provider's context limit, the very
+    thing ``trim_history`` guards against) and leave the summary/watermark
+    untouched, so the next turn retries summarizing those messages.
     """
     msgs = list(messages)
     split, kept = partition_history(msgs, summarized_count, max_tokens)
@@ -147,5 +153,5 @@ async def summarize_and_partition(
     try:
         new_summary = await summarizer(summary, new_messages)
     except Exception:  # noqa: BLE001 - never fail a turn on summarization
-        return msgs[summarized_count:], summary, summarized_count
+        return trim_history(msgs[summarized_count:], max_tokens), summary, summarized_count
     return kept, new_summary, split
