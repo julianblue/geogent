@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     # turns. Bounds token cost/latency on long threads. Set <= 0 to disable.
     agent_max_history_tokens: int = Field(default=12000)
 
+    # When true, history that exceeds the budget is folded into a running LLM
+    # summary (one extra, incremental model call per over-budget turn) rather
+    # than silently dropped, so older context survives in condensed form. When
+    # false, the agent falls back to the structural drop-only trim above.
+    agent_history_summarize: bool = Field(default=True)
+
     # Amazon Bedrock. Credentials are resolved via the standard boto3
     # chain (env vars, shared config, instance/task role) — not stored here.
     bedrock_model_id: str = Field(default="us.anthropic.claude-sonnet-4-5-20250929-v1:0")

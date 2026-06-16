@@ -7,18 +7,26 @@ the kept window always starts on a human message, so an ``AIMessage`` with
 ``tool_calls`` is never separated from its following ``ToolMessage`` (which the
 provider would reject).
 
-Trimming is deterministic and provider-agnostic — token counting uses a simple
+The trim is deterministic and provider-agnostic — token counting uses a simple
 ~4-chars/token heuristic rather than a model tokenizer — so the behaviour is
-unit-testable with no key and identical across model backends. (A summarizing
-trimmer that folds dropped turns into a synopsis is a natural future extension;
-this module is the structural seam for it.)
+unit-testable with no key and identical across model backends.
+
+``summarize_and_partition`` builds on that seam: instead of silently dropping
+older turns, it folds them into a running LLM summary so their gist survives.
+Crucially it **never prunes the message state** — the UI renders the transcript
+from ``messages`` — it only shapes what the model receives this turn. A
+``summarized_count`` watermark in graph state means each turn re-summarizes only
+the *newly* dropped messages (incremental, cheap), not the whole prefix.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 
 from langchain_core.messages import AnyMessage, HumanMessage, trim_messages
+
+# Folds the prior summary + the newly-dropped messages into an updated summary.
+Summarizer = Callable[[str, list[AnyMessage]], Awaitable[str]]
 
 
 def approx_token_count(messages: Sequence[AnyMessage]) -> int:
@@ -74,3 +82,76 @@ def trim_history(messages: Sequence[AnyMessage], max_tokens: int) -> list[AnyMes
         if isinstance(msgs[i], HumanMessage):
             return msgs[i:]
     return msgs
+
+
+_ROLE = {"human": "User", "ai": "Assistant", "tool": "Tool", "system": "System"}
+
+
+def render_messages(messages: Sequence[AnyMessage]) -> str:
+    """Flatten messages to ``Role: text`` lines for a summarization prompt.
+
+    Tool calls are rendered as a compact ``Assistant: [called name(args)]`` line
+    so the summary can mention what the agent did, not just what it said.
+    """
+    lines: list[str] = []
+    for m in messages:
+        role = _ROLE.get(getattr(m, "type", ""), "Message")
+        content = m.content if isinstance(m.content, str) else str(m.content)
+        for call in getattr(m, "tool_calls", None) or []:
+            lines.append(f"{role}: [called {call.get('name')}({call.get('args')})]")
+        if content.strip():
+            lines.append(f"{role}: {content.strip()}")
+    return "\n".join(lines)
+
+
+def partition_history(
+    messages: Sequence[AnyMessage], summarized_count: int, max_tokens: int
+) -> tuple[int, list[AnyMessage]]:
+    """Split history into a summarizable prefix and a verbatim kept suffix.
+
+    Returns ``(split, kept)`` where ``messages[:split]`` belongs in the running
+    summary and ``messages[split:]`` is sent verbatim. ``split`` is a human-turn
+    boundary (so ``kept`` is valid for tool-calling) and never moves backwards
+    below ``summarized_count`` — once a message is summarized it stays summarized,
+    so the model never sees a turn that's also folded into the summary.
+
+    The budget applies only to the **unsummarized tail** (``messages[floor:]``) —
+    the already-summarized prefix is never sent, so counting it would cause
+    needless extra trimming/summarization once the watermark grows.
+    """
+    msgs = list(messages)
+    floor = max(0, min(summarized_count, len(msgs)))
+    tail = msgs[floor:]  # the only messages eligible to be sent verbatim
+    if max_tokens <= 0 or approx_token_count(tail) <= max_tokens:
+        return floor, tail
+    kept = trim_history(tail, max_tokens)
+    split = floor + (len(tail) - len(kept))
+    return split, msgs[split:]
+
+
+async def summarize_and_partition(
+    messages: Sequence[AnyMessage],
+    summary: str,
+    summarized_count: int,
+    max_tokens: int,
+    summarizer: Summarizer,
+) -> tuple[list[AnyMessage], str, int]:
+    """Return ``(model_messages, new_summary, new_summarized_count)``.
+
+    Folds any newly-dropped messages into the running summary via ``summarizer``
+    and returns the verbatim suffix to send. If the summarizer raises, we degrade
+    gracefully to a **budget-bounded drop-only trim** of the unsummarized tail
+    (not the full tail — that could blow the provider's context limit, the very
+    thing ``trim_history`` guards against) and leave the summary/watermark
+    untouched, so the next turn retries summarizing those messages.
+    """
+    msgs = list(messages)
+    split, kept = partition_history(msgs, summarized_count, max_tokens)
+    new_messages = msgs[summarized_count:split]
+    if not new_messages:
+        return kept, summary, summarized_count
+    try:
+        new_summary = await summarizer(summary, new_messages)
+    except Exception:  # noqa: BLE001 - never fail a turn on summarization
+        return trim_history(msgs[summarized_count:], max_tokens), summary, summarized_count
+    return kept, new_summary, split
