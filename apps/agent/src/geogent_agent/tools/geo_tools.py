@@ -11,6 +11,11 @@ from geogent_agent.tools.backend_client import get_backend_client
 _TIME_SERIES_POLL_INTERVAL_SECONDS = 0.5
 _TIME_SERIES_POLL_TIMEOUT_SECONDS = 60.0
 
+# The cube/field-memory build reads many scenes, so it gets a longer budget than
+# the per-scene time-series job. Also module constants, not tool args.
+_ARTIFACT_POLL_INTERVAL_SECONDS = 0.5
+_ARTIFACT_POLL_TIMEOUT_SECONDS = 180.0
+
 
 @tool
 async def list_features() -> list[dict]:
@@ -301,3 +306,62 @@ async def seasonal_index_time_series_for_field(
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"time-series job {job_id} did not finish before timeout")
             await asyncio.sleep(_TIME_SERIES_POLL_INTERVAL_SECONDS)
+
+
+@tool
+async def field_memory_for_field(
+    field_id: int,
+    start_date: str,
+    end_date: str,
+    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    max_cloud_cover: float = 20,
+    max_scenes: int = 60,
+) -> dict:
+    """Build a multi-season "field memory" layer for a field and return its summary.
+
+    Stacks every low-cloud scene in [start_date, end_date] into a data cube and
+    reduces it per pixel into two layers: ``productivity`` (multi-date mean of
+    the index — how good each spot is) and ``stability`` (temporal coefficient
+    of variation — how consistent each spot is). Use this to find management
+    zones *within* one field, not a single-date or whole-field average.
+
+    Returns ``{artifact_id, status, summary, ...}`` where ``summary`` has the
+    per-feature stats and, importantly, ``within_field_spread`` — a near-zero
+    spread means the field is uniform (no zones worth drawing); a larger spread
+    means there is real structure. Answer the user from ``summary``. Pass the
+    returned ``artifact_id`` to ``show_field_memory`` to render it on the map;
+    the heavy pixels themselves are never returned to you.
+
+    ``index`` must be one of ``ndvi``, ``ndwi``, ``evi``.
+    """
+    async with get_backend_client() as client:
+        start = await client.post(
+            "/api/v1/analytics/temporal-features",
+            json={
+                "field_id": field_id,
+                "index": index,
+                "start_date": start_date,
+                "end_date": end_date,
+                "max_cloud_cover": max_cloud_cover,
+                "max_scenes": max_scenes,
+            },
+        )
+        start.raise_for_status()
+        artifact_id = start.json()["artifact_id"]
+        deadline = time.monotonic() + _ARTIFACT_POLL_TIMEOUT_SECONDS
+
+        while True:
+            status_resp = await client.get(f"/api/v1/analytics/artifacts/{artifact_id}")
+            status_resp.raise_for_status()
+            result = status_resp.json()
+            status = result.get("status")
+            if status == "succeeded":
+                return result
+            if status == "failed":
+                error = result.get("error") or f"field-memory build {artifact_id} failed"
+                raise RuntimeError(str(error))
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    f"field-memory build {artifact_id} did not finish before timeout"
+                )
+            await asyncio.sleep(_ARTIFACT_POLL_INTERVAL_SECONDS)

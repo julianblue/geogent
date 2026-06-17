@@ -150,6 +150,34 @@ def add_aggregation_layer(
 
 
 @tool
+def show_field_memory(
+    artifact_id: str,
+    band: Literal["productivity", "stability"] = "productivity",
+    label: str | None = None,
+) -> dict:
+    """Render a built "field memory" layer as a colored overlay on the map.
+
+    The browser fetches the artifact's COG and paints the chosen ``band`` with a
+    colormap (productivity = how good each pixel is; stability = how consistent
+    it is across the season). Returns only an acknowledgement — it reads no data
+    back to you. Call ``field_memory_for_field`` first to build the artifact and
+    answer from its ``summary``; pass the returned ``artifact_id`` here only to
+    display it.
+
+    Args:
+        artifact_id: The id returned by ``field_memory_for_field``.
+        band: Which layer to display — ``productivity`` (default) or ``stability``.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_field_memory": True,
+        "artifact_id": artifact_id,
+        "band": band,
+        "label": label,
+    }
+
+
+@tool
 def list_features_in_viewport() -> dict:
     """Display-only: open an interactive feature-list panel in the user's UI.
 

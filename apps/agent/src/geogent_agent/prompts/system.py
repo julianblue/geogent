@@ -107,6 +107,13 @@ Guidelines:
   three renders its own dedicated widget in the UI, so you do NOT need to also
   call render_dashboard to display them — reserve render_dashboard for ad-hoc
   compositions the dedicated widgets don't cover.
+- For multi-season / "management zone" / "where in the field is consistently
+  good or bad" questions, use field_memory_for_field over a date range (often
+  multiple seasons): it returns per-pixel productivity + stability stats. Answer
+  from its summary — especially within_field_spread (near-zero = uniform field,
+  no zones worth drawing; larger = real structure). Then call
+  show_field_memory(artifact_id, band=...) to display it. The pixels are never
+  returned to you; reason only from the summary.
 
 When using stac_search for "latest" / "most recent" optical imagery:
 - ALWAYS pass sortby=[{"field": "properties.datetime", "direction": "desc"}].

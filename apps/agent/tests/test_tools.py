@@ -15,6 +15,7 @@ from geogent_agent.tools import (
     crop_stats_within_bbox,
     distance_between,
     features_within,
+    field_memory_for_field,
     fields_within_bbox,
     geo_tools,
     geometries_intersect,
@@ -330,6 +331,83 @@ async def test_seasonal_time_series_raises_on_failed_job(monkeypatch: pytest.Mon
                 "start_date": "2025-04-01",
                 "end_date": "2025-09-30",
             }
+        )
+
+
+@pytest.mark.asyncio
+async def test_field_memory_builds_and_polls_until_succeeded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    polls = {"n": 0}
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        captured.setdefault("requests", []).append((request.method, request.url.path))
+        if request.method == "POST" and request.url.path == "/api/v1/analytics/temporal-features":
+            captured["start_body"] = json.loads(request.content)
+            return httpx.Response(
+                202,
+                json={
+                    "artifact_id": "cafe1234",
+                    "kind": "temporal_features",
+                    "status": "pending",
+                    "cached": False,
+                },
+            )
+        if request.method == "GET" and request.url.path == "/api/v1/analytics/artifacts/cafe1234":
+            polls["n"] += 1
+            if polls["n"] == 1:
+                return httpx.Response(200, json={"id": "cafe1234", "status": "running"})
+            return httpx.Response(
+                200,
+                json={
+                    "id": "cafe1234",
+                    "kind": "temporal_features",
+                    "status": "succeeded",
+                    "summary": {
+                        "index": "ndvi",
+                        "n_scenes_used": 18,
+                        "productivity": {"mean": 0.39, "within_field_spread": 0.17},
+                        "stability": {"mean": 0.20, "within_field_spread": 0.11},
+                    },
+                    "assets": [{"role": "field_memory", "key": "field_memory.tif", "url": "/x"}],
+                    "error": None,
+                },
+            )
+        return httpx.Response(404, json={"detail": "unexpected path"})
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
+
+    result = await field_memory_for_field.ainvoke(
+        {
+            "field_id": 7,
+            "index": "ndvi",
+            "start_date": "2024-04-01",
+            "end_date": "2025-09-30",
+        }
+    )
+
+    assert captured["start_body"]["field_id"] == 7
+    assert polls["n"] == 2
+    assert result["status"] == "succeeded"
+    assert result["summary"]["productivity"]["within_field_spread"] == 0.17
+
+
+@pytest.mark.asyncio
+async def test_field_memory_raises_on_failed_build(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, _captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            return httpx.Response(
+                202, json={"artifact_id": "dead", "kind": "temporal_features", "status": "pending"}
+            )
+        return httpx.Response(200, json={"id": "dead", "status": "failed", "error": "no scenes"})
+
+    _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
+
+    with pytest.raises(RuntimeError, match="no scenes"):
+        await field_memory_for_field.ainvoke(
+            {"field_id": 7, "start_date": "2024-04-01", "end_date": "2025-09-30"}
         )
 
 
