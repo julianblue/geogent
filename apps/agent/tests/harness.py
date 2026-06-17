@@ -25,7 +25,7 @@ from pathlib import Path
 
 import httpx
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 # tests/harness.py -> tests/ -> apps/agent
 AGENT_DIR = Path(__file__).resolve().parents[1]
@@ -259,7 +259,11 @@ def build_backend_stub() -> FastAPI:
 
     @app.post("/api/v1/routing/route")
     def route(payload: dict) -> dict:
-        coords = payload.get("coordinates") or [[0.0, 0.0], [0.0, 0.0]]
+        coords = payload.get("coordinates") or []
+        # Mirror the backend's RouteRequest validation (coordinates min_length=2)
+        # so a malformed agent request surfaces as a 422 here too, not a fake route.
+        if len(coords) < 2:
+            raise HTTPException(status_code=422, detail="coordinates must have at least 2 points")
         first = coords[0]
         last = coords[-1]
 
@@ -277,7 +281,10 @@ def build_backend_stub() -> FastAPI:
 
     @app.post("/api/v1/routing/matrix")
     def matrix(payload: dict) -> dict:
-        n = max(len(payload.get("coordinates") or []), 1)
+        n = len(payload.get("coordinates") or [])
+        # Backend MatrixRequest requires coordinates min_length=2.
+        if n < 2:
+            raise HTTPException(status_code=422, detail="coordinates must have at least 2 points")
         durations = [[0.0 if i == j else 1200.0 for j in range(n)] for i in range(n)]
         distances = [[0.0 if i == j else 25000.0 for j in range(n)] for i in range(n)]
         return {
@@ -288,6 +295,10 @@ def build_backend_stub() -> FastAPI:
 
     @app.post("/api/v1/routing/isochrone")
     def isochrone(payload: dict) -> dict:
+        ranges = payload.get("range_minutes") or []
+        # Backend IsochroneRequest: range_minutes min_length=1, each value gt=0.
+        if not ranges or any(r <= 0 for r in ranges):
+            raise HTTPException(status_code=422, detail="range_minutes must be non-empty and > 0")
         lon = payload.get("longitude", 0.0)
         lat = payload.get("latitude", 0.0)
         d = 0.05
@@ -300,7 +311,7 @@ def build_backend_stub() -> FastAPI:
         ]
         return {
             "profile": payload.get("profile", "driving"),
-            "range_minutes": payload.get("range_minutes", [10]),
+            "range_minutes": ranges,
             "geojson": {
                 "type": "FeatureCollection",
                 "features": [
