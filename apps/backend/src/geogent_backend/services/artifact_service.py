@@ -37,7 +37,8 @@ from geogent_backend.storage.artifact_store import ArtifactStore, get_artifact_s
 
 logger = logging.getLogger(__name__)
 
-_ASSET_KEY = "field_memory.tif"
+# One single-band COG per field-memory layer; the key is also the asset role.
+_FEATURE_ASSETS = ("productivity", "stability")
 _ASSET_MEDIA_TYPE = "image/tiff; application=geotiff"
 
 
@@ -143,7 +144,7 @@ class ArtifactService:
                     limit=max_scenes,
                 )
 
-                summary, cog = await anyio.to_thread.run_sync(
+                summary, cogs = await anyio.to_thread.run_sync(
                     cube.build_field_memory,
                     geom_4326,
                     scenes,
@@ -151,15 +152,20 @@ class ArtifactService:
                     self._settings.cube_resolution_m,
                 )
 
-                await self._store.put(artifact_id, _ASSET_KEY, cog)
-                asset = ArtifactAsset(
-                    role="field_memory",
-                    key=_ASSET_KEY,
-                    url=_asset_url(artifact_id, _ASSET_KEY),
-                    media_type=_ASSET_MEDIA_TYPE,
-                    bands=["productivity", "stability"],
-                )
-                await repo.set_result(artifact_id, summary, [asset.model_dump()])
+                assets: list[dict] = []
+                for role in _FEATURE_ASSETS:
+                    key = f"{role}.tif"
+                    await self._store.put(artifact_id, key, cogs[role])
+                    assets.append(
+                        ArtifactAsset(
+                            role=role,
+                            key=key,
+                            url=_asset_url(artifact_id, key),
+                            media_type=_ASSET_MEDIA_TYPE,
+                            bands=[role],
+                        ).model_dump()
+                    )
+                await repo.set_result(artifact_id, summary, assets)
             except FieldNotFoundError as exc:
                 await repo.set_error(artifact_id, str(exc))
             except cube.CubeError as exc:

@@ -170,6 +170,32 @@ describe("parseSnapshot", () => {
       { id: "agg-bad", label: "Bad pts", visible: true },
     ]);
   });
+
+  it("restores field-memory layer sources and rejects bad bands (#65)", () => {
+    const fm = {
+      kind: "fieldMemory",
+      artifactId: "cafe1234",
+      band: "stability",
+      url: "/api/proxy/analytics/artifacts/cafe1234/assets/stability.tif",
+    };
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        { id: "fm-1", label: "Field memory — Stability", source: fm },
+        // Unknown band → source dropped, layer kept.
+        {
+          id: "fm-bad",
+          label: "Bad band",
+          source: { kind: "fieldMemory", artifactId: "x", band: "humidity", url: "/x" },
+        },
+      ],
+      workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "fm-1", label: "Field memory — Stability", visible: true, source: fm },
+      { id: "fm-bad", label: "Bad band", visible: true },
+    ]);
+  });
 });
 
 describe("snapshotsEqual", () => {

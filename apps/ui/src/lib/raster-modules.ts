@@ -153,3 +153,60 @@ export const EVI_MODULE: RasterModule = {
     },
   },
 };
+
+/**
+ * Field-memory PRODUCTIVITY (#65): the multi-date mean of an index loaded as a
+ * single band into `color.r`. Same RdYlGn ramp as NDVI (productivity *is* a mean
+ * NDVI/index), so a brown→straw→green field reads the same way a single NDVI
+ * scene does. NaN marks nodata (outside the field / no valid observations) and
+ * is discarded so it stays transparent. Composite: `{r: "value"}`.
+ */
+export const PRODUCTIVITY_MODULE: RasterModule = {
+  module: {
+    name: "fieldMemoryProductivity",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        // remap index [-1, 1] → [0, 1] for the ramp
+        float t = clamp(v * 0.5 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.65, 0.16, 0.16),  // brown    — consistently poor
+          vec3(0.99, 0.91, 0.51),  // straw    — middling
+          vec3(0.10, 0.55, 0.20)   // forest g — consistently productive
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * Field-memory STABILITY (#65): the temporal coefficient of variation loaded as
+ * a single band into `color.r`. Low CV = consistent across the season (good),
+ * high CV = erratic. Green→yellow→red so "stable" reads green and "unstable"
+ * reads red — the inverse of productivity's meaning, hence its own ramp. CV is
+ * stretched [0, 0.5] → [0, 1]; NaN nodata is discarded. Composite: `{r: "value"}`.
+ */
+export const STABILITY_MODULE: RasterModule = {
+  module: {
+    name: "fieldMemoryStability",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        float t = clamp(v / 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.10, 0.55, 0.20),  // green  — stable
+          vec3(0.99, 0.91, 0.51),  // yellow — variable
+          vec3(0.84, 0.19, 0.15)   // red    — unstable
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};

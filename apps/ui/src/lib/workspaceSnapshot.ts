@@ -173,6 +173,18 @@ function parseLayers(raw: unknown): MapLayer[] {
           points: src.points as [number, number, number][],
           radius: src.radius as number,
         };
+      } else if (
+        src.kind === "fieldMemory" &&
+        typeof src.artifactId === "string" &&
+        (src.band === "productivity" || src.band === "stability") &&
+        typeof src.url === "string"
+      ) {
+        layer.source = {
+          kind: "fieldMemory",
+          artifactId: src.artifactId,
+          band: src.band,
+          url: src.url,
+        };
       }
     }
     out.push(layer);

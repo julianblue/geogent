@@ -82,22 +82,25 @@ def _feature_stats(layer: np.ndarray, inside: np.ndarray) -> dict:
     }
 
 
-def write_feature_cog(
-    productivity: np.ndarray,
-    stability: np.ndarray,
+def write_single_band_cog(
+    band: np.ndarray,
     crs: CRS,
     transform: Affine,
+    description: str,
 ) -> bytes:
-    """Write the two field-memory layers as a 2-band GeoTIFF and return bytes.
+    """Write one float32 layer as a single-band GeoTIFF and return its bytes.
 
-    Production swaps ``driver="COG"`` + object storage; a tiled GTiff keeps v1
-    dependency-free while remaining a valid windowed-read source for the UI.
+    Single-band (not multi-band) so each layer maps to one COG URL — the shape
+    the UI's MultiCOGLayer renders with a colormap. Production swaps
+    ``driver="COG"`` + object storage; a tiled GTiff keeps v1 dependency-free
+    while remaining a valid windowed-read source. NaN marks nodata; the UI
+    discards NaN pixels in-shader.
     """
-    height, width = productivity.shape
+    height, width = band.shape
     profile: dict = {
         "driver": "GTiff",
         "dtype": "float32",
-        "count": 2,
+        "count": 1,
         "height": height,
         "width": width,
         "crs": crs,
@@ -105,16 +108,12 @@ def write_feature_cog(
         "compress": "deflate",
         "nodata": float("nan"),
     }
-    # Internal tiling only helps (and is only valid) once the raster is larger
-    # than a tile; small field rasters are written stripped.
     if width >= 256 and height >= 256:
         profile.update(tiled=True, blockxsize=256, blockysize=256)
     with MemoryFile() as mem:
         with mem.open(**profile) as dst:
-            dst.write(productivity.astype("float32"), 1)
-            dst.write(stability.astype("float32"), 2)
-            dst.set_band_description(1, "productivity_mean_index")
-            dst.set_band_description(2, "stability_temporal_cv")
+            dst.write(band.astype("float32"), 1)
+            dst.set_band_description(1, description)
         return bytes(mem.read())
 
 
@@ -123,11 +122,12 @@ def build_field_memory(
     scene_items: list[dict],
     index: IndexName,
     resolution_m: float = 10.0,
-) -> tuple[dict, bytes]:
+) -> tuple[dict, dict[str, bytes]]:
     """Build the season cube and reduce it to the field-memory layers.
 
     BLOCKING: opens band COGs and warps each onto the canonical grid. Call via
-    ``to_thread``. Returns ``(summary_dict, cog_bytes)``.
+    ``to_thread``. Returns ``(summary_dict, {"productivity": bytes,
+    "stability": bytes})`` — one single-band COG per layer.
     """
     if not scene_items:
         raise CubeError("No scenes to build a cube from.")
@@ -216,5 +216,12 @@ def build_field_memory(
         "stability": _feature_stats(stability, inside),
     }
 
-    cog = write_feature_cog(productivity, stability, target_crs, transform)
-    return summary, cog
+    cogs = {
+        "productivity": write_single_band_cog(
+            productivity, target_crs, transform, "productivity_mean_index"
+        ),
+        "stability": write_single_band_cog(
+            stability, target_crs, transform, "stability_temporal_cv"
+        ),
+    }
+    return summary, cogs

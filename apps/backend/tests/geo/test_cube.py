@@ -10,7 +10,7 @@ from affine import Affine
 from rasterio.crs import CRS
 from rasterio.io import MemoryFile
 
-from geogent_backend.geo.cube import reduce_field_memory, write_feature_cog
+from geogent_backend.geo.cube import reduce_field_memory, write_single_band_cog
 
 
 def test_reduce_field_memory_stability_and_productivity() -> None:
@@ -39,17 +39,16 @@ def test_reduce_field_memory_stability_and_productivity() -> None:
     assert np.isnan(productivity[1, 0])
 
 
-def test_write_feature_cog_roundtrips_two_bands() -> None:
+def test_write_single_band_cog_roundtrips() -> None:
     productivity = np.full((8, 8), 0.6, dtype="float32")
-    stability = np.full((8, 8), 0.1, dtype="float32")
     crs = CRS.from_epsg(32611)
     transform = Affine(10.0, 0.0, 500000.0, 0.0, -10.0, 4000000.0)
 
-    data = write_feature_cog(productivity, stability, crs, transform)
+    data = write_single_band_cog(productivity, crs, transform, "productivity_mean_index")
 
     assert isinstance(data, bytes) and len(data) > 0
     with MemoryFile(data) as mem, mem.open() as ds:
-        assert ds.count == 2
+        assert ds.count == 1
         assert ds.crs.to_epsg() == 32611
         assert np.isclose(ds.read(1).mean(), 0.6, atol=1e-4)
         assert ds.descriptions[0] == "productivity_mean_index"

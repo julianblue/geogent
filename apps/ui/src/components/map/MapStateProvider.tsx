@@ -62,7 +62,18 @@ export type LayerSource =
       weightBy: AggregationWeightBy;
       points: AggregationPoint[];
       radius: number;
+    }
+  | {
+      // Field-memory COG layer (#65). Only the artifact id, chosen band, and
+      // asset URL ride along — the COG itself is refetched by FieldMemoryOverlay
+      // on thread reopen, so nothing heavy lands in the snapshot.
+      kind: "fieldMemory";
+      artifactId: string;
+      band: FieldMemoryBand;
+      url: string;
     };
+
+export type FieldMemoryBand = "productivity" | "stability";
 
 export type MapLayer = {
   id: string;
