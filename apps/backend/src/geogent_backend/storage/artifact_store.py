@@ -24,11 +24,9 @@ class ArtifactStoreError(Exception):
 class ArtifactStore(Protocol):
     async def put(self, artifact_id: str, key: str, data: bytes) -> str:
         """Persist ``data`` under ``(artifact_id, key)``; return its storage URI."""
-        ...
 
     async def get(self, artifact_id: str, key: str) -> bytes:
         """Read back the bytes stored under ``(artifact_id, key)``."""
-        ...
 
 
 class LocalArtifactStore:
