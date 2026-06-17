@@ -21,7 +21,7 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 
 ## Resolved decisions (ADR 0002)
 
-- **Compute:** in-process `xarray` + `stackstac` behind the `geo/` seam; no Dask
+- **Compute:** in-process `numpy` + `rasterio` (`WarpedVRT`) behind the `geo/` seam; no Dask
   cluster, no worker service for v1.
 - **Storage:** object storage (MinIO dev / S3 prod), COGs fetched client-side.
 - **Rendering:** reuse `MultiCOGLayer` with a discrete colormap; **TiTiler
@@ -41,23 +41,29 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
   manifest the cube builder needs.
 
 ### M1 — Data cube + "field memory"
-- [ ] Add `xarray`/`stackstac`/`rioxarray` deps + MinIO to the compose stack.
-- [ ] `artifacts` registry (table + service): id, type, recipe_hash, status,
-      storage_uris, summary, provenance.
-- [ ] `geo/cube.py` — build a `(x, y, time, band)` cube from a STAC manifest;
+- [x] Build cube in-process on `numpy` + `rasterio` (`WarpedVRT`) — zero new
+      deps (ADR 0002 D2 correction; `xarray`/`stackstac` deferred to when we
+      persist/serve full cubes). MinIO deferred too — v1 uses a local
+      `ArtifactStore`.
+- [x] `artifacts` registry (model + migration `0004` + repository + service):
+      id, kind, recipe_hash, status, owner, recipe, summary, assets.
+- [x] `ArtifactStore` (local-filesystem impl) + asset-serving route; S3/MinIO
+      deferred behind the same interface.
+- [x] `geo/cube.py` — build a `(time, y, x)` cube from STAC scenes;
       `indices.py` applied over the time dim.
-- [ ] **Reproject every scene onto one canonical grid** (stackstac
-      `epsg=/resolution=/bounds=`, or `WarpedVRT`). **Load-bearing, not M2:** the
-      spike dropped 20/40 scenes — half the season — on grid mismatch when this
-      step was absent. See `apps/backend/spikes/cube_zones/DECISION.md`.
+- [x] **Reproject every scene onto one canonical grid** (`WarpedVRT` per band).
+      **Load-bearing, not M2:** the spike dropped 20/40 scenes — half the season
+      — on grid mismatch when this step was absent. See
+      `apps/backend/spikes/cube_zones/DECISION.md`.
 - [ ] **Per-pixel SCL cloud masking** (drop classes 3/8/9/10/11), resampled to
       the 10 m grid — without it, residual cloud/shadow inflates temporal CV and
-      fakes "instability".
-- [ ] `temporal_features` — per-pixel productivity (mean/integral) + stability
-      (CV) → **stability COG** artifact.
-- [ ] Agent primitives `build_cube`, `temporal_features` (handles in/out).
+      fakes "instability". *(deferred within M1)*
+- [x] `temporal_features` recipe → per-pixel productivity (mean) + stability
+      (temporal CV) → **2-band field-memory COG** artifact, via
+      `POST /api/v1/analytics/temporal-features`.
+- [ ] Agent primitives `build_cube`, `temporal_features` (handles in/out). *(next)*
 - [ ] UI: `LayerSource` arm for a single-band index COG + continuous colormap;
-      persisted in the thread snapshot (#20).
+      persisted in the thread snapshot (#20). *(next)*
 - **Ships:** the first per-pixel product ("field memory"), no clustering risk.
 - **De-risked by** `apps/backend/spikes/cube_zones/` (cube builds in-process at
       0.85 MB/field; real within-field structure to cluster).

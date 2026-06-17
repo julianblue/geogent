@@ -122,21 +122,30 @@ COGs so the existing deck.gl render path displays them directly. This generalize
 **Provenance is intrinsic** — the recipe hash *is* the audit trail ("47 scenes,
 2021–2024, NDVI, SCL-masked, k=4 by silhouette").
 
-### D2 — Compute engine: in-process xarray + stackstac for v1  ✅
+### D2 — Compute engine: in-process numpy + rasterio for v1  ✅
 
-Add `xarray` + `stackstac` (+ `rioxarray` for resampling) behind the `geo/` seam.
-**No Dask cluster, no separate worker service yet** — consistent with the
-raster-compute spike's "don't stand up infra we don't need." Field/farm-scale
-AOIs over a few seasons fit comfortably in memory on a background job. Dask
-remains the documented escape hatch behind the same service interface.
-`indices.py` stays pure functions (work on `DataArray`s unchanged).
+Build the cube in-process behind the `geo/` seam, with **zero new heavy deps**:
+windowed COG reads + `rasterio.vrt.WarpedVRT` for canonical-grid alignment, and
+plain `numpy` for the per-pixel temporal reduction. `indices.py` kernels are
+reused unchanged. **No Dask cluster, no separate worker service** — consistent
+with the raster-compute spike's "don't stand up infra we don't need."
 
-- *Rejected for v1:* a standing Dask/worker cluster (premature; always-on cost).
-- *Trigger to revisit:* AOIs beyond single-farm scale, or cube builds that
-  exceed the job's memory/time budget.
-- *Validated:* the M1 spike (`apps/backend/spikes/cube_zones/`) builds a real
-  season-long field cube in **0.85 MB** in-process — Dask would be pure overhead
-  at this scale.
+> **Implementation correction (M1, `geo/cube.py`).** This ADR originally
+> proposed `xarray` + `stackstac` (+ `rioxarray`). On building M1 that proved
+> the wrong trade for *this* backend: `stackstac` hard-depends on `dask`, and
+> `xarray`/`rioxarray` pull `pandas`/`pyproj` — exactly the heavyweight stack
+> this repo deliberately quarantines (cf. the `ingest` dependency group kept out
+> of CI). The spike showed the cube is **0.85 MB at field scale** and the
+> reductions are one-line numpy, so the labeled-array machinery earns nothing
+> yet. v1 therefore ships on `numpy` + `rasterio` (both already core deps);
+> `WarpedVRT` delivers the same canonical-grid reprojection `stackstac` would
+> have. The cube is a small `(time, y, x)` ndarray, not an xarray `DataArray`.
+
+- *Rejected for v1:* `xarray`/`stackstac`/`dask` (dependency weight unjustified
+  at field scale); a standing worker cluster (premature; always-on cost).
+- *Trigger to revisit (→ xarray/Zarr):* persisting/serving *full* cubes for
+  repeated re-querying, AOIs beyond single-farm scale, or lazy/chunked cubes
+  that exceed a job's memory budget.
 
 > **Spike correction to sequencing (see `spikes/cube_zones/DECISION.md`):** the
 > cross-grid **reprojection** step originally scheduled for M2 is load-bearing

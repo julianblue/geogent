@@ -51,6 +51,23 @@ class Settings(BaseSettings):
     raster_max_scenes: int = Field(default=60)
     raster_job_concurrency: int = Field(default=4)
 
+    # --- Data cubes / artifacts (#65, ADR 0002) ------------------------------
+    # Heavy cube outputs (stability/zone COGs) are written here and served back
+    # via the artifacts route. A local filesystem store keeps v1 dependency-free;
+    # swap ArtifactStore for an S3/MinIO impl behind the same interface later.
+    artifact_storage_dir: str = Field(
+        default="/tmp/geogent-artifacts",
+        description="Directory the local ArtifactStore writes COG assets under.",
+    )
+    cube_resolution_m: float = Field(
+        default=10.0,
+        description="Target ground resolution (m) of the canonical cube grid.",
+    )
+    cube_max_scenes: int = Field(
+        default=120,
+        description="Cap on scenes stacked into one cube (cost guard).",
+    )
+
     # --- Routing / geocoding providers (#55) ---------------------------------
     # All pluggable + self-hostable via env. Defaults point at the public OSM
     # demo services; respect their usage policies and swap to a self-hosted

@@ -127,16 +127,11 @@ def canonical_window(item: dict, geom_4326: dict) -> tuple[object, object, Windo
     first scene. Every other scene must match crs + transform to stack onto the
     same pixels without resampling — the same-grid invariant geo/raster.py
     already relies on, here extended across time."""
-    with rasterio.Env(**GDAL_ENV):
-        with rasterio.open(item["assets"]["red"]["href"]) as ds:
-            geom_utm = transform_geom("EPSG:4326", ds.crs, geom_4326)
-            minx, miny, maxx, maxy = shape(geom_utm).bounds
-            window = (
-                from_bounds(minx, miny, maxx, maxy, ds.transform)
-                .round_offsets()
-                .round_lengths()
-            )
-            return ds.crs, ds.transform, window, geom_utm
+    with rasterio.Env(**GDAL_ENV), rasterio.open(item["assets"]["red"]["href"]) as ds:
+        geom_utm = transform_geom("EPSG:4326", ds.crs, geom_4326)
+        minx, miny, maxx, maxy = shape(geom_utm).bounds
+        window = from_bounds(minx, miny, maxx, maxy, ds.transform).round_offsets().round_lengths()
+        return ds.crs, ds.transform, window, geom_utm
 
 
 def read_ndvi(item: dict, crs, transform, window: Window) -> np.ndarray | None:
@@ -237,12 +232,18 @@ def main() -> None:
     prod_in = productivity[inside]
     cv_in = stability[inside]
     print(f"   pixels in polygon: {int(inside.sum())}")
-    print(f"   valid obs/pixel: min {int(n_obs[inside].min())}, "
-          f"median {int(np.median(n_obs[inside]))}, max {int(n_obs[inside].max())}")
-    print(f"   productivity (mean NDVI): mean {np.nanmean(prod_in):.3f}, "
-          f"range [{np.nanmin(prod_in):.3f}, {np.nanmax(prod_in):.3f}]")
-    print(f"   stability (temporal CV):  mean {np.nanmean(cv_in):.3f}, "
-          f"range [{np.nanmin(cv_in):.3f}, {np.nanmax(cv_in):.3f}]")
+    print(
+        f"   valid obs/pixel: min {int(n_obs[inside].min())}, "
+        f"median {int(np.median(n_obs[inside]))}, max {int(n_obs[inside].max())}"
+    )
+    print(
+        f"   productivity (mean NDVI): mean {np.nanmean(prod_in):.3f}, "
+        f"range [{np.nanmin(prod_in):.3f}, {np.nanmax(prod_in):.3f}]"
+    )
+    print(
+        f"   stability (temporal CV):  mean {np.nanmean(cv_in):.3f}, "
+        f"range [{np.nanmin(cv_in):.3f}, {np.nanmax(cv_in):.3f}]"
+    )
     # The whole point of "field memory": within ONE field, pixels differ in
     # both how productive they are and how stable that is year-to-year. A flat
     # field would show near-zero spread here; spread => zones worth drawing.
@@ -252,8 +253,10 @@ def main() -> None:
     print("\n4. Write the field-memory layers as a (tiled) GeoTIFF")
     with timer("write_cog"):
         size = write_cog(OUT_COG, productivity, stability, crs, win_transform)
-    print(f"   wrote {OUT_COG}: {size / 1e3:.1f} KB, 2 bands "
-          f"(productivity_mean_ndvi, stability_temporal_cv)")
+    print(
+        f"   wrote {OUT_COG}: {size / 1e3:.1f} KB, 2 bands "
+        f"(productivity_mean_ndvi, stability_temporal_cv)"
+    )
     print("\n   -> this is the M1 'stability COG' artifact: a per-pixel product")
     print("      the existing deck.gl-geotiff layer renders with a colormap,")
     print("      and the input to M3 zone clustering.")
