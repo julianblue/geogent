@@ -59,17 +59,12 @@ def _ndwi(green: np.ndarray, nir: np.ndarray) -> np.ndarray:
 
 
 def _evi(nir: np.ndarray, red: np.ndarray, blue: np.ndarray) -> np.ndarray:
-    """Enhanced Vegetation Index on reflectance-scaled (0..1) band values.
-
-    Sentinel-2 L2A digital numbers are reflectance * 10000; scale them down so
-    the EVI constants (the +1 and the 6/-7.5 coefficients) are dimensionally
-    correct.
-    """
-    nir_r = nir / 10000.0
-    red_r = red / 10000.0
-    blue_r = blue / 10000.0
-    denom = nir_r + 6.0 * red_r - 7.5 * blue_r + 1.0
-    return np.where(denom != 0, 2.5 * (nir_r - red_r) / denom, np.nan).astype("float32")
+    """Enhanced Vegetation Index. Inputs are reflectance in [0, 1] — the read
+    path scales raw DN to reflectance per collection before calling this, so the
+    EVI constants (the +1 and the 6/-7.5 coefficients) are dimensionally correct
+    for any sensor."""
+    denom = nir + 6.0 * red - 7.5 * blue + 1.0
+    return np.where(denom != 0, 2.5 * (nir - red) / denom, np.nan).astype("float32")
 
 
 def _nbr(nir: np.ndarray, swir22: np.ndarray) -> np.ndarray:

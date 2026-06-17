@@ -83,16 +83,25 @@ async def search_scenes(
     end_date: date,
     max_cloud_cover: float = 20,
     limit: int = 60,
+    collection: str | None = None,
+    cloud_field: str | None = "eo:cloud_cover",
 ) -> list[dict]:
-    """All low-cloud scenes intersecting ``bbox`` over a date range, oldest first."""
+    """All low-cloud scenes intersecting ``bbox`` over a date range, oldest first.
+
+    ``collection`` defaults to the configured Sentinel-2 collection; pass another
+    STAC collection id (e.g. ``landsat-c2-l2``) to search a different sensor.
+    ``cloud_field`` is the property the cloud filter targets, or ``None`` to skip
+    it (sensors without a cloud metric, e.g. SAR).
+    """
     payload: dict = {
-        "collections": [_collection()],
+        "collections": [collection or _collection()],
         "bbox": bbox,
         "datetime": f"{start_date.isoformat()}T00:00:00Z/{end_date.isoformat()}T23:59:59Z",
-        "query": {"eo:cloud_cover": {"lt": max_cloud_cover}},
         "sortby": [{"field": "properties.datetime", "direction": "asc"}],
         "limit": limit,
     }
+    if cloud_field is not None:
+        payload["query"] = {cloud_field: {"lt": max_cloud_cover}}
     async with _client() as client:
         resp = await client.post("/search", json=payload)
         resp.raise_for_status()

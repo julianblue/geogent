@@ -15,6 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from geogent_backend.geo.collections import CollectionName, supports_index
 from geogent_backend.geo.indices import IndexName
 from geogent_backend.geo.reducers import ReducerName
 from geogent_backend.schemas.raster import JobStatus
@@ -48,6 +49,7 @@ class TemporalFeaturesRecipe(BaseModel):
     field_id: int | None = None
     geometry_wkt: str | None = None
     bbox: tuple[float, float, float, float] | None = None
+    collection: CollectionName = CollectionName.sentinel_2_l2a
     index: IndexName = IndexName.ndvi
     reducer: ReducerName = ReducerName.field_memory
     reducer_params: dict[str, float] = Field(default_factory=dict)
@@ -63,6 +65,10 @@ class TemporalFeaturesRecipe(BaseModel):
         provided = [self.field_id is not None, self.geometry_wkt is not None, self.bbox is not None]
         if sum(provided) != 1:
             raise ValueError("provide exactly one of field_id, geometry_wkt, bbox")
+        if not supports_index(self.collection, self.index):
+            raise ValueError(
+                f"{self.collection.value} does not provide the bands for {self.index.value}"
+            )
         return self
 
 

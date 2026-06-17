@@ -74,6 +74,31 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 - **De-risked by** `apps/backend/spikes/cube_zones/` (cube builds in-process at
   0.85 MB/field; real within-field structure to cluster).
 
+### M1.5 — Generalize the engine (ag feature → temporal-raster engine)
+
+Turns the field-memory pipeline into a general temporal-raster engine without
+re-architecting; each piece reuses the cube/artifact/render scaffold.
+
+- [x] **Pluggable reducer registry** (`geo/reducers.py`): `field_memory`,
+      `composite` (median), `trend` (per-pixel slope/yr), `frequency` (fraction
+      above a threshold). Recipe gains `reducer` + `reducer_params`; each output
+      declares a `colormap` id the UI resolves (rdylgn/stability/diverging/
+      sequential).
+- [x] **Extended indices + SWIR unblock**: NBR (implemented), NDMI, MNDWI,
+      NDRE, SAVI; `zonal_stats` warps bands with `WarpedVRT` so SWIR/red-edge
+      co-register everywhere (not just the cube path).
+- [x] **Arbitrary AOI**: `field_id` | `geometry_wkt` | `bbox`; hard pixel-cap
+      guard (`cube_max_pixels`, default 4M @ 10 m) → 422 (decision: reject, not
+      auto-coarsen).
+- [x] **Collection registry** (`geo/collections.py`): Sentinel-2 L2A + Landsat
+      C2 L2 via logical-band aliasing; per-sensor DN→reflectance scale/offset so
+      the index kernels are sensor-agnostic (EVI/SAVI de-hardcoded off the S2
+      `/10000`); per-collection index availability validated (e.g. NDRE rejected
+      on Landsat, which has no red-edge band).
+- [ ] **Follow-ups:** SAR (Sentinel-1 RTC — own backscatter index family);
+      reducer-output colormap value-range tuning once seen on real data;
+      phenology-shape reducer (argmax/integral) as an alternate clustering input.
+
 ### M2 — Terrain fusion
 
 - [ ] `geo/terrain.py` — DEM provider (Copernicus GLO-30 via STAC) + derivatives

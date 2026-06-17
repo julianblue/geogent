@@ -23,7 +23,7 @@ from shapely.geometry import box, mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.config import get_settings
-from geogent_backend.geo import cube, reducers, stac
+from geogent_backend.geo import collections, cube, reducers, stac
 from geogent_backend.models.artifact import Artifact
 from geogent_backend.repositories.artifact_repo import ArtifactRepository
 from geogent_backend.repositories.field_repo import FieldRepository
@@ -91,6 +91,7 @@ def _build(
         recipe.reducer,
         resolution_m,
         recipe.reducer_params,
+        collection=collections.get_spec(recipe.collection),
     )
 
 
@@ -185,12 +186,15 @@ class ArtifactService:
                 geom_4326 = await _resolve_geometry(session, recipe)
                 bbox = list(shape(geom_4326).bounds)
                 max_scenes = min(recipe.max_scenes, self._settings.cube_max_scenes)
+                coll = collections.get_spec(recipe.collection)
                 scenes = await stac.search_scenes(
                     bbox,
                     recipe.start_date,
                     recipe.end_date,
                     max_cloud_cover=recipe.max_cloud_cover,
                     limit=max_scenes,
+                    collection=coll.stac_id,
+                    cloud_field=coll.cloud_field,
                 )
 
                 summary, cogs = await anyio.to_thread.run_sync(

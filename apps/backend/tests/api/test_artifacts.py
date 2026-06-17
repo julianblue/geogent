@@ -106,6 +106,22 @@ async def test_requires_exactly_one_aoi(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_index_unavailable_for_collection_returns_422(client: AsyncClient) -> None:
+    # NDRE needs a red-edge band Landsat lacks -> schema validation 422.
+    r = await client.post(
+        "/api/v1/analytics/temporal-features",
+        json={
+            "field_id": 1,
+            "collection": "landsat-c2-l2",
+            "index": "ndre",
+            "start_date": "2025-04-01",
+            "end_date": "2025-09-30",
+        },
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_temporal_features_requires_auth() -> None:
     # No get_current_user override here: the bearer guard must reject the call.
     transport = ASGITransport(app=app)

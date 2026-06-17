@@ -76,11 +76,11 @@ def test_ndwi_matches_hand_computation() -> None:
 
 
 def test_evi_matches_hand_computation() -> None:
-    nir = np.full(_SHAPE, 3000.0, dtype="float32")
-    red = np.full(_SHAPE, 1000.0, dtype="float32")
-    blue = np.full(_SHAPE, 500.0, dtype="float32")
+    # EVI now takes reflectance directly (the read path scales DN per collection).
+    nir = np.full(_SHAPE, 0.3, dtype="float32")
+    red = np.full(_SHAPE, 0.1, dtype="float32")
+    blue = np.full(_SHAPE, 0.05, dtype="float32")
     values = get_spec(IndexName.evi).compute(nir, red, blue)
-    # Reflectance-scaled (/10000): nir=0.3 red=0.1 blue=0.05
     n, r, b = 0.3, 0.1, 0.05
     expected = 2.5 * (n - r) / (n + 6.0 * r - 7.5 * b + 1.0)
     assert np.allclose(values, expected, atol=1e-5)

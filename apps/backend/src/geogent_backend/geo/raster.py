@@ -21,6 +21,7 @@ from rasterio.warp import transform_geom
 from rasterio.windows import from_bounds
 from shapely.geometry import shape
 
+from geogent_backend.geo.collections import COLLECTIONS, CollectionName, CollectionSpec
 from geogent_backend.geo.indices import IndexName, get_spec
 
 # GDAL tuning for COG-over-HTTP windowed reads (from the spike, minus the
@@ -52,6 +53,7 @@ def zonal_stats(
     scene_item: dict,
     index: IndexName,
     histogram_bins: int = 20,
+    collection: CollectionSpec | None = None,
 ) -> dict:
     """Compute zonal statistics for ``index`` over ``geom_4326`` within one scene.
 
@@ -61,6 +63,7 @@ def zonal_stats(
     {bin_edges, counts}}``.
     """
     spec = get_spec(index)
+    coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
     band_arrays: list[np.ndarray] = []
     geom_proj: dict | None = None
     win_transform = None
@@ -72,7 +75,7 @@ def zonal_stats(
             # warped onto exactly this grid via WarpedVRT, so mixed-resolution
             # bands (e.g. 20 m swir for NBR/NDMI) line up without a same-grid
             # restriction.
-            first_href = _band_href(scene_item, spec.band_keys[0])
+            first_href = _band_href(scene_item, coll.asset_key(spec.band_keys[0]))
             with rasterio.open(first_href) as ds0:
                 geom_proj = transform_geom("EPSG:4326", ds0.crs, geom_4326)
                 minx, miny, maxx, maxy = shape(geom_proj).bounds
@@ -96,9 +99,11 @@ def zonal_stats(
                 "resampling": Resampling.nearest,
             }
             for key in spec.band_keys:
-                href = _band_href(scene_item, key)
+                href = _band_href(scene_item, coll.asset_key(key))
                 with rasterio.open(href) as src, WarpedVRT(src, **vrt_opts) as vrt:
-                    band_arrays.append(vrt.read(1).astype("float32"))
+                    # Scale DN -> reflectance per collection so the index kernels
+                    # (esp. EVI/SAVI) are sensor-agnostic.
+                    band_arrays.append(vrt.read(1).astype("float32") * coll.scale + coll.offset)
     except RasterComputeError:
         raise
     except Exception as exc:  # rasterio / GDAL / network failures

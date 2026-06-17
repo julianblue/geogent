@@ -31,6 +31,7 @@ from rasterio.vrt import WarpedVRT
 from rasterio.warp import transform_geom
 from shapely.geometry import shape
 
+from geogent_backend.geo.collections import COLLECTIONS, CollectionName, CollectionSpec
 from geogent_backend.geo.indices import IndexName, get_spec
 from geogent_backend.geo.raster import GDAL_ENV, _band_href
 from geogent_backend.geo.reducers import ReducerName
@@ -119,6 +120,7 @@ def build_reduction(
     reducer: ReducerName,
     resolution_m: float = 10.0,
     params: dict | None = None,
+    collection: CollectionSpec | None = None,
 ) -> tuple[dict, dict[str, bytes]]:
     """Build the season cube and apply ``reducer`` to it per pixel.
 
@@ -132,6 +134,7 @@ def build_reduction(
 
     spec = get_spec(index)
     rspec = get_reducer_spec(reducer)
+    coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
 
     # Canonical grid: the first scene's UTM zone, the field's bounds, at the
     # requested resolution. Every scene is warped onto exactly this grid.
@@ -166,9 +169,10 @@ def build_reduction(
                 try:
                     bands: list[np.ndarray] = []
                     for key in spec.band_keys:
-                        href = _band_href(item, key)
+                        href = _band_href(item, coll.asset_key(key))
                         with rasterio.open(href) as src, WarpedVRT(src, **vrt_opts) as vrt:
-                            bands.append(vrt.read(1).astype("float32"))
+                            # DN -> reflectance per collection (sensor-agnostic indices).
+                            bands.append(vrt.read(1).astype("float32") * coll.scale + coll.offset)
                     values = spec.compute(*bands)
                     values = np.where(polygon_mask, values, np.nan).astype("float32")
                     layers.append(values)
@@ -202,6 +206,7 @@ def build_reduction(
     summary = {
         "reducer": reducer.value,
         "index": index.value,
+        "collection": coll.stac_id,
         "n_scenes_found": len(scene_items),
         "n_scenes_used": len(layers),
         "n_scenes_failed": failed,
