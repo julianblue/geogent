@@ -64,16 +64,17 @@ export type LayerSource =
       radius: number;
     }
   | {
-      // Field-memory COG layer (#65). Only the artifact id, chosen band, and
-      // asset URL ride along — the COG itself is refetched by FieldMemoryOverlay
-      // on thread reopen, so nothing heavy lands in the snapshot.
+      // Cube-reduction COG layer (#65). Only the artifact id, output name,
+      // colormap id, and asset URL ride along — the COG itself is refetched by
+      // FieldMemoryOverlay on thread reopen, so nothing heavy lands in the
+      // snapshot. `band` is a reducer output name (productivity, stability,
+      // slope, frequency, composite, …); `colormap` selects the GLSL ramp.
       kind: "fieldMemory";
       artifactId: string;
-      band: FieldMemoryBand;
+      band: string;
+      colormap: string;
       url: string;
     };
-
-export type FieldMemoryBand = "productivity" | "stability";
 
 export type MapLayer = {
   id: string;

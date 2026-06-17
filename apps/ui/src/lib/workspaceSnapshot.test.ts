@@ -171,29 +171,30 @@ describe("parseSnapshot", () => {
     ]);
   });
 
-  it("restores field-memory layer sources and rejects bad bands (#65)", () => {
+  it("restores field-memory layer sources and rejects incomplete ones (#65)", () => {
     const fm = {
       kind: "fieldMemory",
       artifactId: "cafe1234",
-      band: "stability",
-      url: "/api/proxy/analytics/artifacts/cafe1234/assets/stability.tif",
+      band: "slope",
+      colormap: "diverging",
+      url: "/api/proxy/analytics/artifacts/cafe1234/assets/slope.tif",
     };
     const parsed = parseSnapshot({
       v: 1,
       layers: [
-        { id: "fm-1", label: "Field memory — Stability", source: fm },
-        // Unknown band → source dropped, layer kept.
+        { id: "fm-1", label: "Trend", source: fm },
+        // Missing colormap → source dropped, layer kept.
         {
           id: "fm-bad",
-          label: "Bad band",
-          source: { kind: "fieldMemory", artifactId: "x", band: "humidity", url: "/x" },
+          label: "No colormap",
+          source: { kind: "fieldMemory", artifactId: "x", band: "slope", url: "/x" },
         },
       ],
       workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
     });
     expect(parsed?.layers).toEqual([
-      { id: "fm-1", label: "Field memory — Stability", visible: true, source: fm },
-      { id: "fm-bad", label: "Bad band", visible: true },
+      { id: "fm-1", label: "Trend", visible: true, source: fm },
+      { id: "fm-bad", label: "No colormap", visible: true },
     ]);
   });
 });

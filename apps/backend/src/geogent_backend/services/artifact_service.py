@@ -21,7 +21,7 @@ from shapely.geometry import mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.config import get_settings
-from geogent_backend.geo import cube, stac
+from geogent_backend.geo import cube, reducers, stac
 from geogent_backend.models.artifact import Artifact
 from geogent_backend.repositories.artifact_repo import ArtifactRepository
 from geogent_backend.repositories.field_repo import FieldRepository
@@ -37,8 +37,6 @@ from geogent_backend.storage.artifact_store import ArtifactStore, get_artifact_s
 
 logger = logging.getLogger(__name__)
 
-# One single-band COG per field-memory layer; the key is also the asset role.
-_FEATURE_ASSETS = ("productivity", "stability")
 _ASSET_MEDIA_TYPE = "image/tiff; application=geotiff"
 
 
@@ -52,6 +50,20 @@ def recipe_hash(recipe: TemporalFeaturesRecipe) -> str:
 
 def _asset_url(artifact_id: str, key: str) -> str:
     return f"/api/v1/analytics/artifacts/{artifact_id}/assets/{key}"
+
+
+def _build(
+    geom_4326: dict, scenes: list[dict], recipe: TemporalFeaturesRecipe, resolution_m: float
+) -> tuple[dict, dict[str, bytes]]:
+    """Blocking cube build + reduction; runs on a worker thread."""
+    return cube.build_reduction(
+        geom_4326,
+        scenes,
+        recipe.index,
+        recipe.reducer,
+        resolution_m,
+        recipe.reducer_params,
+    )
 
 
 def _to_response(row: Artifact) -> ArtifactResponse:
@@ -153,24 +165,28 @@ class ArtifactService:
                 )
 
                 summary, cogs = await anyio.to_thread.run_sync(
-                    cube.build_field_memory,
+                    _build,
                     geom_4326,
                     scenes,
-                    recipe.index,
+                    recipe,
                     self._settings.cube_resolution_m,
                 )
 
+                outputs = {o.name: o for o in reducers.get_spec(recipe.reducer).outputs}
                 assets: list[dict] = []
-                for role in _FEATURE_ASSETS:
-                    key = f"{role}.tif"
-                    await self._store.put(artifact_id, key, cogs[role])
+                for name, data in cogs.items():
+                    key = f"{name}.tif"
+                    await self._store.put(artifact_id, key, data)
+                    out = outputs[name]
                     assets.append(
                         ArtifactAsset(
-                            role=role,
+                            role=name,
                             key=key,
                             url=_asset_url(artifact_id, key),
                             media_type=_ASSET_MEDIA_TYPE,
-                            bands=[role],
+                            colormap=out.colormap,
+                            label=out.label,
+                            bands=[name],
                         ).model_dump()
                     )
                 await repo.set_result(artifact_id, summary, assets)

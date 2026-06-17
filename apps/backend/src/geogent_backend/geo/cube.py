@@ -19,7 +19,6 @@ out so they unit-test offline.
 from __future__ import annotations
 
 import math
-import warnings
 
 import numpy as np
 import rasterio
@@ -34,6 +33,8 @@ from shapely.geometry import shape
 
 from geogent_backend.geo.indices import IndexName, get_spec
 from geogent_backend.geo.raster import GDAL_ENV, _band_href
+from geogent_backend.geo.reducers import ReducerName
+from geogent_backend.geo.reducers import get_spec as get_reducer_spec
 
 
 class CubeError(Exception):
@@ -46,26 +47,19 @@ def _target_epsg(scene_item: dict) -> int | None:
     return int(epsg) if epsg is not None else None
 
 
-def reduce_field_memory(
-    cube: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Reduce a ``(time, y, x)`` index cube per pixel over time.
+def _decimal_years(dates: list[str]) -> np.ndarray:
+    """ISO ``YYYY-MM-DD`` dates → decimal years, aligned with the cube's time
+    axis (used by the trend reducer for an index-units-per-year slope)."""
+    import datetime as _dt
 
-    Returns ``(productivity, stability, n_obs)`` as ``(y, x)`` arrays:
-    productivity = nanmean over time, stability = temporal CV (std/mean, NaN
-    where mean <= 0), n_obs = count of finite observations.
-    """
-    if cube.ndim != 3:
-        raise CubeError("cube must be (time, y, x)")
-    with warnings.catch_warnings():
-        # All-NaN pixels (outside the polygon / fully cloudy) warn on nanmean;
-        # expected — they are masked out by callers via the polygon/ n_obs.
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        productivity = np.nanmean(cube, axis=0).astype("float32")
-        tstd = np.nanstd(cube, axis=0).astype("float32")
-        stability = np.where(productivity > 0, tstd / productivity, np.nan).astype("float32")
-    n_obs = np.sum(np.isfinite(cube), axis=0).astype("int32")
-    return productivity, stability, n_obs
+    out: list[float] = []
+    for d in dates:
+        try:
+            dd = _dt.date.fromisoformat(d)
+            out.append(dd.year + (dd.timetuple().tm_yday - 1) / 365.25)
+        except ValueError:
+            out.append(0.0)
+    return np.array(out, dtype="float64")
 
 
 def _feature_stats(layer: np.ndarray, inside: np.ndarray) -> dict:
@@ -118,22 +112,26 @@ def write_single_band_cog(
         return bytes(mem.read())
 
 
-def build_field_memory(
+def build_reduction(
     geom_4326: dict,
     scene_items: list[dict],
     index: IndexName,
+    reducer: ReducerName,
     resolution_m: float = 10.0,
+    params: dict | None = None,
 ) -> tuple[dict, dict[str, bytes]]:
-    """Build the season cube and reduce it to the field-memory layers.
+    """Build the season cube and apply ``reducer`` to it per pixel.
 
     BLOCKING: opens band COGs and warps each onto the canonical grid. Call via
-    ``to_thread``. Returns ``(summary_dict, {"productivity": bytes,
-    "stability": bytes})`` — one single-band COG per layer.
+    ``to_thread``. Returns ``(summary_dict, {output_name: cog_bytes})`` — one
+    single-band GeoTIFF per reducer output.
     """
+    params = params or {}
     if not scene_items:
         raise CubeError("No scenes to build a cube from.")
 
     spec = get_spec(index)
+    rspec = get_reducer_spec(reducer)
 
     # Canonical grid: the first scene's UTM zone, the field's bounds, at the
     # requested resolution. Every scene is warped onto exactly this grid.
@@ -186,7 +184,8 @@ def build_field_memory(
         raise CubeError("All scenes failed to read; cube is empty.")
 
     cube = np.stack(layers, axis=0)
-    productivity, stability, n_obs = reduce_field_memory(cube)
+    n_obs = np.sum(np.isfinite(cube), axis=0).astype("int32")
+    outputs = rspec.reduce(cube, _decimal_years(dates), params)
 
     inside = polygon_mask & (n_obs > 0)
     obs_in = n_obs[inside]
@@ -201,6 +200,7 @@ def build_field_memory(
     )
     used_dates = sorted(d for d in dates if d)
     summary = {
+        "reducer": reducer.value,
         "index": index.value,
         "n_scenes_found": len(scene_items),
         "n_scenes_used": len(layers),
@@ -213,16 +213,11 @@ def build_field_memory(
             "height": height,
         },
         "valid_obs": valid_obs,
-        "productivity": _feature_stats(productivity, inside),
-        "stability": _feature_stats(stability, inside),
+        "outputs": {out.name: _feature_stats(outputs[out.name], inside) for out in rspec.outputs},
     }
 
     cogs = {
-        "productivity": write_single_band_cog(
-            productivity, target_crs, transform, "productivity_mean_index"
-        ),
-        "stability": write_single_band_cog(
-            stability, target_crs, transform, "stability_temporal_cv"
-        ),
+        out.name: write_single_band_cog(outputs[out.name], target_crs, transform, out.name)
+        for out in rspec.outputs
     }
     return summary, cogs

@@ -2,14 +2,17 @@ import { NextRequest } from "next/server";
 
 import { backendFetch } from "@/lib/api";
 
-// Field-memory assets are single-band COGs. proxyJson can't carry them (it
-// stringifies the body), so this route streams the raw bytes through with the
-// session JWT attached, for deck.gl-geotiff to fetch same-origin.
-const ALLOWED_KEYS = new Set(["productivity.tif", "stability.tif"]);
+// Cube-reduction assets are single-band COGs (one per reducer output:
+// productivity.tif, stability.tif, slope.tif, frequency.tif, composite.tif, …).
+// proxyJson can't carry them (it stringifies the body), so this route streams
+// the raw bytes through with the session JWT attached for deck.gl-geotiff. The
+// key is constrained to a simple `<name>.tif` to avoid path games; the backend
+// also validates it against the artifact's declared assets.
+const ASSET_KEY = /^[a-z][a-z0-9_]*\.tif$/;
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string; key: string } }) {
   const { id, key } = params;
-  if (!ALLOWED_KEYS.has(key)) {
+  if (!ASSET_KEY.test(key)) {
     return new Response("Not found", { status: 404 });
   }
   const path = `/api/v1/analytics/artifacts/${encodeURIComponent(id)}/assets/${encodeURIComponent(key)}`;

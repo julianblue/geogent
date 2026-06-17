@@ -314,32 +314,43 @@ async def field_memory_for_field(
     start_date: str,
     end_date: str,
     index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    reducer: Literal["field_memory", "composite", "trend", "frequency"] = "field_memory",
+    threshold: float | None = None,
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
-    """Build a multi-season "field memory" layer for a field and return its summary.
+    """Build a multi-date data cube for a field and reduce it per pixel.
 
-    Stacks every low-cloud scene in [start_date, end_date] into a data cube and
-    reduces it per pixel into two layers: ``productivity`` (multi-date mean of
-    the index — how good each spot is) and ``stability`` (temporal coefficient
-    of variation — how consistent each spot is). Use this to find management
-    zones *within* one field, not a single-date or whole-field average.
+    Stacks every low-cloud scene in [start_date, end_date] into a cube and
+    applies ``reducer`` to the time axis. Use this for questions about patterns
+    *within* one field over time, not a single-date or whole-field average.
+    Reducers (each returns the named per-pixel output layers in ``summary``):
 
-    Returns ``{artifact_id, status, summary, ...}`` where ``summary`` has the
-    per-feature stats and, importantly, ``within_field_spread`` — a near-zero
-    spread means the field is uniform (no zones worth drawing); a larger spread
-    means there is real structure. Answer the user from ``summary``. Pass the
-    returned ``artifact_id`` to ``show_field_memory`` to render it on the map;
-    the heavy pixels themselves are never returned to you.
+    - ``field_memory`` (default) → ``productivity`` (multi-date mean) +
+      ``stability`` (temporal CV). The "where is consistently good vs erratic"
+      management-zone view.
+    - ``composite`` → ``composite``: the median index (a typical, cloud-free value).
+    - ``trend`` → ``slope``: per-pixel change per year (greening/browning, decline).
+    - ``frequency`` → ``frequency``: fraction of dates the index exceeds
+      ``threshold`` (e.g. water/snow/vegetation frequency). Set ``threshold``.
+
+    Returns ``{artifact_id, status, summary, ...}``. ``summary.outputs`` holds
+    per-output stats incl. ``within_field_spread`` — near-zero means uniform (no
+    zones worth drawing), larger means real structure. Answer from ``summary``;
+    pass ``artifact_id`` (and the output name) to ``show_field_memory`` to draw
+    it. The heavy pixels are never returned to you.
 
     ``index`` must be one of ``ndvi``, ``ndwi``, ``evi``.
     """
+    reducer_params = {"threshold": threshold} if threshold is not None else {}
     async with get_backend_client() as client:
         start = await client.post(
             "/api/v1/analytics/temporal-features",
             json={
                 "field_id": field_id,
                 "index": index,
+                "reducer": reducer,
+                "reducer_params": reducer_params,
                 "start_date": start_date,
                 "end_date": end_date,
                 "max_cloud_cover": max_cloud_cover,

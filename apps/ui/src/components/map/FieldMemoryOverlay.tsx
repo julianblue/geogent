@@ -5,14 +5,14 @@ import type { IControl } from "maplibre-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { MultiCOGLayer } from "@developmentseed/deck.gl-geotiff";
 import { defaultDecoderPool } from "@developmentseed/geotiff";
-import type { RasterModule } from "@developmentseed/deck.gl-raster/gpu-modules";
 
+import { useMapState, type MapLayer } from "@/components/map/MapStateProvider";
 import {
-  useMapState,
-  type FieldMemoryBand,
-  type MapLayer,
-} from "@/components/map/MapStateProvider";
-import { PRODUCTIVITY_MODULE, STABILITY_MODULE } from "@/lib/raster-modules";
+  COLORMAP_LEGENDS,
+  COLORMAP_MODULES,
+  DEFAULT_COLORMAP,
+  PRODUCTIVITY_MODULE,
+} from "@/lib/raster-modules";
 
 type FieldMemorySource = Extract<MapLayer["source"], { kind: "fieldMemory" }>;
 type FieldMemoryLayer = MapLayer & { source: FieldMemorySource };
@@ -21,35 +21,14 @@ function isFieldMemoryLayer(layer: MapLayer): layer is FieldMemoryLayer {
   return layer.source?.kind === "fieldMemory";
 }
 
-const BAND_PIPELINE: Record<FieldMemoryBand, RasterModule[]> = {
-  productivity: [PRODUCTIVITY_MODULE],
-  stability: [STABILITY_MODULE],
-};
-
-// Three-stop legends mirroring the GLSL ramps in raster-modules.ts.
-const BAND_LEGEND: Record<FieldMemoryBand, { stops: string[]; low: string; high: string }> = {
-  productivity: {
-    stops: ["rgb(166,41,41)", "rgb(252,232,130)", "rgb(26,140,51)"],
-    low: "poor",
-    high: "productive",
-  },
-  stability: {
-    stops: ["rgb(26,140,51)", "rgb(252,232,130)", "rgb(214,48,38)"],
-    low: "stable",
-    high: "unstable",
-  },
-};
-
 /**
- * FieldMemoryOverlay renders multi-season "field memory" COGs (#65) — the
- * per-pixel productivity or stability layer built by `field_memory_for_field`.
- * Like AggregationOverlay it owns no layer state: the `show_field_memory` tool
- * registers a `fieldMemory` MapLayer and this overlay reacts, honouring the
- * layer's visibility/opacity from the Layer Manager. Each layer is a
- * single-band float COG rendered through the band's colormap module.
- *
- * It uses its own MapboxOverlay so it doesn't fight the Sentinel-2 or
- * aggregation deck instances for control.
+ * FieldMemoryOverlay renders cube-reduction COGs (#65) — productivity,
+ * stability, trend, frequency, … — for any MapState layer whose source is a
+ * `fieldMemory`. The reducer output's `colormap` id selects the GLSL ramp and
+ * the legend, so new reducers need no change here as long as they reuse a known
+ * colormap. Like AggregationOverlay it owns no layer state and honours the
+ * Layer Manager's visibility/opacity; it uses its own MapboxOverlay so it
+ * doesn't fight the Sentinel-2 / aggregation deck instances.
  */
 export function FieldMemoryOverlay() {
   const { mapRef, mapReady, layers } = useMapState();
@@ -89,7 +68,7 @@ export function FieldMemoryOverlay() {
             id: l.id,
             sources: { value: { url: l.source.url } },
             composite: { r: "value" },
-            renderPipeline: BAND_PIPELINE[l.source.band],
+            renderPipeline: [COLORMAP_MODULES[l.source.colormap] ?? PRODUCTIVITY_MODULE],
             opacity: l.opacity ?? 1,
             pool: decoderPool,
           }),
@@ -103,7 +82,7 @@ export function FieldMemoryOverlay() {
   return (
     <div className="pointer-events-none absolute bottom-16 right-3 z-10 flex flex-col gap-2">
       {visible.map((l) => {
-        const legend = BAND_LEGEND[l.source.band];
+        const legend = COLORMAP_LEGENDS[l.source.colormap] ?? COLORMAP_LEGENDS[DEFAULT_COLORMAP];
         return (
           <div
             key={l.id}

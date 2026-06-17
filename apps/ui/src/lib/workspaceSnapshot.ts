@@ -176,13 +176,17 @@ function parseLayers(raw: unknown): MapLayer[] {
       } else if (
         src.kind === "fieldMemory" &&
         typeof src.artifactId === "string" &&
-        (src.band === "productivity" || src.band === "stability") &&
+        typeof src.band === "string" &&
+        src.band.length > 0 &&
+        typeof src.colormap === "string" &&
+        src.colormap.length > 0 &&
         typeof src.url === "string"
       ) {
         layer.source = {
           kind: "fieldMemory",
           artifactId: src.artifactId,
           band: src.band,
+          colormap: src.colormap,
           url: src.url,
         };
       }

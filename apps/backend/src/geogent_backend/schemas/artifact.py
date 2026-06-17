@@ -16,6 +16,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 from geogent_backend.geo.indices import IndexName
+from geogent_backend.geo.reducers import ReducerName
 from geogent_backend.schemas.raster import JobStatus
 
 __all__ = [
@@ -44,6 +45,8 @@ class TemporalFeaturesRecipe(BaseModel):
     recipe_version: int = 1
     field_id: int
     index: IndexName = IndexName.ndvi
+    reducer: ReducerName = ReducerName.field_memory
+    reducer_params: dict[str, float] = Field(default_factory=dict)
     start_date: date
     end_date: date
     max_cloud_cover: float = Field(default=20, ge=0, le=100)
@@ -82,6 +85,7 @@ class ValidObs(BaseModel):
 
 
 class TemporalFeaturesSummary(BaseModel):
+    reducer: ReducerName
     index: IndexName
     n_scenes_found: int
     n_scenes_used: int
@@ -89,8 +93,8 @@ class TemporalFeaturesSummary(BaseModel):
     time_span: tuple[date, date] | None
     grid: GridInfo
     valid_obs: ValidObs
-    productivity: FeatureStats
-    stability: FeatureStats
+    # One entry per reducer output (e.g. productivity/stability, or slope, …).
+    outputs: dict[str, FeatureStats]
 
 
 class ArtifactAsset(BaseModel):
@@ -98,6 +102,8 @@ class ArtifactAsset(BaseModel):
     key: str
     url: str
     media_type: str
+    colormap: str = "rdylgn"
+    label: str = ""
     bands: list[str] = Field(default_factory=list)
 
 
