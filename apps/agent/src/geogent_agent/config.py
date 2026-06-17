@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     # false, the agent falls back to the structural drop-only trim above.
     agent_history_summarize: bool = Field(default=True)
 
+    # Optional dedicated model for history summarization. Summarization is a
+    # cheap, mechanical task, so pointing it at a smaller/faster model than
+    # AGENT_MODEL cuts the incremental cost/latency of the summarizing trimmer.
+    # When unset, summarization reuses the main agent model. Same name format as
+    # AGENT_MODEL (e.g. "openrouter:google/gemini-2.5-flash").
+    agent_summary_model: str | None = Field(default=None)
+
     # Amazon Bedrock. Credentials are resolved via the standard boto3
     # chain (env vars, shared config, instance/task role) — not stored here.
     bedrock_model_id: str = Field(default="us.anthropic.claude-sonnet-4-5-20250929-v1:0")

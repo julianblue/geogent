@@ -38,7 +38,9 @@ async def _summarize_history(
     are sent."""
     rendered = render_messages(new_messages)
     prior_block = f"Summary so far:\n{prior_summary}\n\n" if prior_summary else ""
-    model = get_chat_model().with_config(
+    # Summarization can use a cheaper/faster dedicated model; falls back to the
+    # main agent model when AGENT_SUMMARY_MODEL is unset.
+    model = get_chat_model(get_settings().agent_summary_model).with_config(
         **build_tracing_config(configurable, architecture="summarizer")
     )
     response = await model.ainvoke(
