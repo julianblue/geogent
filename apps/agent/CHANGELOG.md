@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.5.0](https://github.com/julianblue/geogent/compare/geogent-agent-v0.4.0...geogent-agent-v0.5.0) (2026-06-17)
+
+
+### Features
+
+* **agent:** conversation context trimming + eval guardrail scorer & coverage ([aba426c](https://github.com/julianblue/geogent/commit/aba426c9681da221063e4c8b5a5dbc27583e9526))
+* **agent:** field-memory data tool + show_field_memory render tool ([#65](https://github.com/julianblue/geogent/issues/65)) ([2b0aa29](https://github.com/julianblue/geogent/commit/2b0aa293953ba1780d977ba2e928d4e048dcff0c))
+* **agent:** optional dedicated summary model for the trimmer ([8b5f69e](https://github.com/julianblue/geogent/commit/8b5f69e4e61c45ec3a770e7740138c98d0680f58))
+* **agent:** summarizing trimmer — fold dropped turns into a running summary ([7ae69ef](https://github.com/julianblue/geogent/commit/7ae69efefdab7b8e450aab9b0c44cd6e281c58ec))
+* **agent:** tool-contract + prompt fixes clear both xfail eval cases ([3442be5](https://github.com/julianblue/geogent/commit/3442be5a39f3e2f0588e9c82c91eefe46a4f7cc7))
+* arbitrary AOI (geometry/bbox) + pixel-cap guard ([#65](https://github.com/julianblue/geogent/issues/65)) ([b5c3652](https://github.com/julianblue/geogent/commit/b5c3652f3ad4419ed78577d598b535a9a5e93bf3))
+* EuroCrops Germany (Brandenburg) parcels — ingest, crop queries, evals ([1d41e0c](https://github.com/julianblue/geogent/commit/1d41e0c7407abc3500b5884d4c3aba6287edd63c))
+* extend index set + WarpedVRT-align zonal_stats ([#65](https://github.com/julianblue/geogent/issues/65)) ([1f51cf1](https://github.com/julianblue/geogent/commit/1f51cf1fb1181c9c7bd7ffffe49cc70d88506756))
+* multi-collection cube (Sentinel-2 + Landsat) with reflectance scaling ([#65](https://github.com/julianblue/geogent/issues/65)) ([75ba17c](https://github.com/julianblue/geogent/commit/75ba17cd1169a6958f7cb24703856673617776e0))
+* pluggable temporal reducer registry — composite/trend/frequency ([#65](https://github.com/julianblue/geogent/issues/65)) ([b4d2fd4](https://github.com/julianblue/geogent/commit/b4d2fd42f837717abc181dce832eba420bae96f6))
+* **routing:** routing, isochrones & geocoding tools ([#55](https://github.com/julianblue/geogent/issues/55)) ([88fdd41](https://github.com/julianblue/geogent/commit/88fdd416b4c2c28d09e0bc94f709037edda59270))
+* satellite data cubes — general temporal-raster engine + "field memory" zones ([#65](https://github.com/julianblue/geogent/issues/65)) ([973a9ab](https://github.com/julianblue/geogent/commit/973a9ab3c60e691c62460f84607968159f8a9587))
+* **ui:** agent-composed dashboards via curated render_dashboard tool ([6d372b5](https://github.com/julianblue/geogent/commit/6d372b5c011b74f6ffd433e880df72b204d68f50))
+* **ui:** agriculture widgets — field selection, zonal stats, NDVI series, composite ([#24](https://github.com/julianblue/geogent/issues/24)) ([c00c9cc](https://github.com/julianblue/geogent/commit/c00c9cc2e7b0057ec721cad12ec6e2c2c5895198))
+* **ui:** agriculture widgets — field selection, zonal stats, NDVI series, composite ([#24](https://github.com/julianblue/geogent/issues/24)) ([0428fbe](https://github.com/julianblue/geogent/commit/0428fbeac795b1ec6081a8b8022f6f12a9edb460))
+* **ui:** deck.gl analytics aggregation layers — heatmap & hexbin ([#57](https://github.com/julianblue/geogent/issues/57)) ([ef40d2f](https://github.com/julianblue/geogent/commit/ef40d2fb5dc391518848a80613391c07a9c6bf8d))
+
+
+### Bug Fixes
+
+* **agent:** budget only the unsummarized tail; bounded summarizer-failure fallback ([56cab0e](https://github.com/julianblue/geogent/commit/56cab0ef153670553417608f80d30b8e6205c2b0))
+* **agent:** enforce min_length on DashboardSpec lists to match Zod ([57d68ad](https://github.com/julianblue/geogent/commit/57d68ada270672b36914e7f2f93185b36191da42))
+* **agent:** smaller trim fallback + tools_forbidden parse tests ([46a5c7b](https://github.com/julianblue/geogent/commit/46a5c7b66419be4471665b86e37e41798380a911))
+* **routing:** address PR review — hardening & error clarity ([#55](https://github.com/julianblue/geogent/issues/55)) ([421bcd7](https://github.com/julianblue/geogent/commit/421bcd7272e0ec4b8449b52638a8938496672ecb))
+
+
+### Documentation
+
+* add repository CONTEXT.md and per-app CLAUDE.md guides ([f918d3e](https://github.com/julianblue/geogent/commit/f918d3e59e0df16ae0b6e5ec4a9643538da80841))
+* **adr:** recommend assistant-ui generative UI over json-render/A2UI ([c976d7f](https://github.com/julianblue/geogent/commit/c976d7f66df6884b5e0d1a37b248a6f57628d5f6))
+
 ## [0.4.0](https://github.com/julianblue/geogent/compare/geogent-agent-v0.3.0...geogent-agent-v0.4.0) (2026-05-25)
 
 
