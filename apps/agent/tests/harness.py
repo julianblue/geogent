@@ -255,6 +255,88 @@ def build_backend_stub() -> FastAPI:
             "error": None,
         }
 
+    # --- routing / geocoding (#55): mirror apps/backend response shapes -------
+
+    @app.post("/api/v1/routing/route")
+    def route(payload: dict) -> dict:
+        coords = payload.get("coordinates") or [[0.0, 0.0], [0.0, 0.0]]
+        first = coords[0]
+        last = coords[-1]
+
+        def _pt(c: object) -> list[float]:
+            if isinstance(c, dict):
+                return [c.get("longitude", 0.0), c.get("latitude", 0.0)]
+            return list(c)  # type: ignore[arg-type]
+
+        return {
+            "distance_m": 21340.0,
+            "duration_s": 1530.0,
+            "profile": payload.get("profile", "driving"),
+            "geometry": {"type": "LineString", "coordinates": [_pt(first), _pt(last)]},
+        }
+
+    @app.post("/api/v1/routing/matrix")
+    def matrix(payload: dict) -> dict:
+        n = max(len(payload.get("coordinates") or []), 1)
+        durations = [[0.0 if i == j else 1200.0 for j in range(n)] for i in range(n)]
+        distances = [[0.0 if i == j else 25000.0 for j in range(n)] for i in range(n)]
+        return {
+            "durations_s": durations,
+            "distances_m": distances,
+            "profile": payload.get("profile", "driving"),
+        }
+
+    @app.post("/api/v1/routing/isochrone")
+    def isochrone(payload: dict) -> dict:
+        lon = payload.get("longitude", 0.0)
+        lat = payload.get("latitude", 0.0)
+        d = 0.05
+        ring = [
+            [lon - d, lat - d],
+            [lon + d, lat - d],
+            [lon + d, lat + d],
+            [lon - d, lat + d],
+            [lon - d, lat - d],
+        ]
+        return {
+            "profile": payload.get("profile", "driving"),
+            "range_minutes": payload.get("range_minutes", [10]),
+            "geojson": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {"type": "Polygon", "coordinates": [ring]},
+                    }
+                ],
+            },
+        }
+
+    @app.get("/api/v1/geocode")
+    def geocode(q: str, limit: int = 5) -> dict:
+        return {
+            "results": [
+                {
+                    "display_name": f"{q}, France",
+                    "longitude": 2.3522,
+                    "latitude": 48.8566,
+                    "type": "city",
+                    "bbox": [2.2, 48.8, 2.5, 48.9],
+                }
+            ]
+        }
+
+    @app.get("/api/v1/geocode/reverse")
+    def reverse_geocode(lon: float, lat: float) -> dict:
+        return {
+            "display_name": "Champ de Mars, 5 Avenue Anatole France, Paris, France",
+            "longitude": lon,
+            "latitude": lat,
+            "type": "tourism",
+            "address": {"city": "Paris", "country": "France"},
+        }
+
     return app
 
 

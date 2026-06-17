@@ -1,0 +1,348 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "What area is within a 10-minute drive of the Eiffel Tower?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "0d29e703-f1a0-40f8-ace2-b99915754fcf"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 7211,
+            "total_tokens": 7218,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6490,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0004285,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0004285,
+              "upstream_inference_prompt_cost": 0.000411,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710894-AryFTfwHicsFM4ZgTMUl",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-b649-7780-945a-e8062bd11ff1-0",
+        "tool_calls": [
+          {
+            "name": "geocode_place",
+            "args": {
+              "query": "Eiffel Tower"
+            },
+            "id": "tool_geocode_place_5SXbEJd4veDdbeZWj4bt",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7211,
+          "output_tokens": 7,
+          "total_tokens": 7218,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 6490
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"lat\": 48.8582599, \"lon\": 2.2945006, \"display_name\": \"Tour Eiffel, 5, Avenue Anatole France, Quartier du Gros-Caillou, Paris 7e Arrondissement, Paris, \u00cele-de-France, France m\u00e9tropolitaine, 75007, France\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "geocode_place",
+        "id": "e4e05c7f-2661-48a6-9e2f-9586ec2c8953",
+        "tool_call_id": "tool_geocode_place_5SXbEJd4veDdbeZWj4bt",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 15,
+            "prompt_tokens": 7277,
+            "total_tokens": 7292,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6462,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00047586,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00047586,
+              "upstream_inference_prompt_cost": 0.00043836,
+              "upstream_inference_completions_cost": 3.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710896-LqutIET7C9nDaXogwWxp",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-bc46-7383-bd7b-3c3c95a16b4b-0",
+        "tool_calls": [
+          {
+            "name": "isochrone_for",
+            "args": {
+              "range_minutes": [
+                10
+              ],
+              "latitude": 48.8582599,
+              "longitude": 2.2945006,
+              "profile": "driving"
+            },
+            "id": "tool_isochrone_for_4zF7NnRLFUaP94GpdpDD",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7277,
+          "output_tokens": 15,
+          "total_tokens": 7292,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 6462
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"profile\": \"driving\", \"range_minutes\": [10.0], \"geojson\": {\"type\": \"FeatureCollection\", \"features\": [{\"type\": \"Feature\", \"properties\": {}, \"geometry\": {\"type\": \"Polygon\", \"coordinates\": [[[2.2445006000000003, 48.8082599], [2.3445006, 48.8082599], [2.3445006, 48.9082599], [2.2445006000000003, 48.9082599], [2.2445006000000003, 48.8082599]]]}}]}}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "isochrone_for",
+        "id": "3d44dfef-85d4-4ae5-aa30-c2752681648e",
+        "tool_call_id": "tool_isochrone_for_4zF7NnRLFUaP94GpdpDD",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 147,
+            "prompt_tokens": 7325,
+            "total_tokens": 7472,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6320,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0008586,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0008586,
+              "upstream_inference_prompt_cost": 0.0004911,
+              "upstream_inference_completions_cost": 0.0003675
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710897-ts1M3oEY3nCEtvOQqybE",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-bfd7-7d92-8a53-dd10045f99f8-0",
+        "tool_calls": [
+          {
+            "name": "area_of",
+            "args": {
+              "geometry_wkt": "POLYGON ((2.2445006000000003 48.8082599, 2.3445006 48.8082599, 2.3445006 48.9082599, 2.2445006000000003 48.9082599, 2.2445006000000003 48.8082599))"
+            },
+            "id": "tool_area_of_dOp8Gdoa6z8XqMG9G96v",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7325,
+          "output_tokens": 147,
+          "total_tokens": 7472,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 6320
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "12345.6",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "area_of",
+        "id": "973f0b94-0241-408e-aa81-f6e972a29c25",
+        "tool_call_id": "tool_area_of_dOp8Gdoa6z8XqMG9G96v",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The area within a 10-minute drive of the Eiffel Tower is approximately 12345.6 square meters. I've also added the isochrone to the map.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 40,
+            "prompt_tokens": 7483,
+            "total_tokens": 7523,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 7121,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00042223,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00042223,
+              "upstream_inference_prompt_cost": 0.00032223,
+              "upstream_inference_completions_cost": 0.0001
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710898-fzOk9oQwb2SvbH3ayE88",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-c57a-7132-9826-cc60cb9c213d-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7483,
+          "output_tokens": 40,
+          "total_tokens": 7523,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 7121
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "summary": "",
+    "summarized_count": 0
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:58197",
+    "run_id": "019ed63e-b241-7f02-9211-2dc8d4d26716",
+    "thread_id": "ce2dcb97-0c1b-4bc3-9fd4-b850cee3abf8",
+    "source": "loop",
+    "step": 7,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "346dad0a-7fe9-4c79-8bfd-c0758e5bd17b"
+  },
+  "created_at": "2026-06-17T15:41:39.455170+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f16a630-80ca-6fff-8007-6abc94b7644c",
+    "thread_id": "ce2dcb97-0c1b-4bc3-9fd4-b850cee3abf8",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f16a630-7778-6cf4-8006-b0f1440e8bc5",
+    "thread_id": "ce2dcb97-0c1b-4bc3-9fd4-b850cee3abf8",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f16a630-80ca-6fff-8007-6abc94b7644c",
+  "parent_checkpoint_id": "1f16a630-7778-6cf4-8006-b0f1440e8bc5"
+}
