@@ -74,7 +74,10 @@ class ArtifactService:
         store: ArtifactStore | None = None,
     ) -> None:
         self._session = session
-        self._owner = owner
+        # Normalize to a non-NULL sentinel: Postgres treats NULLs as distinct in
+        # UNIQUE(owner, recipe_hash), so a NULL owner would defeat the
+        # content-addressing dedup. "" means "unowned" (e.g. service-internal).
+        self._owner = owner or ""
         self._repo = ArtifactRepository(session)
         self._store = store or get_artifact_store()
         self._settings = get_settings()
@@ -108,13 +111,18 @@ class ArtifactService:
 
     async def get(self, artifact_id: str) -> ArtifactResponse | None:
         row = await self._repo.get(artifact_id)
-        if row is None or (self._owner is not None and row.owner != self._owner):
+        if row is None or row.owner != self._owner:
             return None
         return _to_response(row)
 
     async def get_asset(self, artifact_id: str, key: str) -> bytes | None:
         row = await self._repo.get(artifact_id)
-        if row is None or (self._owner is not None and row.owner != self._owner):
+        if row is None or row.owner != self._owner:
+            return None
+        # Only serve keys this artifact actually declared — never read arbitrary
+        # files under its directory, even for an owner who knows the id.
+        declared = {a.get("key") for a in (row.assets or [])}
+        if key not in declared:
             return None
         return await self._store.get(artifact_id, key)
 

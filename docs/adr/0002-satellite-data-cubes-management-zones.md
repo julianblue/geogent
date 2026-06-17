@@ -11,13 +11,13 @@ widget / `render_dashboard` composition layer).
 Add a **multi-temporal data-cube** capability and, on top of it,
 **management-zone delineation** — clustering multi-seasonal vegetation patterns
 fused with terrain (and, later, soil/yield) into agronomic zones with an
-explanation of *why* each zone exists.
+explanation of _why_ each zone exists.
 
 The load-bearing decision is a single architectural rule that keeps the agent
 thin (CONTEXT.md principle #1):
 
 > **Heavy datasets (cubes, derived layers, zone maps) are content-addressed
-> server-side artifacts with stable IDs. The agent manipulates *handles*, never
+> server-side artifacts with stable IDs. The agent manipulates _handles_, never
 > pixels. Each cube tool consumes artifact IDs and returns a new artifact ID
 > plus a compact summary + a render URL.**
 
@@ -28,10 +28,11 @@ Chosen path, in tiers:
 
 1. **Enabler (small, ships first):** extend the time-series job to emit a
    **scene manifest** (per-scene IDs + band hrefs), not just scalars. One change
-   that unblocks temporal playback (#58) *and* feeds the cube builder.
+   that unblocks temporal playback (#58) _and_ feeds the cube builder.
 2. **Cube + temporal features:** `build_cube` and `temporal_features` on
-   **in-process xarray + stackstac** behind the existing `geo/` seam, producing
-   a **stability ("field memory") COG**. The first per-pixel product; no
+   **in-process numpy + rasterio (`WarpedVRT`)** behind the existing `geo/` seam
+   (see the D2 correction below — _not_ xarray/stackstac), producing the
+   per-pixel **"field memory"** layers. The first per-pixel product; no
    clustering risk yet.
 3. **Terrain fusion:** a `geo/terrain.py` DEM provider + terrain derivatives
    (slope/aspect/TWI/curvature), co-registered to the cube grid. Also clears the
@@ -71,7 +72,7 @@ per-scene path.
   items a cube builder needs.
 - **Client-side COG rendering** — the UI already paints COGs with
   `MultiCOGLayer` (`@developmentseed/deck.gl-geotiff`) and inline GLSL colormaps
-  (`RasterModule`). A zone map is the same layer with a *discrete* colormap.
+  (`RasterModule`). A zone map is the same layer with a _discrete_ colormap.
 - **Snapshot persistence (#20)** — overlays carry their `LayerSource` into the
   thread snapshot and repaint reactively, so a cube/zone artifact becomes a
   durable conversational object with no extra plumbing.
@@ -85,7 +86,7 @@ Not "compute NDVI clusters" — that's commodity. The differentiators:
 1. **"Field memory" — temporal stability zones.** Reduce the multi-season cube
    per pixel into two axes: **productivity** (multi-year mean/integral NDVI) and
    **stability** (temporal CV). The high-value output is a 3×3 matrix —
-   *consistently high / consistently low / unstable* — each cell mapping to a
+   _consistently high / consistently low / unstable_ — each cell mapping to a
    distinct decision (invest / investigate the constraint / don't bother with
    variable rate). More actionable than raw k-means, and the product metaphor we
    lead with.
@@ -98,31 +99,31 @@ Not "compute NDVI clusters" — that's commodity. The differentiators:
    information / per-zone distributions; the LLM writes the causal story
    ("low-stable zone coincides with slope >8% + convex curvature → erosion-prone
    → reduced seeding + cover crop"). Numbers from a data tool, synthesis from the
-   model. This is where an *agent* beats a GIS tool.
+   model. This is where an _agent_ beats a GIS tool.
 4. **Anomaly-vs-self.** Because the cube holds each pixel's own history, flag
-   pixels deviating from *their own* baseline this season (drainage failure,
+   pixels deviating from _their own_ baseline this season (drainage failure,
    pest, machinery skip). Change-vs-self, complementary to change-detection (#25,
    change-vs-time).
 5. **Close the loop — VRA export.** Zones → variable-rate prescription map
    (seeding, N) exported as GeoJSON/Shapefile/ISO-XML for the tractor. The
-   natural HITL "save/export" endpoint and what makes the feature *matter*.
+   natural HITL "save/export" endpoint and what makes the feature _matter_.
 
 ## Decisions (the open forks, resolved)
 
 These are the architectural choices the cube path forces. Marked recommended;
 this ADR is **proposed** pending owner sign-off.
 
-### D1 — Cube as content-addressed artifact  ✅
+### D1 — Cube as content-addressed artifact ✅
 
 New backend `artifacts` registry: `(id, type, recipe_hash, status, storage_uris,
 summary_json, provenance, created_at)`, reused by `recipe_hash`. Artifact types:
 `cube`, `temporal_layer`, `terrain_layer`, `zone_map`. Outputs are written as
 COGs so the existing deck.gl render path displays them directly. This generalizes
 `raster_stat_cache` (immutability + hashing) and `raster_jobs` (lifecycle).
-**Provenance is intrinsic** — the recipe hash *is* the audit trail ("47 scenes,
+**Provenance is intrinsic** — the recipe hash _is_ the audit trail ("47 scenes,
 2021–2024, NDVI, SCL-masked, k=4 by silhouette").
 
-### D2 — Compute engine: in-process numpy + rasterio for v1  ✅
+### D2 — Compute engine: in-process numpy + rasterio for v1 ✅
 
 Build the cube in-process behind the `geo/` seam, with **zero new heavy deps**:
 windowed COG reads + `rasterio.vrt.WarpedVRT` for canonical-grid alignment, and
@@ -132,7 +133,7 @@ with the raster-compute spike's "don't stand up infra we don't need."
 
 > **Implementation correction (M1, `geo/cube.py`).** This ADR originally
 > proposed `xarray` + `stackstac` (+ `rioxarray`). On building M1 that proved
-> the wrong trade for *this* backend: `stackstac` hard-depends on `dask`, and
+> the wrong trade for _this_ backend: `stackstac` hard-depends on `dask`, and
 > `xarray`/`rioxarray` pull `pandas`/`pyproj` — exactly the heavyweight stack
 > this repo deliberately quarantines (cf. the `ingest` dependency group kept out
 > of CI). The spike showed the cube is **0.85 MB at field scale** and the
@@ -141,9 +142,9 @@ with the raster-compute spike's "don't stand up infra we don't need."
 > `WarpedVRT` delivers the same canonical-grid reprojection `stackstac` would
 > have. The cube is a small `(time, y, x)` ndarray, not an xarray `DataArray`.
 
-- *Rejected for v1:* `xarray`/`stackstac`/`dask` (dependency weight unjustified
+- _Rejected for v1:_ `xarray`/`stackstac`/`dask` (dependency weight unjustified
   at field scale); a standing worker cluster (premature; always-on cost).
-- *Trigger to revisit (→ xarray/Zarr):* persisting/serving *full* cubes for
+- _Trigger to revisit (→ xarray/Zarr):_ persisting/serving _full_ cubes for
   repeated re-querying, AOIs beyond single-farm scale, or lazy/chunked cubes
   that exceed a job's memory budget.
 
@@ -155,23 +156,23 @@ with the raster-compute spike's "don't stand up infra we don't need."
 > co-registration then reuses the same primitive. M1 also needs per-pixel SCL
 > cloud masking (clouds left in a pixel's series fake temporal instability).
 
-### D3 — Storage: object storage (MinIO dev / S3 prod)  ✅
+### D3 — Storage: object storage (MinIO dev / S3 prod) ✅
 
 Artifact COGs live in object storage; the browser fetches them directly via the
 existing deck.gl-geotiff path (mirrors how `sentinel-cogs` is read today). Add
 MinIO to the compose stack for local dev.
 
-- *Rejected:* PostGIS out-db raster (couples raster lifecycle to the DB, no
+- _Rejected:_ PostGIS out-db raster (couples raster lifecycle to the DB, no
   client-direct read path, fights the established COG-over-HTTP pattern).
 
-### D4 — Rendering: reuse `MultiCOGLayer`; TiTiler deferred  ✅
+### D4 — Rendering: reuse `MultiCOGLayer`; TiTiler deferred ✅
 
 A management-zone overlay is `MultiCOGLayer` with a **discrete/step colormap**
 instead of a continuous one. So per-pixel classified overlays need: a zone COG
 (D1/D3) + one new `LayerSource` arm + one categorical colormap. **TiTiler is a
 later scale optimization, not a v1 prerequisite.**
 
-### D5 — Tool surface: recipe-first + primitives as escape hatch  ✅
+### D5 — Tool surface: recipe-first + primitives as escape hatch ✅
 
 Ship one opinionated high-level tool, `delineate_management_zones`, that runs the
 whole pipeline server-side (the 90% path), **and** expose mid-level primitives
@@ -180,7 +181,7 @@ exploration and the "re-cluster into 3 / drop the drought year" follow-ups.
 Chaining only micro-tools is token-heavy and error-prone for the model; a single
 recipe tool keeps trajectories reliable and eval-able.
 
-### D6 — v1 fusion scope: terrain only  ✅
+### D6 — v1 fusion scope: terrain only ✅
 
 v1 clusters temporal-stability features + terrain derivatives. Soil (SoilGrids),
 uploaded yield-monitor data, weather/GDD, and ECa are deferred — but the

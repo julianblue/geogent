@@ -90,11 +90,12 @@ def write_single_band_cog(
 ) -> bytes:
     """Write one float32 layer as a single-band GeoTIFF and return its bytes.
 
-    Single-band (not multi-band) so each layer maps to one COG URL — the shape
-    the UI's MultiCOGLayer renders with a colormap. Production swaps
-    ``driver="COG"`` + object storage; a tiled GTiff keeps v1 dependency-free
-    while remaining a valid windowed-read source. NaN marks nodata; the UI
-    discards NaN pixels in-shader.
+    v1 emits a **tiled GeoTIFF**, not a full COG layout (no overviews / COG
+    driver yet), so don't assume HTTP-range/COG semantics — the small field
+    rasters are read whole. Single-band (not multi-band) so each layer maps to
+    one source URL, the shape the UI's MultiCOGLayer renders with a colormap.
+    Moving to ``driver="COG"`` + object storage is a later step. NaN marks
+    nodata; the UI discards NaN pixels in-shader.
     """
     height, width = band.shape
     profile: dict = {

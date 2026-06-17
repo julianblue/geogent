@@ -77,7 +77,7 @@ Key choices, each tracing to an existing pattern:
   departure from `RasterJob.result` (which inlines JSONB). Cubes/COGs are
   MB–GB; they cannot sit in Postgres and must not reach the model. Each asset:
   `{"role": "stability", "key": "<id>/stability.tif", "uri": "s3://…",
-  "media_type": "image/tiff; application=geo", "bands": ["productivity","cv"]}`.
+"media_type": "image/tiff; application=geo", "bands": ["productivity","cv"]}`.
 - **`summary` is the only thing the agent reads back** — compact, model-friendly
   facts (shape, band stats, scenes used). See per-kind summaries below.
 - **`recipe` is the full normalized request** — intrinsic provenance ("47
@@ -160,16 +160,16 @@ ArtifactRecipe = Annotated[
 Compact, no pixels — sized for the context window:
 
 - **cube:** `{n_scenes_found, n_scenes_used, n_skipped_reproject, time_span,
-  grid:{epsg,resolution_m,width,height}, indices, valid_obs:{min,median,max}}`
+grid:{epsg,resolution_m,width,height}, indices, valid_obs:{min,median,max}}`
   — note `n_skipped_reproject` surfaces the spike's grid-mismatch signal as a
   first-class field.
 - **temporal_features:** per feature `{mean, min, max, std, within_field_spread}`
   (the within-field spread is the "are there zones worth drawing?" signal).
 - **zone_map:** `{n_zones, cluster_validity:{metric, score}, zones:[{zone,
-  area_ha, pct, mean_productivity, mean_stability}]}` — directly feeds
+area_ha, pct, mean_productivity, mean_stability}]}` — directly feeds
   `attribute_zones` and the `management-zones` widget.
 
-## Object storage
+## Artifact storage
 
 A thin provider behind an interface, mirroring how `geo/` wraps external
 providers (typed errors, settings-driven):
@@ -177,20 +177,23 @@ providers (typed errors, settings-driven):
 ```python
 # storage/artifact_store.py
 class ArtifactStore(Protocol):
-    async def put(self, key: str, data: bytes, media_type: str) -> str: ...   # -> uri
-    async def presigned_get(self, uri: str, ttl_s: int) -> str: ...           # -> browser URL
-
-class S3ArtifactStore:  # MinIO in dev, S3 in prod (same API); creds in config.py
-    ...
+    async def put(self, artifact_id: str, key: str, data: bytes) -> str:  # -> uri
+    async def get(self, artifact_id: str, key: str) -> bytes:
 ```
 
-- **The UI fetches COGs by presigned GET URL** (TTL-scoped), exactly as it reads
-  `sentinel-cogs` today via deck.gl-geotiff — no new client rendering path
-  (ADR 0002 D4).
-- **Settings:** `ARTIFACT_BUCKET`, `S3_ENDPOINT_URL` (MinIO), creds → `config.py`
-  + `.env.example`; MinIO added to the compose stack for dev.
-- **Provenance/security:** presigned URLs are short-lived and minted per
-  `GET /artifacts/{id}` after the owner check, so the bucket is never public.
+**Shipped in M1 — local filesystem.** `LocalArtifactStore` writes assets under
+`<artifact_storage_dir>/<artifact_id>/<key>`; the COG is served back through an
+**auth-gated backend route** (`GET /analytics/artifacts/{id}/assets/{key}`,
+owner-checked + key-validated against the artifact's declared `assets`) and a
+**same-origin UI proxy** that deck.gl-geotiff fetches. No object-store
+dependency, no MinIO, no presigning — keeps v1 dependency-free.
+
+**Deferred (future) — object storage.** An `S3ArtifactStore` (MinIO dev / S3
+prod) implementing the same protocol, with **presigned GET URLs** minted after
+the owner check so the bucket is never public, and `ARTIFACT_BUCKET` /
+`S3_ENDPOINT_URL` settings + MinIO in the compose stack. The service is
+unchanged when this lands — only the store implementation and the URL the asset
+route hands back differ (ADR 0002 D3).
 
 ## Service interface
 
@@ -294,7 +297,7 @@ the `summary`).
 
 ## Open decisions (need owner input)
 
-1. **Owner propagation.** Artifacts should be owned by the *end user*, but the
+1. **Owner propagation.** Artifacts should be owned by the _end user_, but the
    agent calls the backend with a **service-user JWT** today. Until the
    end-user identity is propagated from the thread `owner` (relates to #50),
    artifacts would be owned by the service user — weakening per-user cache
@@ -303,9 +306,9 @@ the `summary`).
    for M1, file the propagation as a follow-up.
 2. **Lifecycle / GC.** Artifacts are immutable and cached forever (like
    `RasterStatCache`), but COGs cost storage. **Recommend** keep-forever for M1
-   + an `last_accessed` column now (cheap) so an LRU sweeper is a later,
-   non-breaking addition.
-3. **Does `artifacts` subsume `raster_jobs`?** It can, for *new* heavy outputs.
+   - an `last_accessed` column now (cheap) so an LRU sweeper is a later,
+     non-breaking addition.
+3. **Does `artifacts` subsume `raster_jobs`?** It can, for _new_ heavy outputs.
    **Recommend** leaving the existing time-series path on `raster_jobs`
    untouched for M1 and only migrating it if the scene-manifest work (M0) makes
    it natural.

@@ -8,7 +8,7 @@
 
 Give the agent multi-temporal **data-cube** capabilities and, on top of them,
 **management-zone delineation**: cluster multi-seasonal vegetation patterns fused
-with terrain into agronomic zones, and explain *why* each zone exists. Close the
+with terrain into agronomic zones, and explain _why_ each zone exists. Close the
 loop with variable-rate prescription export.
 
 ## Architecture rule (load-bearing)
@@ -23,7 +23,9 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 
 - **Compute:** in-process `numpy` + `rasterio` (`WarpedVRT`) behind the `geo/` seam; no Dask
   cluster, no worker service for v1.
-- **Storage:** object storage (MinIO dev / S3 prod), COGs fetched client-side.
+- **Storage:** local-filesystem `ArtifactStore` for v1 (assets served through an
+  auth-gated route + same-origin UI proxy); object storage (MinIO/S3) deferred
+  behind the same interface.
 - **Rendering:** reuse `MultiCOGLayer` with a discrete colormap; **TiTiler
   deferred**.
 - **Tool surface:** recipe-first (`delineate_management_zones`) + mid-level
@@ -34,6 +36,7 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 ## Milestones
 
 ### M0 — Scene-manifest enabler (small; unblocks #58 too)
+
 - [ ] Extend the time-series result (or add a parallel manifest output) to carry
       per-scene IDs + band hrefs, not just scalars.
 - [ ] Wire the manifest into the temporal-playback scrubber (#58).
@@ -41,6 +44,7 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
   manifest the cube builder needs.
 
 ### M1 — Data cube + "field memory"
+
 - [x] Build cube in-process on `numpy` + `rasterio` (`WarpedVRT`) — zero new
       deps (ADR 0002 D2 correction; `xarray`/`stackstac` deferred to when we
       persist/serve full cubes). MinIO deferred too — v1 uses a local
@@ -57,18 +61,21 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
       `apps/backend/spikes/cube_zones/DECISION.md`.
 - [ ] **Per-pixel SCL cloud masking** (drop classes 3/8/9/10/11), resampled to
       the 10 m grid — without it, residual cloud/shadow inflates temporal CV and
-      fakes "instability". *(deferred within M1)*
+      fakes "instability". _(deferred within M1)_
 - [x] `temporal_features` recipe → per-pixel productivity (mean) + stability
-      (temporal CV) → **2-band field-memory COG** artifact, via
+      (temporal CV) → **two single-band field-memory GeoTIFF assets**
+      (`productivity.tif`, `stability.tif`), via
       `POST /api/v1/analytics/temporal-features`.
-- [ ] Agent primitives `build_cube`, `temporal_features` (handles in/out). *(next)*
-- [ ] UI: `LayerSource` arm for a single-band index COG + continuous colormap;
-      persisted in the thread snapshot (#20). *(next)*
+- [x] Agent tools: `field_memory_for_field` (submit + poll, returns summary) and
+      `show_field_memory` (render a band).
+- [x] UI: `fieldMemory` `LayerSource` + `FieldMemoryOverlay` (MultiCOGLayer +
+      colormap), persisted/restored in the thread snapshot (#20).
 - **Ships:** the first per-pixel product ("field memory"), no clustering risk.
 - **De-risked by** `apps/backend/spikes/cube_zones/` (cube builds in-process at
-      0.85 MB/field; real within-field structure to cluster).
+  0.85 MB/field; real within-field structure to cluster).
 
 ### M2 — Terrain fusion
+
 - [ ] `geo/terrain.py` — DEM provider (Copernicus GLO-30 via STAC) + derivatives
       (slope/aspect/TWI/curvature), co-registered to the cube grid (**reuses the
       M1 reprojection primitive**).
@@ -76,10 +83,11 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
 - [ ] Agent primitive `terrain_derive`.
 
 ### M3 — Management zones + explanation
+
 - [ ] `geo/zones.py` — standardize features → cluster (k-means / fuzzy c-means)
       with validity-index cluster-count selection → smooth/sieve → vectorize.
 - [ ] Recipe tool `delineate_management_zones(field/aoi, years, indices,
-      extra_layers, n_zones="auto", mask)` → zone COG + per-zone stats.
+extra_layers, n_zones="auto", mask)` → zone COG + per-zone stats.
 - [ ] `attribute_zones` — driver attribution (mutual information / per-zone
       distributions); LLM writes the causal narrative.
 - [ ] HITL save via `interrupt()` + `ApprovalWidget`.
@@ -87,15 +95,18 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
       `management-zones` widget (legend + stats table + attribution narrative).
 
 ### M4 — Close the loop
+
 - [ ] VRA prescription export (GeoJSON/Shapefile/ISO-XML) behind HITL.
 - [ ] Anomaly-vs-self detection (pixel deviates from its own baseline).
 - [ ] (Stretch) phenology-shape features as an alternate clustering input.
 
 ## Evals
+
 - [ ] Trajectory scoring for the recipe path (multi-step pipeline).
 - [ ] Numeric correctness for zone outputs vs a synthetic planted-gradient field.
 - [ ] Recordings store handles + summaries only — never cubes.
 
 ## Out of scope (tracked, not built here)
+
 TiTiler service; Dask cluster; soil (SoilGrids) / yield-monitor / weather fusion;
 user-defined custom band-math indices.

@@ -26,7 +26,9 @@ class Artifact(Base):
     kind: Mapped[str] = mapped_column(String(32), nullable=False)
     recipe_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False)
-    owner: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Non-NULL ("" = unowned) so UNIQUE(owner, recipe_hash) actually dedups:
+    # Postgres treats NULLs as distinct, which would defeat content-addressing.
+    owner: Mapped[str] = mapped_column(String(255), nullable=False, server_default="")
 
     recipe: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)

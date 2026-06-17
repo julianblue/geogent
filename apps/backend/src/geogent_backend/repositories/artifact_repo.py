@@ -18,9 +18,11 @@ class ArtifactRepository:
     async def get(self, artifact_id: str) -> Artifact | None:
         return await self._session.get(Artifact, artifact_id)
 
-    async def get_by_recipe(self, owner: str | None, recipe_hash: str) -> Artifact | None:
+    async def get_by_recipe(self, owner: str, recipe_hash: str) -> Artifact | None:
+        # owner is a non-NULL sentinel ("" == unowned), so a plain equality match
+        # is correct and the UNIQUE(owner, recipe_hash) index backs the dedup.
         stmt = select(Artifact).where(
-            Artifact.owner.is_(owner) if owner is None else Artifact.owner == owner,
+            Artifact.owner == owner,
             Artifact.recipe_hash == recipe_hash,
         )
         return (await self._session.execute(stmt)).scalar_one_or_none()

@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column("kind", sa.String(length=32), nullable=False),
         sa.Column("recipe_hash", sa.String(length=64), nullable=False),
         sa.Column("status", sa.String(length=16), nullable=False),
-        sa.Column("owner", sa.String(length=255), nullable=True),
+        sa.Column("owner", sa.String(length=255), nullable=False, server_default=""),
         sa.Column("recipe", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("summary", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("assets", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
