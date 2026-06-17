@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.0](https://github.com/julianblue/geogent/compare/geogent-backend-v0.4.0...geogent-backend-v0.5.0) (2026-06-17)
+
+
+### Features
+
+* arbitrary AOI (geometry/bbox) + pixel-cap guard ([#65](https://github.com/julianblue/geogent/issues/65)) ([b5c3652](https://github.com/julianblue/geogent/commit/b5c3652f3ad4419ed78577d598b535a9a5e93bf3))
+* **backend:** M1 artifacts registry + data-cube field-memory layer ([#65](https://github.com/julianblue/geogent/issues/65)) ([26436b6](https://github.com/julianblue/geogent/commit/26436b632d3fa8a45d42be2a2c9f278640300449))
+* EuroCrops Germany (Brandenburg) parcels — ingest, crop queries, evals ([1d41e0c](https://github.com/julianblue/geogent/commit/1d41e0c7407abc3500b5884d4c3aba6287edd63c))
+* extend index set + WarpedVRT-align zonal_stats ([#65](https://github.com/julianblue/geogent/issues/65)) ([1f51cf1](https://github.com/julianblue/geogent/commit/1f51cf1fb1181c9c7bd7ffffe49cc70d88506756))
+* multi-collection cube (Sentinel-2 + Landsat) with reflectance scaling ([#65](https://github.com/julianblue/geogent/issues/65)) ([75ba17c](https://github.com/julianblue/geogent/commit/75ba17cd1169a6958f7cb24703856673617776e0))
+* pluggable temporal reducer registry — composite/trend/frequency ([#65](https://github.com/julianblue/geogent/issues/65)) ([b4d2fd4](https://github.com/julianblue/geogent/commit/b4d2fd42f837717abc181dce832eba420bae96f6))
+* **routing:** routing, isochrones & geocoding tools ([#55](https://github.com/julianblue/geogent/issues/55)) ([88fdd41](https://github.com/julianblue/geogent/commit/88fdd416b4c2c28d09e0bc94f709037edda59270))
+* satellite data cubes — general temporal-raster engine + "field memory" zones ([#65](https://github.com/julianblue/geogent/issues/65)) ([973a9ab](https://github.com/julianblue/geogent/commit/973a9ab3c60e691c62460f84607968159f8a9587))
+* **ui:** agriculture widgets — field selection, zonal stats, NDVI series, composite ([#24](https://github.com/julianblue/geogent/issues/24)) ([c00c9cc](https://github.com/julianblue/geogent/commit/c00c9cc2e7b0057ec721cad12ec6e2c2c5895198))
+* **ui:** agriculture widgets — field selection, zonal stats, NDVI series, composite ([#24](https://github.com/julianblue/geogent/issues/24)) ([0428fbe](https://github.com/julianblue/geogent/commit/0428fbeac795b1ec6081a8b8022f6f12a9edb460))
+* **ui:** render field-memory layers on the map ([#65](https://github.com/julianblue/geogent/issues/65)) ([85ea270](https://github.com/julianblue/geogent/commit/85ea270eebbee1ed01687c43f7eb61fffe3e8e93))
+
+
+### Bug Fixes
+
+* address PR [#69](https://github.com/julianblue/geogent/issues/69) review (owner dedup, asset allowlist, doc drift) ([#65](https://github.com/julianblue/geogent/issues/65)) ([e9299f3](https://github.com/julianblue/geogent/commit/e9299f3e19e024ae08aff97a11ac2ee96fef30cf))
+* drop no-effect ellipsis bodies in ArtifactStore Protocol ([#65](https://github.com/julianblue/geogent/issues/65)) ([6c16e96](https://github.com/julianblue/geogent/commit/6c16e961d41f9d69a04fe3b5f87bdfc4dd56ee55))
+* **routing:** address PR review — hardening & error clarity ([#55](https://github.com/julianblue/geogent/issues/55)) ([421bcd7](https://github.com/julianblue/geogent/commit/421bcd7272e0ec4b8449b52638a8938496672ecb))
+
+
+### Documentation
+
+* add repository CONTEXT.md and per-app CLAUDE.md guides ([f918d3e](https://github.com/julianblue/geogent/commit/f918d3e59e0df16ae0b6e5ec4a9643538da80841))
+
 ## [0.4.0](https://github.com/julianblue/geogent/compare/geogent-backend-v0.3.0...geogent-backend-v0.4.0) (2026-05-25)
 
 
