@@ -1,0 +1,226 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Show me a heatmap of the features on the map.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "9841d070-072c-4039-b241-195a9aec6dcb"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 7468,
+            "total_tokens": 7475,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0022579,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0022579,
+              "upstream_inference_prompt_cost": 0.0022404,
+              "upstream_inference_completions_cost": 1.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710900-cgnuKrEoRAoELuMWEX6m",
+          "service_tier": "provisioned",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-cd5c-7b01-977a-3cf5b01c8db4-0",
+        "tool_calls": [
+          {
+            "name": "add_aggregation_layer",
+            "args": {
+              "kind": "heatmap"
+            },
+            "id": "tool_add_aggregation_layer_jEF7xUriJFCq6Tw4e15F",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7468,
+          "output_tokens": 7,
+          "total_tokens": 7475,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"queued_aggregation\": true, \"kind\": \"heatmap\", \"weight_by\": \"count\", \"radius\": null, \"label\": null}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add_aggregation_layer",
+        "id": "4be469a3-ccc7-47dc-a218-0e04db66d4a3",
+        "tool_call_id": "tool_add_aggregation_layer_jEF7xUriJFCq6Tw4e15F",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "I've added a heatmap layer of the features currently on the map.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 15,
+            "prompt_tokens": 7494,
+            "total_tokens": 7509,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 7324,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00030822,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00030822,
+              "upstream_inference_prompt_cost": 0.00027072,
+              "upstream_inference_completions_cost": 3.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1781710901-GIBAxGr2rE3p9MMh1WRu",
+          "service_tier": "provisioned",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--019ed63e-d0e6-7892-b8f3-cb2f3817bb9f-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 7494,
+          "output_tokens": 15,
+          "total_tokens": 7509,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 7324
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "summary": "",
+    "summarized_count": 0
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "map_state": {
+      "features": [
+        {
+          "id": "f1",
+          "name": "Site A",
+          "geometryType": "Point",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              2.35,
+              48.86
+            ]
+          }
+        },
+        {
+          "id": "f2",
+          "name": "Site B",
+          "geometryType": "Point",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              2.36,
+              48.87
+            ]
+          }
+        }
+      ],
+      "viewport": {
+        "longitude": 2.35,
+        "latitude": 48.86,
+        "zoom": 12,
+        "bounds": {
+          "west": 2.2,
+          "south": 48.8,
+          "east": 2.5,
+          "north": 48.93
+        }
+      }
+    },
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:58197",
+    "run_id": "019ed63e-c9c6-7c62-9f88-ad1d158d27d0",
+    "thread_id": "7a548c07-b2ce-4b70-914e-3acdb74c2e0f",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "b90df08b-02c5-45a8-9493-95b48934c869"
+  },
+  "created_at": "2026-06-17T15:41:42.156803+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f16a630-9a8e-6c7e-8003-68ab5dd51a86",
+    "thread_id": "7a548c07-b2ce-4b70-914e-3acdb74c2e0f",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f16a630-9369-6d76-8002-5e36b146b5b6",
+    "thread_id": "7a548c07-b2ce-4b70-914e-3acdb74c2e0f",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f16a630-9a8e-6c7e-8003-68ab5dd51a86",
+  "parent_checkpoint_id": "1f16a630-9369-6d76-8002-5e36b146b5b6"
+}
