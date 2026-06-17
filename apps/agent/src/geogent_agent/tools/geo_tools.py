@@ -233,7 +233,7 @@ async def features_within(geometry_wkt: str) -> list[dict]:
 @tool
 async def zonal_stats_for_field(
     field_id: int,
-    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     scene_id: str | None = None,
     datetime: str | None = None,
     max_cloud_cover: float = 20,
@@ -266,7 +266,7 @@ async def seasonal_index_time_series_for_field(
     field_id: int,
     start_date: str,
     end_date: str,
-    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
@@ -313,7 +313,7 @@ async def field_memory_for_field(
     field_id: int,
     start_date: str,
     end_date: str,
-    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     reducer: Literal["field_memory", "composite", "trend", "frequency"] = "field_memory",
     threshold: float | None = None,
     max_cloud_cover: float = 20,
