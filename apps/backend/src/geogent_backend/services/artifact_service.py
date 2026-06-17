@@ -12,12 +12,14 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
 from uuid import uuid4
 
 import anyio
 from fastapi import BackgroundTasks
 from geoalchemy2.shape import to_shape
-from shapely.geometry import mapping, shape
+from shapely import wkt
+from shapely.geometry import box, mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.config import get_settings
@@ -38,6 +40,32 @@ from geogent_backend.storage.artifact_store import ArtifactStore, get_artifact_s
 logger = logging.getLogger(__name__)
 
 _ASSET_MEDIA_TYPE = "image/tiff; application=geotiff"
+
+
+class AOITooLargeError(Exception):
+    """The requested AOI would exceed the in-process pixel budget (-> 422)."""
+
+
+async def _resolve_geometry(session: AsyncSession, recipe: TemporalFeaturesRecipe) -> dict:
+    """Resolve the recipe's AOI to a WGS84 GeoJSON geometry."""
+    if recipe.field_id is not None:
+        row = await FieldRepository(session).get(recipe.field_id)
+        if row is None:
+            raise FieldNotFoundError(f"Field {recipe.field_id} not found")
+        return mapping(to_shape(row.geometry))
+    if recipe.geometry_wkt is not None:
+        return mapping(wkt.loads(recipe.geometry_wkt))
+    return mapping(box(*recipe.bbox))  # validator guarantees one AOI is set
+
+
+def _estimate_pixels(geom_4326: dict, resolution_m: float) -> int:
+    """Rough pixel count of the AOI's grid at ``resolution_m`` (lat-corrected
+    degrees → metres). Approximate — only used as a cost guard, not for sizing."""
+    minx, miny, maxx, maxy = shape(geom_4326).bounds
+    midlat = math.radians((miny + maxy) / 2.0)
+    width_m = (maxx - minx) * 111_320.0 * max(math.cos(midlat), 0.01)
+    height_m = (maxy - miny) * 110_540.0
+    return math.ceil(width_m / resolution_m) * math.ceil(height_m / resolution_m)
 
 
 def recipe_hash(recipe: TemporalFeaturesRecipe) -> str:
@@ -99,9 +127,15 @@ class ArtifactService:
     ) -> tuple[Artifact, bool]:
         """Return the artifact for this recipe (building it if new). The bool is
         whether it was a cache hit."""
-        # Fail fast on a missing field so the caller gets a 404, not a failed job.
-        if await FieldRepository(self._session).get(recipe.field_id) is None:
-            raise FieldNotFoundError(f"Field {recipe.field_id} not found")
+        # Resolve the AOI up front so a missing field is a 404 (not a failed job)
+        # and an oversized AOI is a 422 before any work is dispatched.
+        geom_4326 = await _resolve_geometry(self._session, recipe)
+        pixels = _estimate_pixels(geom_4326, self._settings.cube_resolution_m)
+        if pixels > self._settings.cube_max_pixels:
+            raise AOITooLargeError(
+                f"AOI is ~{pixels:,} px at {self._settings.cube_resolution_m:g} m "
+                f"(limit {self._settings.cube_max_pixels:,}); use a smaller area."
+            )
 
         h = recipe_hash(recipe)
         existing = await self._repo.get_by_recipe(self._owner, h)
@@ -145,15 +179,10 @@ class ArtifactService:
 
         async with SessionLocal() as session:
             repo = ArtifactRepository(session)
-            fields = FieldRepository(session)
             try:
                 await repo.set_status(artifact_id, JobStatus.running.value)
 
-                row = await fields.get(recipe.field_id)
-                if row is None:
-                    raise FieldNotFoundError(f"Field {recipe.field_id} not found")
-                geom_4326 = mapping(to_shape(row.geometry))
-
+                geom_4326 = await _resolve_geometry(session, recipe)
                 bbox = list(shape(geom_4326).bounds)
                 max_scenes = min(recipe.max_scenes, self._settings.cube_max_scenes)
                 scenes = await stac.search_scenes(

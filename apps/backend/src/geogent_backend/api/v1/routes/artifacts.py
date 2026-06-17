@@ -16,7 +16,7 @@ from geogent_backend.schemas.artifact import (
     TemporalFeaturesRecipe,
 )
 from geogent_backend.schemas.raster import JobStatus
-from geogent_backend.services.artifact_service import ArtifactService
+from geogent_backend.services.artifact_service import AOITooLargeError, ArtifactService
 from geogent_backend.services.raster_service import FieldNotFoundError
 from geogent_backend.storage.artifact_store import ArtifactStoreError
 
@@ -39,6 +39,8 @@ async def create_temporal_features(
         row, cached = await service.create_temporal_features(payload, background_tasks)
     except FieldNotFoundError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AOITooLargeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
     return ArtifactCreateResponse(
         artifact_id=row.id,
         kind=ArtifactKind(row.kind),

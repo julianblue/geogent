@@ -310,20 +310,27 @@ async def seasonal_index_time_series_for_field(
 
 @tool
 async def field_memory_for_field(
-    field_id: int,
     start_date: str,
     end_date: str,
+    field_id: int | None = None,
+    bbox: list[float] | None = None,
     index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     reducer: Literal["field_memory", "composite", "trend", "frequency"] = "field_memory",
     threshold: float | None = None,
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
-    """Build a multi-date data cube for a field and reduce it per pixel.
+    """Build a multi-date data cube for an area and reduce it per pixel.
 
     Stacks every low-cloud scene in [start_date, end_date] into a cube and
     applies ``reducer`` to the time axis. Use this for questions about patterns
-    *within* one field over time, not a single-date or whole-field average.
+    *over time per pixel* within an area, not a single-date or whole-area mean.
+
+    Pass EITHER ``field_id`` (a stored field) OR ``bbox``
+    ``[min_lon, min_lat, max_lon, max_lat]`` for an arbitrary area — exactly
+    one. Large bboxes are rejected (the engine is field/farm-scale); keep an
+    AOI within a few km.
+
     Reducers (each returns the named per-pixel output layers in ``summary``):
 
     - ``field_memory`` (default) → ``productivity`` (multi-date mean) +
@@ -343,11 +350,12 @@ async def field_memory_for_field(
     ``index`` must be one of ``ndvi``, ``ndwi``, ``evi``.
     """
     reducer_params = {"threshold": threshold} if threshold is not None else {}
+    aoi: dict = {"bbox": bbox} if bbox is not None else {"field_id": field_id}
     async with get_backend_client() as client:
         start = await client.post(
             "/api/v1/analytics/temporal-features",
             json={
-                "field_id": field_id,
+                **aoi,
                 "index": index,
                 "reducer": reducer,
                 "reducer_params": reducer_params,

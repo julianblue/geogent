@@ -43,7 +43,11 @@ class TemporalFeaturesRecipe(BaseModel):
 
     kind: Literal[ArtifactKind.temporal_features] = ArtifactKind.temporal_features
     recipe_version: int = 1
-    field_id: int
+    # Area of interest — exactly one of these. field_id resolves to a stored
+    # field's polygon; geometry_wkt / bbox let any caller pass an arbitrary AOI.
+    field_id: int | None = None
+    geometry_wkt: str | None = None
+    bbox: tuple[float, float, float, float] | None = None
     index: IndexName = IndexName.ndvi
     reducer: ReducerName = ReducerName.field_memory
     reducer_params: dict[str, float] = Field(default_factory=dict)
@@ -53,9 +57,12 @@ class TemporalFeaturesRecipe(BaseModel):
     max_scenes: int = Field(default=60, gt=0, le=200)
 
     @model_validator(mode="after")
-    def _check_dates(self) -> TemporalFeaturesRecipe:
+    def _check(self) -> TemporalFeaturesRecipe:
         if self.end_date < self.start_date:
             raise ValueError("end_date must be on or after start_date")
+        provided = [self.field_id is not None, self.geometry_wkt is not None, self.bbox is not None]
+        if sum(provided) != 1:
+            raise ValueError("provide exactly one of field_id, geometry_wkt, bbox")
         return self
 
 

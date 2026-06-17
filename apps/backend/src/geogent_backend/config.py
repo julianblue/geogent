@@ -67,6 +67,11 @@ class Settings(BaseSettings):
         default=120,
         description="Cap on scenes stacked into one cube (cost guard).",
     )
+    cube_max_pixels: int = Field(
+        default=4_000_000,
+        description="Reject (422) AOIs whose grid would exceed this many pixels "
+        "at cube_resolution_m — the in-process path is field/farm-scale only.",
+    )
 
     # --- Routing / geocoding providers (#55) ---------------------------------
     # All pluggable + self-hostable via env. Defaults point at the public OSM

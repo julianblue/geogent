@@ -81,6 +81,31 @@ async def test_get_unknown_artifact_returns_404(
 
 
 @pytest.mark.asyncio
+async def test_oversized_bbox_returns_422(client: AsyncClient) -> None:
+    # A ~20°-wide bbox is far over the pixel cap; the guard rejects it before
+    # any work is dispatched (no service monkeypatch / DB needed).
+    r = await client.post(
+        "/api/v1/analytics/temporal-features",
+        json={
+            "bbox": [-10.0, -10.0, 10.0, 10.0],
+            "start_date": "2025-04-01",
+            "end_date": "2025-09-30",
+        },
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_requires_exactly_one_aoi(client: AsyncClient) -> None:
+    # Neither field_id nor bbox nor geometry_wkt -> schema validation 422.
+    r = await client.post(
+        "/api/v1/analytics/temporal-features",
+        json={"start_date": "2025-04-01", "end_date": "2025-09-30"},
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_temporal_features_requires_auth() -> None:
     # No get_current_user override here: the bearer guard must reject the call.
     transport = ASGITransport(app=app)
