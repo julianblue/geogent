@@ -7,6 +7,7 @@ from geogent_agent.tools.frontend_actions import (
     fly_to,
     list_features_in_viewport,
     render_dashboard,
+    show_field_memory,
     show_sentinel2_scene,
 )
 from geogent_agent.tools.geo_tools import (
@@ -15,6 +16,7 @@ from geogent_agent.tools.geo_tools import (
     crop_stats_within_bbox,
     distance_between,
     features_within,
+    field_memory_for_field,
     fields_within_bbox,
     geometries_intersect,
     list_features,
@@ -47,6 +49,7 @@ TOOLS = [
     crop_stats_within_bbox,
     zonal_stats_for_field,
     seasonal_index_time_series_for_field,
+    field_memory_for_field,
     geocode_place,
     reverse_geocode,
     route_between,
@@ -63,6 +66,7 @@ TOOLS = [
     list_features_in_viewport,
     confirm_feature_save,
     show_sentinel2_scene,
+    show_field_memory,
     render_dashboard,
 ]
 
@@ -78,6 +82,7 @@ __all__ = [
     "crop_stats_within_bbox",
     "distance_between",
     "features_within",
+    "field_memory_for_field",
     "fields_within_bbox",
     "fly_to",
     "geocode_place",
@@ -90,6 +95,7 @@ __all__ = [
     "reverse_geocode",
     "route_between",
     "seasonal_index_time_series_for_field",
+    "show_field_memory",
     "show_sentinel2_scene",
     "stac_get_item",
     "stac_list_collections",

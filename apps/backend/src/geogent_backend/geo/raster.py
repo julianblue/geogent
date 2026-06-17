@@ -14,11 +14,14 @@ from __future__ import annotations
 
 import numpy as np
 import rasterio
+from rasterio.enums import Resampling
 from rasterio.features import geometry_mask
+from rasterio.vrt import WarpedVRT
 from rasterio.warp import transform_geom
 from rasterio.windows import from_bounds
 from shapely.geometry import shape
 
+from geogent_backend.geo.collections import COLLECTIONS, CollectionName, CollectionSpec
 from geogent_backend.geo.indices import IndexName, get_spec
 
 # GDAL tuning for COG-over-HTTP windowed reads (from the spike, minus the
@@ -50,6 +53,7 @@ def zonal_stats(
     scene_item: dict,
     index: IndexName,
     histogram_bins: int = 20,
+    collection: CollectionSpec | None = None,
 ) -> dict:
     """Compute zonal statistics for ``index`` over ``geom_4326`` within one scene.
 
@@ -59,33 +63,47 @@ def zonal_stats(
     {bin_edges, counts}}``.
     """
     spec = get_spec(index)
+    coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
     band_arrays: list[np.ndarray] = []
     geom_proj: dict | None = None
     win_transform = None
-    grid: tuple = ()
 
     try:
         with rasterio.Env(**GDAL_ENV):
-            for i, key in enumerate(spec.band_keys):
-                href = _band_href(scene_item, key)
-                with rasterio.open(href) as ds:
-                    if i == 0:
-                        # Reproject the polygon and derive ONE canonical integer
-                        # window. Every band shares this window + transform.
-                        geom_proj = transform_geom("EPSG:4326", ds.crs, geom_4326)
-                        minx, miny, maxx, maxy = shape(geom_proj).bounds
-                        window = (
-                            from_bounds(minx, miny, maxx, maxy, ds.transform)
-                            .round_offsets()
-                            .round_lengths()
-                        )
-                        win_transform = ds.window_transform(window)
-                        grid = (ds.crs, ds.transform)
-                    elif (ds.crs, ds.transform) != grid:
-                        raise RasterComputeError(
-                            f"Band '{key}' is not on the same grid as the first band."
-                        )
-                    band_arrays.append(ds.read(1, window=window).astype("float32"))
+            # Canonical grid from the first band: reproject the polygon into that
+            # band's CRS and derive ONE integer pixel window. Every band is then
+            # warped onto exactly this grid via WarpedVRT, so mixed-resolution
+            # bands (e.g. 20 m swir for NBR/NDMI) line up without a same-grid
+            # restriction.
+            first_href = _band_href(scene_item, coll.asset_key(spec.band_keys[0]))
+            with rasterio.open(first_href) as ds0:
+                geom_proj = transform_geom("EPSG:4326", ds0.crs, geom_4326)
+                minx, miny, maxx, maxy = shape(geom_proj).bounds
+                window = (
+                    from_bounds(minx, miny, maxx, maxy, ds0.transform)
+                    .round_offsets()
+                    .round_lengths()
+                )
+                win_transform = ds0.window_transform(window)
+                target_crs = ds0.crs
+                width, height = int(window.width), int(window.height)
+
+            if width <= 0 or height <= 0:
+                raise RasterComputeError("Polygon does not overlap the scene (empty read window).")
+
+            vrt_opts = {
+                "crs": target_crs,
+                "transform": win_transform,
+                "width": width,
+                "height": height,
+                "resampling": Resampling.nearest,
+            }
+            for key in spec.band_keys:
+                href = _band_href(scene_item, coll.asset_key(key))
+                with rasterio.open(href) as src, WarpedVRT(src, **vrt_opts) as vrt:
+                    # Scale DN -> reflectance per collection so the index kernels
+                    # (esp. EVI/SAVI) are sensor-agnostic.
+                    band_arrays.append(vrt.read(1).astype("float32") * coll.scale + coll.offset)
     except RasterComputeError:
         raise
     except Exception as exc:  # rasterio / GDAL / network failures

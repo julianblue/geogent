@@ -170,6 +170,33 @@ describe("parseSnapshot", () => {
       { id: "agg-bad", label: "Bad pts", visible: true },
     ]);
   });
+
+  it("restores field-memory layer sources and rejects incomplete ones (#65)", () => {
+    const fm = {
+      kind: "fieldMemory",
+      artifactId: "cafe1234",
+      band: "slope",
+      colormap: "diverging",
+      url: "/api/proxy/analytics/artifacts/cafe1234/assets/slope.tif",
+    };
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        { id: "fm-1", label: "Trend", source: fm },
+        // Missing colormap → source dropped, layer kept.
+        {
+          id: "fm-bad",
+          label: "No colormap",
+          source: { kind: "fieldMemory", artifactId: "x", band: "slope", url: "/x" },
+        },
+      ],
+      workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "fm-1", label: "Trend", visible: true, source: fm },
+      { id: "fm-bad", label: "No colormap", visible: true },
+    ]);
+  });
 });
 
 describe("snapshotsEqual", () => {

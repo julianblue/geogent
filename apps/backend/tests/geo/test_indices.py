@@ -10,7 +10,6 @@ polygon).
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from rasterio.features import geometry_mask
 from rasterio.transform import from_origin
 
@@ -77,11 +76,11 @@ def test_ndwi_matches_hand_computation() -> None:
 
 
 def test_evi_matches_hand_computation() -> None:
-    nir = np.full(_SHAPE, 3000.0, dtype="float32")
-    red = np.full(_SHAPE, 1000.0, dtype="float32")
-    blue = np.full(_SHAPE, 500.0, dtype="float32")
+    # EVI now takes reflectance directly (the read path scales DN per collection).
+    nir = np.full(_SHAPE, 0.3, dtype="float32")
+    red = np.full(_SHAPE, 0.1, dtype="float32")
+    blue = np.full(_SHAPE, 0.05, dtype="float32")
     values = get_spec(IndexName.evi).compute(nir, red, blue)
-    # Reflectance-scaled (/10000): nir=0.3 red=0.1 blue=0.05
     n, r, b = 0.3, 0.1, 0.05
     expected = 2.5 * (n - r) / (n + 6.0 * r - 7.5 * b + 1.0)
     assert np.allclose(values, expected, atol=1e-5)
@@ -111,8 +110,24 @@ def test_masked_reduction_only_counts_inside_pixels() -> None:
     assert np.allclose(np.mean(finite), 0.5)
 
 
-def test_nbr_is_not_implemented() -> None:
-    with pytest.raises(NotImplementedError):
-        get_spec(IndexName.nbr).compute(
-            np.zeros(_SHAPE, dtype="float32"), np.zeros(_SHAPE, dtype="float32")
-        )
+def test_nbr_matches_hand_computation() -> None:
+    nir = np.array([[0.4]], dtype="float32")
+    swir22 = np.array([[0.1]], dtype="float32")
+    values = get_spec(IndexName.nbr).compute(nir, swir22)
+    assert np.isclose(values[0, 0], (0.4 - 0.1) / (0.4 + 0.1))  # 0.6
+
+
+def test_swir_and_rededge_indices_compute() -> None:
+    a = np.array([[0.5]], dtype="float32")
+    b = np.array([[0.2]], dtype="float32")
+    nd = (0.5 - 0.2) / (0.5 + 0.2)
+    assert np.isclose(get_spec(IndexName.ndmi).compute(a, b)[0, 0], nd)
+    assert np.isclose(get_spec(IndexName.mndwi).compute(a, b)[0, 0], nd)
+    assert np.isclose(get_spec(IndexName.ndre).compute(a, b)[0, 0], nd)
+
+
+def test_savi_matches_hand_computation() -> None:
+    nir = np.array([[0.5]], dtype="float32")
+    red = np.array([[0.2]], dtype="float32")
+    expected = (0.5 - 0.2) / (0.5 + 0.2 + 0.5) * 1.5
+    assert np.isclose(get_spec(IndexName.savi).compute(nir, red)[0, 0], expected)

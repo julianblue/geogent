@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from geogent_backend.api.v1.routes import (
     analytics,
+    artifacts,
     auth,
     features,
     fields,
@@ -17,5 +18,6 @@ api_router.include_router(features.router, prefix="/features", tags=["features"]
 api_router.include_router(fields.router, prefix="/fields", tags=["fields"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(raster.router, prefix="/analytics", tags=["raster"])
+api_router.include_router(artifacts.router, prefix="/analytics", tags=["artifacts"])
 api_router.include_router(routing.router, prefix="/routing", tags=["routing"])
 api_router.include_router(routing.geocode_router, prefix="/geocode", tags=["geocode"])

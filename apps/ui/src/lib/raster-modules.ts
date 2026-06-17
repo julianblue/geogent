@@ -153,3 +153,151 @@ export const EVI_MODULE: RasterModule = {
     },
   },
 };
+
+/**
+ * Field-memory PRODUCTIVITY (#65): the multi-date mean of an index loaded as a
+ * single band into `color.r`. Same RdYlGn ramp as NDVI (productivity *is* a mean
+ * NDVI/index), so a brown→straw→green field reads the same way a single NDVI
+ * scene does. NaN marks nodata (outside the field / no valid observations) and
+ * is discarded so it stays transparent. Composite: `{r: "value"}`.
+ */
+export const PRODUCTIVITY_MODULE: RasterModule = {
+  module: {
+    name: "fieldMemoryProductivity",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        // remap index [-1, 1] → [0, 1] for the ramp
+        float t = clamp(v * 0.5 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.65, 0.16, 0.16),  // brown    — consistently poor
+          vec3(0.99, 0.91, 0.51),  // straw    — middling
+          vec3(0.10, 0.55, 0.20)   // forest g — consistently productive
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * Field-memory STABILITY (#65): the temporal coefficient of variation loaded as
+ * a single band into `color.r`. Low CV = consistent across the season (good),
+ * high CV = erratic. Green→yellow→red so "stable" reads green and "unstable"
+ * reads red — the inverse of productivity's meaning, hence its own ramp. CV is
+ * stretched [0, 0.5] → [0, 1]; NaN nodata is discarded. Composite: `{r: "value"}`.
+ */
+export const STABILITY_MODULE: RasterModule = {
+  module: {
+    name: "fieldMemoryStability",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        float t = clamp(v / 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.10, 0.55, 0.20),  // green  — stable
+          vec3(0.99, 0.91, 0.51),  // yellow — variable
+          vec3(0.84, 0.19, 0.15)   // red    — unstable
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * DIVERGING (#65 M1.5): a signed value centered at 0 — e.g. the trend reducer's
+ * per-year slope. Red = decline, pale = no change, green = gain. Stretched
+ * roughly [-0.2, +0.2]/yr → [0,1]. NaN nodata discarded. Composite: `{r: "value"}`.
+ */
+export const DIVERGING_MODULE: RasterModule = {
+  module: {
+    name: "cubeDiverging",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        float t = clamp(v / 0.4 + 0.5, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.84, 0.19, 0.15),  // red   — decline
+          vec3(0.96, 0.96, 0.96),  // pale  — no change
+          vec3(0.10, 0.55, 0.20)   // green — gain
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * SEQUENTIAL (#65 M1.5): a [0,1] magnitude — e.g. the frequency reducer's
+ * fraction-of-time-above-threshold. Pale → teal → deep blue. NaN discarded.
+ * Composite: `{r: "value"}`.
+ */
+export const SEQUENTIAL_MODULE: RasterModule = {
+  module: {
+    name: "cubeSequential",
+    inject: {
+      "fs:#decl": RAMP_HELPER,
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }  // NaN == nodata
+        float t = clamp(v, 0.0, 1.0);
+        vec3 rgb = ramp3(
+          t,
+          vec3(0.97, 0.98, 0.80),  // pale
+          vec3(0.25, 0.65, 0.65),  // teal
+          vec3(0.06, 0.20, 0.42)   // deep blue
+        );
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
+ * Colormap registry (#65 M1.5): a reducer output's `colormap` id selects the
+ * GLSL ramp + the on-map legend. Adding a reducer needs no UI change if it
+ * reuses one of these ids.
+ */
+export const COLORMAP_MODULES: Record<string, RasterModule> = {
+  rdylgn: PRODUCTIVITY_MODULE,
+  stability: STABILITY_MODULE,
+  diverging: DIVERGING_MODULE,
+  sequential: SEQUENTIAL_MODULE,
+};
+
+export type ColormapLegend = { stops: string[]; low: string; high: string };
+
+export const COLORMAP_LEGENDS: Record<string, ColormapLegend> = {
+  rdylgn: {
+    stops: ["rgb(166,41,41)", "rgb(252,232,130)", "rgb(26,140,51)"],
+    low: "poor",
+    high: "high",
+  },
+  stability: {
+    stops: ["rgb(26,140,51)", "rgb(252,232,130)", "rgb(214,48,38)"],
+    low: "stable",
+    high: "unstable",
+  },
+  diverging: {
+    stops: ["rgb(214,48,38)", "rgb(245,245,245)", "rgb(26,140,51)"],
+    low: "decline",
+    high: "gain",
+  },
+  sequential: {
+    stops: ["rgb(247,250,204)", "rgb(64,166,166)", "rgb(15,51,107)"],
+    low: "low",
+    high: "high",
+  },
+};
+
+export const DEFAULT_COLORMAP = "rdylgn";

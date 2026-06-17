@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      geogent · Satellite Data Cubes &amp; Management Zones — Design Proposal
+    </title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: #121b2e;
+        --panel-2: #18233a;
+        --ink: #e7edf7;
+        --muted: #9fb0c9;
+        --line: #243149;
+        --green: #4ade80;
+        --green-d: #16a34a;
+        --blue: #60a5fa;
+        --blue-d: #2563eb;
+        --amber: #fbbf24;
+        --violet: #c084fc;
+        --orange: #fb923c;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --radius: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font:
+          16px/1.6 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: var(--ink);
+        background: radial-gradient(
+          1200px 600px at 80% -10%,
+          #15233f 0%,
+          var(--bg) 55%
+        );
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 22px 90px;
+      }
+      header.hero {
+        padding: 64px 22px 30px;
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      .kicker {
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 12px;
+        color: var(--green);
+        font-weight: 700;
+      }
+      h1 {
+        font-size: 40px;
+        line-height: 1.12;
+        margin: 10px 0 14px;
+        letter-spacing: -0.02em;
+      }
+      h1 .accent {
+        color: var(--green);
+      }
+      .lede {
+        font-size: 19px;
+        color: var(--muted);
+        max-width: 760px;
+      }
+      .lede strong {
+        color: var(--ink);
+      }
+      .meta {
+        margin-top: 22px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .pill {
+        font-size: 12.5px;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 5px 12px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .pill b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      section {
+        margin-top: 46px;
+      }
+      h2 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        margin: 0 0 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      h2::before {
+        content: "";
+        width: 18px;
+        height: 2px;
+        background: var(--green);
+        border-radius: 2px;
+      }
+      .card {
+        background: linear-gradient(180deg, var(--panel) 0%, #0f1828 100%);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 22px 24px;
+        box-shadow: var(--shadow);
+      }
+
+      /* The architecture rule banner */
+      .rule {
+        border-left: 4px solid var(--green);
+        background: linear-gradient(
+          90deg,
+          rgba(74, 222, 128, 0.1),
+          rgba(74, 222, 128, 0)
+        );
+      }
+      .rule p {
+        margin: 0;
+        font-size: 18px;
+      }
+      .rule .em {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .rule .sub {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* three-tier flow */
+      .tiers {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+      }
+      .tier {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .tier h3 {
+        margin: 0 0 6px;
+        font-size: 15px;
+      }
+      .tier .role {
+        font-size: 12.5px;
+        color: var(--muted);
+        min-height: 38px;
+      }
+      .tier ul {
+        margin: 10px 0 0;
+        padding-left: 16px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .tier li {
+        margin: 3px 0;
+      }
+      .tier.ui h3 {
+        color: var(--violet);
+      }
+      .tier.agent h3 {
+        color: var(--blue);
+      }
+      .tier.backend h3 {
+        color: var(--green);
+      }
+      .flowlabel {
+        display: flex;
+        justify-content: space-around;
+        gap: 8px;
+        margin: 14px 4px 0;
+        flex-wrap: wrap;
+      }
+      .flowlabel span {
+        font-size: 12px;
+        color: var(--muted);
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        padding: 6px 10px;
+      }
+      .flowlabel b {
+        color: var(--ink);
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+      }
+
+      /* capability cards */
+      .cap {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+      }
+      .cap .tag {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 9px;
+      }
+      .cap h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+      .cap p {
+        margin: 0;
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+      .t-green {
+        background: rgba(74, 222, 128, 0.14);
+        color: var(--green);
+      }
+      .t-blue {
+        background: rgba(96, 165, 250, 0.14);
+        color: var(--blue);
+      }
+      .t-violet {
+        background: rgba(192, 132, 252, 0.14);
+        color: var(--violet);
+      }
+      .t-amber {
+        background: rgba(251, 191, 36, 0.14);
+        color: var(--amber);
+      }
+      .t-orange {
+        background: rgba(251, 146, 60, 0.14);
+        color: var(--orange);
+      }
+
+      /* artifact model table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      td code {
+        color: var(--green);
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+
+      /* milestones */
+      .timeline {
+        position: relative;
+        margin-left: 8px;
+        padding-left: 26px;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: var(--line);
+      }
+      .ms {
+        position: relative;
+        margin-bottom: 16px;
+      }
+      .ms::before {
+        content: "";
+        position: absolute;
+        left: -26px;
+        top: 4px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--bg);
+        border: 3px solid var(--blue);
+      }
+      .ms.first::before {
+        border-color: var(--green);
+        background: var(--green);
+      }
+      .ms .lbl {
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .ms .lbl .id {
+        color: var(--green);
+      }
+      .ms p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      /* spike numbers */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .stat {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+      }
+      .stat .n {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--green);
+        letter-spacing: -0.02em;
+      }
+      .stat .n.warn {
+        color: var(--amber);
+      }
+      .stat .c {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      .note b {
+        color: var(--amber);
+      }
+      a.ref {
+        color: var(--blue);
+        text-decoration: none;
+      }
+      a.ref:hover {
+        text-decoration: underline;
+      }
+      footer {
+        margin-top: 56px;
+        color: var(--muted);
+        font-size: 13px;
+        border-top: 1px solid var(--line);
+        padding-top: 18px;
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 12.5px;
+        color: var(--muted);
+        margin-top: 10px;
+      }
+      .legend i {
+        width: 11px;
+        height: 11px;
+        border-radius: 3px;
+        display: inline-block;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      @media (max-width: 820px) {
+        .tiers,
+        .grid2,
+        .grid3 {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr 1fr;
+        }
+        h1 {
+          font-size: 31px;
+        }
+        svg.pipe {
+          min-width: 720px;
+        }
+        .scroll {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="kicker">geogent · design proposal · ADR 0002</div>
+      <h1>
+        Satellite <span class="accent">data cubes</span> &amp; management-zone
+        delineation
+      </h1>
+      <p class="lede">
+        Give the agent multi-temporal satellite processing: build
+        <strong>(x, y, time, band) data cubes</strong>, reduce them per-pixel
+        into multi-seasonal patterns, fuse with terrain, and cluster into
+        <strong>agronomic management zones</strong> — then explain
+        <em>why</em> each zone exists and export a variable-rate prescription.
+      </p>
+      <div class="meta">
+        <span class="pill"><b>Status</b> &nbsp;Proposed</span>
+        <span class="pill"><b>Issue</b> &nbsp;#65 (child of #27)</span>
+        <span class="pill"><b>Read path</b> &nbsp;de-risked by live spike</span>
+        <span class="pill"><b>Scope</b> &nbsp;backend · agent · UI</span>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- THE GAP -->
+      <section>
+        <h2>The gap today</h2>
+        <div class="card">
+          <p style="margin: 0 0 10px">
+            The imagery pipeline today is
+            <span class="mono">scene → polygon → scalar</span>: each scene is
+            read independently and collapsed to one number per field
+            (mean&nbsp;NDVI, std&nbsp;…). Every pixel's individuality is
+            discarded at the earliest possible moment.
+          </p>
+          <p style="margin: 0; color: var(--muted)">
+            Management zones need the opposite:
+            <strong style="color: var(--ink)"
+              >keep the pixels, stack them over time, fuse with terrain, then
+              cluster and explain.</strong
+            >
+            That is a data cube plus a small algebra of operations on it — a new
+            primitive, not an extension of the per-scene path.
+          </p>
+        </div>
+      </section>
+
+      <!-- THE RULE -->
+      <section>
+        <h2>The one load-bearing rule</h2>
+        <div class="card rule">
+          <p>
+            Heavy datasets — cubes, derived layers, zone maps — are
+            <span class="em"
+              >content-addressed server-side artifacts with stable IDs</span
+            >. The agent manipulates <span class="em">handles</span>, never
+            pixels.
+          </p>
+          <p class="sub">
+            Each cube tool consumes artifact IDs and returns a new artifact ID +
+            a compact
+            <em>summary</em> (for the model) + a <em>render URL</em> (for the
+            map). This keeps the agent thin (CONTEXT.md principle #1) and
+            generalizes two patterns already shipped: the immutable hash-keyed
+            <span class="mono">raster_stat_cache</span> and the
+            submit→poll→result <span class="mono">raster_jobs</span> flow.
+          </p>
+        </div>
+      </section>
+
+      <!-- PIPELINE DAG -->
+      <section>
+        <h2>The processing pipeline (an algebra over handles)</h2>
+        <div class="card scroll">
+          <svg
+            class="pipe"
+            viewBox="0 0 1000 250"
+            width="100%"
+            height="250"
+            role="img"
+            aria-label="Pipeline: STAC scenes to cube to temporal features and terrain, fused into management zones, then attribution and variable-rate export."
+          >
+            <defs>
+              <marker
+                id="arrow"
+                markerWidth="9"
+                markerHeight="9"
+                refX="7"
+                refY="3"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M0,0 L7,3 L0,6 Z" fill="#5b6c8a" />
+              </marker>
+              <style>
+                .box {
+                  rx: 12;
+                }
+                .blab {
+                  fill: #e7edf7;
+                  font: 600 14px sans-serif;
+                }
+                .bsub {
+                  fill: #9fb0c9;
+                  font:
+                    11px ui-monospace,
+                    monospace;
+                }
+                .edge {
+                  stroke: #5b6c8a;
+                  stroke-width: 2;
+                  fill: none;
+                  marker-end: url(#arrow);
+                }
+              </style>
+            </defs>
+
+            <!-- STAC -->
+            <rect
+              x="8"
+              y="96"
+              width="120"
+              height="58"
+              rx="12"
+              fill="#18233a"
+              stroke="#243149"
+            />
+            <text x="68" y="120" text-anchor="middle" class="blab">
+              STAC scenes
+            </text>
+            <text x="68" y="138" text-anchor="middle" class="bsub">
+              Sentinel-2 L2A
+            </text>
+
+            <!-- build_cube -->
+            <rect
+              x="178"
+              y="96"
+              width="150"
+              height="58"
+              rx="12"
+              fill="#13243a"
+              stroke="#2c5a86"
+            />
+            <text x="253" y="120" text-anchor="middle" class="blab">
+              build_cube
+            </text>
+            <text x="253" y="138" text-anchor="middle" class="bsub">
+              cube:abc
+            </text>
+
+            <!-- temporal_features -->
+            <rect
+              x="392"
+              y="34"
+              width="172"
+              height="58"
+              rx="12"
+              fill="#13243a"
+              stroke="#2c5a86"
+            />
+            <text x="478" y="58" text-anchor="middle" class="blab">
+              temporal_features
+            </text>
+            <text x="478" y="76" text-anchor="middle" class="bsub">
+              layer:mem · "field memory"
+            </text>
+
+            <!-- terrain -->
+            <rect
+              x="392"
+              y="158"
+              width="172"
+              height="58"
+              rx="12"
+              fill="#13243a"
+              stroke="#2c5a86"
+            />
+            <text x="478" y="182" text-anchor="middle" class="blab">
+              terrain_derive
+            </text>
+            <text x="478" y="200" text-anchor="middle" class="bsub">
+              layer:ter · slope/TWI
+            </text>
+
+            <!-- delineate -->
+            <rect
+              x="624"
+              y="96"
+              width="168"
+              height="58"
+              rx="12"
+              fill="#0f2a1c"
+              stroke="#2f7d52"
+            />
+            <text x="708" y="120" text-anchor="middle" class="blab">
+              delineate_zones
+            </text>
+            <text x="708" y="138" text-anchor="middle" class="bsub">
+              zones:jkl + stats
+            </text>
+
+            <!-- attribute + VRA -->
+            <rect
+              x="852"
+              y="34"
+              width="140"
+              height="58"
+              rx="12"
+              fill="#2a1f0f"
+              stroke="#7d632f"
+            />
+            <text x="922" y="58" text-anchor="middle" class="blab">
+              attribute
+            </text>
+            <text x="922" y="76" text-anchor="middle" class="bsub">
+              why zone? (LLM)
+            </text>
+
+            <rect
+              x="852"
+              y="158"
+              width="140"
+              height="58"
+              rx="12"
+              fill="#2a160f"
+              stroke="#7d452f"
+            />
+            <text x="922" y="182" text-anchor="middle" class="blab">
+              VRA export
+            </text>
+            <text x="922" y="200" text-anchor="middle" class="bsub">
+              prescription map
+            </text>
+
+            <!-- edges -->
+            <path class="edge" d="M128,125 L176,125" />
+            <path class="edge" d="M328,118 C360,118 360,70 390,66" />
+            <path class="edge" d="M328,132 C360,132 360,184 390,187" />
+            <path class="edge" d="M564,66 C596,66 596,116 622,121" />
+            <path class="edge" d="M564,187 C596,187 596,134 622,129" />
+            <path class="edge" d="M792,118 C824,118 824,70 850,66" />
+            <path class="edge" d="M792,132 C824,132 824,184 850,187" />
+          </svg>
+          <div class="legend">
+            <span
+              ><i style="background: #2c5a86"></i>cube primitives (backend
+              jobs)</span
+            >
+            <span><i style="background: #2f7d52"></i>recipe / clustering</span>
+            <span><i style="background: #7d632f"></i>agent reasoning</span>
+            <span><i style="background: #7d452f"></i>actionable output</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- THREE TIER FLOW -->
+      <section>
+        <h2>What flows where — handles vs. summaries vs. pixels</h2>
+        <div class="tiers">
+          <div class="tier ui">
+            <h3>UI · Next.js</h3>
+            <div class="role">
+              Renders pixels. Gets <b>render URLs</b>, never reasons over data.
+            </div>
+            <ul>
+              <li>New <span class="mono">{kind:"zones"}</span> layer source</li>
+              <li>
+                Discrete colormap on <span class="mono">MultiCOGLayer</span>
+              </li>
+              <li><span class="mono">management-zones</span> widget</li>
+              <li>Persists handle in thread snapshot (#20)</li>
+            </ul>
+          </div>
+          <div class="tier agent">
+            <h3>Agent · LangGraph</h3>
+            <div class="role">
+              Orchestrates. Gets <b>handles + summaries</b>, never pixels.
+            </div>
+            <ul>
+              <li>Tools = algebra over artifact IDs</li>
+              <li>submit → poll → render loop</li>
+              <li>Recipe tool + primitives</li>
+              <li>Writes the zone explanation</li>
+            </ul>
+          </div>
+          <div class="tier backend">
+            <h3>Backend · FastAPI</h3>
+            <div class="role">
+              Owns the heavy compute &amp; the <b>artifacts</b> + COG store.
+            </div>
+            <ul>
+              <li><span class="mono">geo/cube · terrain · zones</span></li>
+              <li>numpy + rasterio (WarpedVRT), in-process</li>
+              <li>Artifact registry (content-addressed)</li>
+              <li>COGs → local store (S3/MinIO later)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="flowlabel">
+          <span><b>UI → Agent:</b> map state + handles</span>
+          <span><b>Agent → Backend:</b> recipe (service JWT)</span>
+          <span><b>Backend → Agent:</b> <b>summary</b> only</span>
+          <span><b>Backend → UI:</b> COG via auth-gated proxy</span>
+        </div>
+      </section>
+
+      <!-- ARTIFACT MODEL -->
+      <section>
+        <h2>The artifact: one row = cache + job + payload pointer</h2>
+        <div class="card scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Role</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>id</code></td>
+                <td>Opaque stable <b>handle</b></td>
+                <td>Passed between tools; persisted in the thread snapshot.</td>
+              </tr>
+              <tr>
+                <td><code>recipe_hash</code></td>
+                <td>Dedup / cache key</td>
+                <td>
+                  Identical recipe → reuse. Versioned so algorithm changes bust
+                  it.
+                </td>
+              </tr>
+              <tr>
+                <td><code>status</code></td>
+                <td>Lifecycle</td>
+                <td>
+                  pending → running → succeeded / failed (from
+                  <span class="mono">RasterJob</span>).
+                </td>
+              </tr>
+              <tr>
+                <td><code>recipe</code></td>
+                <td>Full normalized request</td>
+                <td>
+                  Intrinsic provenance + reproducibility. Embeds parent IDs →
+                  lineage DAG.
+                </td>
+              </tr>
+              <tr>
+                <td><code>summary</code></td>
+                <td>Compact facts → <b>agent</b></td>
+                <td>
+                  Band stats, scenes used, within-field spread. The only thing
+                  the model sees.
+                </td>
+              </tr>
+              <tr>
+                <td><code>assets</code></td>
+                <td>COG store URIs → <b>UI</b></td>
+                <td>
+                  Rasters live in the artifact store (local FS in v1; S3/MinIO
+                  later), never in Postgres or the LLM.
+                </td>
+              </tr>
+              <tr>
+                <td><code>owner</code></td>
+                <td>Per-user scope</td>
+                <td>
+                  Unique on <span class="mono">(owner, recipe_hash)</span> —
+                  fail-closed (#50).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          The one departure from <span class="mono">raster_jobs</span>:
+          <b>assets point to the COG store, never inline JSONB</b> — because the
+          payload must never reach the database or the model.
+        </p>
+      </section>
+
+      <!-- CAPABILITIES -->
+      <section>
+        <h2>The differentiating capabilities</h2>
+        <div class="grid3">
+          <div class="cap">
+            <span class="tag t-green">flagship</span>
+            <h3>“Field memory” zones</h3>
+            <p>
+              Per-pixel <b>productivity</b> (multi-year mean) ×
+              <b>stability</b> (temporal CV): consistently high / low / unstable
+              → invest, investigate, or don't bother.
+            </p>
+          </div>
+          <div class="cap">
+            <span class="tag t-blue">novel</span>
+            <h3>Phenology-shape zones</h3>
+            <p>
+              Cluster on the <b>shape</b> of the season curve (emergence, peak,
+              biomass integral, senescence) — not just average greenness.
+            </p>
+          </div>
+          <div class="cap">
+            <span class="tag t-violet">agent edge</span>
+            <h3>Explainable zones</h3>
+            <p>
+              Correlate zone membership against slope/TWI/aspect; the LLM writes
+              the <b>causal story</b>. Where an agent beats a GIS tool.
+            </p>
+          </div>
+          <div class="cap">
+            <span class="tag t-amber">alerting</span>
+            <h3>Anomaly-vs-self</h3>
+            <p>
+              Flag pixels deviating from <b>their own</b> history this season —
+              drainage failure, pest, a machinery skip.
+            </p>
+          </div>
+          <div class="cap">
+            <span class="tag t-orange">closes the loop</span>
+            <h3>Prescription (VRA) export</h3>
+            <p>
+              Zones → variable-rate seeding/N map, exported as
+              GeoJSON/Shapefile/ISO-XML for the tractor. The deliverable that
+              matters.
+            </p>
+          </div>
+          <div class="cap">
+            <span class="tag t-green">product feel</span>
+            <h3>Cube as conversation</h3>
+            <p>
+              “Re-cluster into 3”, “drop the drought year”, “mask the headlands”
+              — cheap iteration because artifacts are cached handles.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MILESTONES -->
+      <section>
+        <h2>Sequencing — each step ships value &amp; de-risks the next</h2>
+        <div class="card">
+          <div class="timeline">
+            <div class="ms first">
+              <div class="lbl">
+                <span class="id">M0</span> · Scene-manifest enabler
+              </div>
+              <p>
+                Emit per-scene IDs + band hrefs from the time-series job. Tiny
+                change, unblocks temporal playback (#58) <em>and</em> feeds the
+                cube builder.
+              </p>
+            </div>
+            <div class="ms">
+              <div class="lbl">
+                <span class="id">M1</span> · Data cube + “field memory”
+              </div>
+              <p>
+                Artifact registry + object store;
+                <span class="mono">build_cube</span> /
+                <span class="mono">temporal_features</span> on numpy + rasterio
+                (WarpedVRT) → field-memory COGs. Includes canonical-grid
+                reprojection &amp; per-pixel SCL masking (pulled in from the
+                spike finding).
+              </p>
+            </div>
+            <div class="ms">
+              <div class="lbl"><span class="id">M2</span> · Terrain fusion</div>
+              <p>
+                DEM provider + slope/aspect/TWI/curvature, co-registered to the
+                cube grid. Same align step also unblocks NBR.
+              </p>
+            </div>
+            <div class="ms">
+              <div class="lbl">
+                <span class="id">M3</span> · Zones + explanation
+              </div>
+              <p>
+                <span class="mono">delineate_management_zones</span> (cluster +
+                validity-index k-selection) and
+                <span class="mono">attribute_zones</span>, with HITL save.
+              </p>
+            </div>
+            <div class="ms">
+              <div class="lbl"><span class="id">M4</span> · Close the loop</div>
+              <p>
+                VRA prescription export, anomaly-vs-self, (stretch) phenology
+                features.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPIKE -->
+      <section>
+        <h2>De-risked on live data — the M1 spike</h2>
+        <div class="stats">
+          <div class="stat">
+            <div class="n">0.85 MB</div>
+            <div class="c">season cube in memory → no Dask needed (D2)</div>
+          </div>
+          <div class="stat">
+            <div class="n">73 KB</div>
+            <div class="c">2-band stability COG, renders as-is (D4)</div>
+          </div>
+          <div class="stat">
+            <div class="n">0.174</div>
+            <div class="c">
+              within-field productivity spread → real zones exist
+            </div>
+          </div>
+          <div class="stat">
+            <div class="n warn">20 / 40</div>
+            <div class="c">
+              scenes dropped on grid mismatch → reprojection is M1
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          The spike (<span class="mono">apps/backend/spikes/cube_zones/</span>)
+          built a real multi-date NDVI cube for one Fresno County field, reduced
+          it per-pixel, and wrote a stability COG.
+          <b>Key correction:</b> cross-tile/orbit reprojection must move into
+          M1, not M2 — without it half the season silently disappears.
+        </p>
+      </section>
+
+      <footer>
+        Sources on branch
+        <span class="mono">claude/satellite-ag-processing-k48asn</span>:
+        <a
+          class="ref"
+          href="../adr/0002-satellite-data-cubes-management-zones.md"
+          >ADR&nbsp;0002</a
+        >
+        · <a class="ref" href="../roadmap/satellite-data-cubes.md">roadmap</a> ·
+        <a class="ref" href="m1-artifacts-data-model.md">M1 artifacts design</a>
+        ·
+        <a class="ref" href="../../apps/backend/spikes/cube_zones/DECISION.md"
+          >cube spike</a
+        >. &nbsp;Visual explainer — not a substitute for the docs.
+      </footer>
+    </div>
+  </body>
+</html>

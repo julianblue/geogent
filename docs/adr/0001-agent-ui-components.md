@@ -14,8 +14,8 @@ Chosen path, in tiers:
 1. **Done — no new deps:** the assistant-ui Tool UI pattern, formalized into a
    typed widget registry (`components/assistant/widgets/`). Migrate off the
    deprecated `makeAssistantToolUI` toward the `Tools()` API as we add widgets.
-2. **Done — built now (this ADR's decision):** a *curated composition layer we
-   own* — the `json-render` *pattern* (catalog + Zod schema + render registry)
+2. **Done — built now (this ADR's decision):** a _curated composition layer we
+   own_ — the `json-render` _pattern_ (catalog + Zod schema + render registry)
    implemented as a single `render_dashboard` tool over our existing LangGraph
    stream, **not** the Vercel package. The agent composes multiple panels into
    vetted layout templates; it does not emit raw UI. See "Tier 2: implemented".
@@ -29,7 +29,7 @@ The product goal is for the agent to **combine multiple visuals into rich,
 composed insights** (agriculture field-health dashboards), and to grow that
 catalog over time. That is genuinely beyond tier 1 — selection-only frameworks
 (assistant-ui, Vercel AI SDK, CopilotKit) stack widgets vertically but give the
-agent no control over *layout/composition*. Only spec-driven approaches (A2UI,
+agent no control over _layout/composition_. Only spec-driven approaches (A2UI,
 json-render) do.
 
 We deliberately built a **thin composition layer we own** rather than adopting
@@ -40,7 +40,7 @@ A2UI/json-render, because for a single flagship app:
   every composition stays on-brand. Adopting a generic renderer reintroduces the
   "wrong-looking generated UI" risk we explicitly want to avoid.
 - **The standardized schema is ours and tighter.** A2UI standardizes the
-  *layout envelope*, not our *domain data* — we'd still hand-write every panel's
+  _layout envelope_, not our _domain data_ — we'd still hand-write every panel's
   data schema. Our Zod panel schemas + the `DashboardSpec` envelope are a fully
   typed, validated contract native to the stack.
 - **No dependency on a young, churning spec** and no second runtime. We own
@@ -85,7 +85,7 @@ supported. This is exactly the architecture both candidate libraries advertise.
 
 ## Options evaluated
 
-### Option A — Stay on assistant-ui generative UI  ✅ chosen (tier 1)
+### Option A — Stay on assistant-ui generative UI ✅ chosen (tier 1)
 
 Keep the assistant-ui + LangGraph runtime and formalize the existing pattern:
 adding an agent-driven visualization = one `@tool` in `frontend_actions.py`
@@ -118,7 +118,7 @@ JSONL patches.
 
 ### Option C — Google `A2UI`
 
-An open (Apache-2.0) *protocol*: the agent emits a declarative JSON UI spec
+An open (Apache-2.0) _protocol_: the agent emits a declarative JSON UI spec
 against a client-side catalog of trusted components, designed to cross trust
 boundaries safely.
 
@@ -157,7 +157,7 @@ is a Pydantic model (so the LLM gets a real JSON schema): a `layout`
   into the chosen template and gets the inline + promotable workspace views for
   free from the widget framework.
 - `tools/RenderDashboardTool.tsx` — `useAssistantTool({ toolName:
-  "render_dashboard" })`: `safeParse`s the streamed spec and renders
+"render_dashboard" })`: `safeParse`s the streamed spec and renders
   `<Widget type="dashboard" …>`, degrading to a `ToolErrorChip` on a completed
   invalid spec.
 

@@ -11,6 +11,11 @@ from geogent_agent.tools.backend_client import get_backend_client
 _TIME_SERIES_POLL_INTERVAL_SECONDS = 0.5
 _TIME_SERIES_POLL_TIMEOUT_SECONDS = 60.0
 
+# The cube/field-memory build reads many scenes, so it gets a longer budget than
+# the per-scene time-series job. Also module constants, not tool args.
+_ARTIFACT_POLL_INTERVAL_SECONDS = 0.5
+_ARTIFACT_POLL_TIMEOUT_SECONDS = 180.0
+
 
 @tool
 async def list_features() -> list[dict]:
@@ -228,7 +233,7 @@ async def features_within(geometry_wkt: str) -> list[dict]:
 @tool
 async def zonal_stats_for_field(
     field_id: int,
-    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     scene_id: str | None = None,
     datetime: str | None = None,
     max_cloud_cover: float = 20,
@@ -261,7 +266,7 @@ async def seasonal_index_time_series_for_field(
     field_id: int,
     start_date: str,
     end_date: str,
-    index: Literal["ndvi", "ndwi", "evi"] = "ndvi",
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
@@ -301,3 +306,83 @@ async def seasonal_index_time_series_for_field(
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"time-series job {job_id} did not finish before timeout")
             await asyncio.sleep(_TIME_SERIES_POLL_INTERVAL_SECONDS)
+
+
+@tool
+async def field_memory_for_field(
+    start_date: str,
+    end_date: str,
+    field_id: int | None = None,
+    bbox: list[float] | None = None,
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
+    reducer: Literal["field_memory", "composite", "trend", "frequency"] = "field_memory",
+    collection: Literal["sentinel-2-l2a", "landsat-c2-l2"] = "sentinel-2-l2a",
+    threshold: float | None = None,
+    max_cloud_cover: float = 20,
+    max_scenes: int = 60,
+) -> dict:
+    """Build a multi-date data cube for an area and reduce it per pixel.
+
+    Stacks every low-cloud scene in [start_date, end_date] into a cube and
+    applies ``reducer`` to the time axis. Use this for questions about patterns
+    *over time per pixel* within an area, not a single-date or whole-area mean.
+
+    Pass EITHER ``field_id`` (a stored field) OR ``bbox``
+    ``[min_lon, min_lat, max_lon, max_lat]`` for an arbitrary area — exactly
+    one. Large bboxes are rejected (the engine is field/farm-scale); keep an
+    AOI within a few km.
+
+    Reducers (each returns the named per-pixel output layers in ``summary``):
+
+    - ``field_memory`` (default) → ``productivity`` (multi-date mean) +
+      ``stability`` (temporal CV). The "where is consistently good vs erratic"
+      management-zone view.
+    - ``composite`` → ``composite``: the median index (a typical, cloud-free value).
+    - ``trend`` → ``slope``: per-pixel change per year (greening/browning, decline).
+    - ``frequency`` → ``frequency``: fraction of dates the index exceeds
+      ``threshold`` (e.g. water/snow/vegetation frequency). Set ``threshold``.
+
+    Returns ``{artifact_id, status, summary, ...}``. ``summary.outputs`` holds
+    per-output stats incl. ``within_field_spread`` — near-zero means uniform (no
+    zones worth drawing), larger means real structure. Answer from ``summary``;
+    pass ``artifact_id`` (and the output name) to ``show_field_memory`` to draw
+    it. The heavy pixels are never returned to you.
+
+    ``index`` must be one of ``ndvi``, ``ndwi``, ``evi``.
+    """
+    reducer_params = {"threshold": threshold} if threshold is not None else {}
+    aoi: dict = {"bbox": bbox} if bbox is not None else {"field_id": field_id}
+    async with get_backend_client() as client:
+        start = await client.post(
+            "/api/v1/analytics/temporal-features",
+            json={
+                **aoi,
+                "index": index,
+                "reducer": reducer,
+                "collection": collection,
+                "reducer_params": reducer_params,
+                "start_date": start_date,
+                "end_date": end_date,
+                "max_cloud_cover": max_cloud_cover,
+                "max_scenes": max_scenes,
+            },
+        )
+        start.raise_for_status()
+        artifact_id = start.json()["artifact_id"]
+        deadline = time.monotonic() + _ARTIFACT_POLL_TIMEOUT_SECONDS
+
+        while True:
+            status_resp = await client.get(f"/api/v1/analytics/artifacts/{artifact_id}")
+            status_resp.raise_for_status()
+            result = status_resp.json()
+            status = result.get("status")
+            if status == "succeeded":
+                return result
+            if status == "failed":
+                error = result.get("error") or f"field-memory build {artifact_id} failed"
+                raise RuntimeError(str(error))
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    f"field-memory build {artifact_id} did not finish before timeout"
+                )
+            await asyncio.sleep(_ARTIFACT_POLL_INTERVAL_SECONDS)

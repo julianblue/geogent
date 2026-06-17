@@ -4,6 +4,7 @@ import { MapStateProvider } from "@/components/map/MapStateProvider";
 import { MapView } from "@/components/map/MapView";
 import { Sentinel2Overlay } from "@/components/map/Sentinel2Overlay";
 import { AggregationOverlay } from "@/components/map/AggregationOverlay";
+import { FieldMemoryOverlay } from "@/components/map/FieldMemoryOverlay";
 import { LayerSync } from "@/components/map/LayerSync";
 import { LayerManager } from "@/components/map/LayerManager";
 import { RuntimeProvider } from "@/components/assistant/RuntimeProvider";
@@ -36,6 +37,7 @@ export function MapWorkspace({ userId }: { userId: string }) {
                   <MapView />
                   <Sentinel2Overlay />
                   <AggregationOverlay />
+                  <FieldMemoryOverlay />
                   <LayerSync />
                   <LayerManager />
                   {/* Insights surface (#17): expands over the map when a widget

@@ -6,9 +6,10 @@ COGs it needs, and a pure-numpy compute function that takes those band arrays
 the valid domain. The registry keeps the math in one place so both the zonal
 read path and the offline index tests share exactly the same kernels.
 
-All supported indices use 10 m bands (red/green/blue/nir), so they share one
-pixel grid and need no resampling. ``nbr`` is reserved but not yet implemented:
-it requires the 20 m swir22 band resampled onto the 10 m grid.
+Indices that need 20 m bands (swir16/swir22) or red-edge bands work unchanged:
+the read path (``raster.py`` / ``cube.py``) warps every band onto the read
+window's grid with ``WarpedVRT`` before calling these kernels, so mixed-
+resolution bands are already co-registered here.
 """
 
 from __future__ import annotations
@@ -21,10 +22,14 @@ import numpy as np
 
 
 class IndexName(str, Enum):  # noqa: UP042 — str-mixin keeps JSON value as the bare string
-    ndvi = "ndvi"
-    ndwi = "ndwi"
-    evi = "evi"
-    nbr = "nbr"
+    ndvi = "ndvi"  # vegetation (red, nir)
+    ndwi = "ndwi"  # water — McFeeters (green, nir)
+    evi = "evi"  # enhanced vegetation (nir, red, blue)
+    nbr = "nbr"  # burn / vegetation health (nir, swir22)
+    ndmi = "ndmi"  # vegetation moisture (nir, swir16)
+    mndwi = "mndwi"  # modified water — Xu (green, swir16)
+    ndre = "ndre"  # red-edge chlorophyll (nir, rededge1)
+    savi = "savi"  # soil-adjusted vegetation (nir, red)
 
 
 @dataclass(frozen=True)
@@ -54,32 +59,49 @@ def _ndwi(green: np.ndarray, nir: np.ndarray) -> np.ndarray:
 
 
 def _evi(nir: np.ndarray, red: np.ndarray, blue: np.ndarray) -> np.ndarray:
-    """Enhanced Vegetation Index on reflectance-scaled (0..1) band values.
-
-    Sentinel-2 L2A digital numbers are reflectance * 10000; scale them down so
-    the EVI constants (the +1 and the 6/-7.5 coefficients) are dimensionally
-    correct.
-    """
-    nir_r = nir / 10000.0
-    red_r = red / 10000.0
-    blue_r = blue / 10000.0
-    denom = nir_r + 6.0 * red_r - 7.5 * blue_r + 1.0
-    return np.where(denom != 0, 2.5 * (nir_r - red_r) / denom, np.nan).astype("float32")
+    """Enhanced Vegetation Index. Inputs are reflectance in [0, 1] — the read
+    path scales raw DN to reflectance per collection before calling this, so the
+    EVI constants (the +1 and the 6/-7.5 coefficients) are dimensionally correct
+    for any sensor."""
+    denom = nir + 6.0 * red - 7.5 * blue + 1.0
+    return np.where(denom != 0, 2.5 * (nir - red) / denom, np.nan).astype("float32")
 
 
-def _nbr_not_implemented(*_bands: np.ndarray) -> np.ndarray:
-    # TODO: NBR needs the 20 m swir22 band resampled onto the 10 m grid before
-    # it can share the single-window read path used by the other indices.
-    raise NotImplementedError(
-        "NBR is not implemented yet: it requires the 20 m swir22 band resampled onto the 10 m grid."
-    )
+def _nbr(nir: np.ndarray, swir22: np.ndarray) -> np.ndarray:
+    return _normalized_difference(nir, swir22)
 
 
+def _ndmi(nir: np.ndarray, swir16: np.ndarray) -> np.ndarray:
+    return _normalized_difference(nir, swir16)
+
+
+def _mndwi(green: np.ndarray, swir16: np.ndarray) -> np.ndarray:
+    return _normalized_difference(green, swir16)
+
+
+def _ndre(nir: np.ndarray, rededge1: np.ndarray) -> np.ndarray:
+    return _normalized_difference(nir, rededge1)
+
+
+def _savi(nir: np.ndarray, red: np.ndarray, soil_factor: float = 0.5) -> np.ndarray:
+    """Soil-Adjusted Vegetation Index (Huete 1988); ``L=0.5`` reduces soil
+    background influence vs NDVI on sparse canopies."""
+    denom = nir + red + soil_factor
+    return np.where(denom > 0, (nir - red) / denom * (1.0 + soil_factor), np.nan).astype("float32")
+
+
+# Indices on 20 m (swir16/swir22) or red-edge bands are resampled onto the
+# read window's grid by the WarpedVRT path in raster.py / cube.py, so they need
+# no special-casing here — the band math is identical to the 10 m ones.
 INDICES: dict[IndexName, IndexSpec] = {
     IndexName.ndvi: IndexSpec(band_keys=("red", "nir"), compute=_ndvi),
     IndexName.ndwi: IndexSpec(band_keys=("green", "nir"), compute=_ndwi),
     IndexName.evi: IndexSpec(band_keys=("nir", "red", "blue"), compute=_evi),
-    IndexName.nbr: IndexSpec(band_keys=("nir", "swir22"), compute=_nbr_not_implemented),
+    IndexName.nbr: IndexSpec(band_keys=("nir", "swir22"), compute=_nbr),
+    IndexName.ndmi: IndexSpec(band_keys=("nir", "swir16"), compute=_ndmi),
+    IndexName.mndwi: IndexSpec(band_keys=("green", "swir16"), compute=_mndwi),
+    IndexName.ndre: IndexSpec(band_keys=("nir", "rededge1"), compute=_ndre),
+    IndexName.savi: IndexSpec(band_keys=("nir", "red"), compute=_savi),
 }
 
 

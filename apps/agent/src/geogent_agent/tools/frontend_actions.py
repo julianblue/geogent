@@ -150,6 +150,35 @@ def add_aggregation_layer(
 
 
 @tool
+def show_field_memory(
+    artifact_id: str,
+    band: str = "productivity",
+    label: str | None = None,
+) -> dict:
+    """Render a built cube-reduction layer as a colored overlay on the map.
+
+    The browser fetches the artifact's COG for the chosen ``band`` and paints it
+    with the colormap the reducer declared. Returns only an acknowledgement — it
+    reads no data back to you. Call ``field_memory_for_field`` first to build the
+    artifact and answer from its ``summary``; pass the returned ``artifact_id``
+    and the output name here only to display it.
+
+    Args:
+        artifact_id: The id returned by ``field_memory_for_field``.
+        band: Which reducer output to display — an output name from
+            ``summary.outputs`` (e.g. ``productivity``, ``stability``, ``slope``,
+            ``frequency``, ``composite``). Defaults to ``productivity``.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_field_memory": True,
+        "artifact_id": artifact_id,
+        "band": band,
+        "label": label,
+    }
+
+
+@tool
 def list_features_in_viewport() -> dict:
     """Display-only: open an interactive feature-list panel in the user's UI.
 
