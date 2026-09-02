@@ -1,5 +1,6 @@
 import asyncio
 import time
+from datetime import date
 from typing import Literal
 
 from langchain_core.tools import tool
@@ -20,6 +21,26 @@ _ARTIFACT_POLL_TIMEOUT_SECONDS = 180.0
 # baseline year), so it gets the longest budget of the three.
 _SEASON_ANALYSIS_POLL_INTERVAL_SECONDS = 0.5
 _SEASON_ANALYSIS_POLL_TIMEOUT_SECONDS = 300.0
+
+
+# Zoning is a multi-season question, so an unspecified window is not a reason to
+# stop and ask: three years is the conventional default and keeps one bad
+# weather year from defining the map.
+_DEFAULT_ZONE_WINDOW_YEARS = 3
+
+
+def _default_window(start_date: str | None, end_date: str | None) -> tuple[str, str]:
+    """Fill in a multi-season window when the caller gave no dates."""
+    today = date.today()
+    end = end_date or today.isoformat()
+    if start_date:
+        return start_date, end
+    anchor = date.fromisoformat(end)
+    try:
+        start = anchor.replace(year=anchor.year - _DEFAULT_ZONE_WINDOW_YEARS)
+    except ValueError:  # 29 Feb
+        start = anchor.replace(year=anchor.year - _DEFAULT_ZONE_WINDOW_YEARS, day=28)
+    return start.isoformat(), end
 
 
 def _resolve_aoi(
@@ -529,9 +550,9 @@ async def analyze_index_season(
 
 @tool
 async def delineate_management_zones(
-    start_date: str,
-    end_date: str,
     field_id: int | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     geometry_wkt: str | None = None,
     bbox: list[float] | None = None,
     indices: list[str] | None = None,
@@ -557,8 +578,11 @@ async def delineate_management_zones(
     ``n_zones`` defaults to automatic (a variance-ratio criterion picks 2-6);
     set it when the user names a number, e.g. three rates for a spreader.
 
-    Cover at least one full season; several seasons make the zones more
-    trustworthy because a one-off weather event stops dominating them.
+    Dates are OPTIONAL: leaving them out uses the last three years, which is the
+    right default for zoning — several seasons stop a single bad weather year
+    dominating the map. Don't stall on asking for a window the user has no
+    opinion about; pass dates only when they name a period, and say which window
+    you used in your answer (``summary.inputs`` reports the scenes behind it).
 
     Returns ``{artifact_id, status, summary, ...}``. In ``summary``:
       - ``zones``: per zone, area_ha, share_of_area, and the mean of every
@@ -574,6 +598,7 @@ async def delineate_management_zones(
     Then call ``show_raster_layer(artifact_id, band="zones")`` to draw the map.
     """
     aoi = _resolve_aoi(field_id=field_id, geometry_wkt=geometry_wkt, bbox=bbox)
+    window_start, window_end = _default_window(start_date, end_date)
     async with get_backend_client() as client:
         start = await client.post(
             "/api/v1/analytics/management-zones",
@@ -582,8 +607,8 @@ async def delineate_management_zones(
                 "indices": indices or ["ndvi"],
                 "n_zones": n_zones,
                 "collection": collection,
-                "start_date": start_date,
-                "end_date": end_date,
+                "start_date": window_start,
+                "end_date": window_end,
                 "max_cloud_cover": max_cloud_cover,
                 "max_scenes": max_scenes,
             },

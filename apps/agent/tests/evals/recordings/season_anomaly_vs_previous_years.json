@@ -1,0 +1,197 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "How is the 2025 season going on field 7 compared with the last two years?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "87bd9291-b6ec-4746-a50f-5b98632b75b2"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 39,
+            "prompt_tokens": 8885,
+            "total_tokens": 8924,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.002763,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.002763,
+              "upstream_inference_prompt_cost": 0.0026655,
+              "upstream_inference_completions_cost": 9.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1788341402-uEqcUGhsiExcaIJS65Xl",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--01a06174-3a5d-70f0-9c25-0c8725958400-0",
+        "tool_calls": [
+          {
+            "name": "analyze_index_season",
+            "args": {
+              "start_date": "2024-09-01",
+              "end_date": "2025-08-31",
+              "field_id": 7,
+              "baseline_years": 2
+            },
+            "id": "tool_analyze_index_season_SXCiqNWnChPgYFVdcvOU",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 8885,
+          "output_tokens": 39,
+          "total_tokens": 8924,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"job_id\": \"22222222-2222-2222-2222-222222222222\", \"status\": \"succeeded\", \"field_id\": 7, \"index\": \"ndvi\", \"params\": {}, \"points\": [], \"curve\": [{\"date\": \"2025-04-15\", \"value\": 0.31}, {\"date\": \"2025-06-20\", \"value\": 0.82}, {\"date\": \"2025-08-30\", \"value\": 0.35}], \"phenology\": {\"status\": \"ok\", \"n_observations\": 22, \"peak_value\": 0.82, \"peak_date\": \"2025-06-20\", \"start_of_season\": \"2025-04-08\", \"end_of_season\": \"2025-09-02\", \"season_length_days\": 147, \"amplitude\": 0.55, \"seasonal_integral\": 52.4, \"greenup_rate_per_day\": 0.0078, \"senescence_rate_per_day\": 0.0074, \"max_gap_days\": 11, \"observed_span_days\": 180}, \"anomaly\": {\"status\": \"ok\", \"baseline_years\": [2023, 2024], \"n_days_compared\": 160, \"mean_difference\": -0.07, \"mean_z_score\": -1.4, \"fraction_of_season_below_baseline\": 0.81, \"largest_shortfall\": {\"date\": \"2025-07-05\", \"difference\": -0.16}, \"largest_surplus\": {\"date\": \"2025-04-20\", \"difference\": 0.02}}, \"error\": null}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "analyze_index_season",
+        "id": "4d094dcd-ef1d-4358-8da8-791d327c97b2",
+        "tool_call_id": "tool_analyze_index_season_SXCiqNWnChPgYFVdcvOU",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The 2025 season for North field (winter common soft wheat) shows a mean NDVI difference of -0.07 and a mean Z-score of -1.4 compared to the last two years (2023 and 2024). This indicates that the field is performing below average. 81% of the season has been below the baseline. The largest shortfall occurred on July 5, 2025, with a difference of -0.16, while the largest surplus was on April 20, 2025, with a difference of 0.02.\n\nThe phenology metrics for 2025 are:\n- Start of season: April 8, 2025\n- Peak date: June 20, 2025 with a peak value of 0.82\n- End of season: September 2, 2025\n- Season length: 147 days\n- Amplitude: 0.55\n- Seasonal integral: 52.4 (cumulative canopy biomass)\n- Green-up rate: 0.0078 per day\n- Senescence rate: 0.0074 per day\n\nThere were 22 observations over an observed span of 180 days, with a maximum gap of 11 days between observations, so the phenology metrics are reliable.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 302,
+            "prompt_tokens": 9186,
+            "total_tokens": 9488,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 9011,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00107783,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00107783,
+              "upstream_inference_prompt_cost": 0.00032283,
+              "upstream_inference_completions_cost": 0.000755
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1788341404-YQnjR5JEuk0dta9ej203",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--01a06174-4341-77d2-82d0-74f8c1373bbd-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 9186,
+          "output_tokens": 302,
+          "total_tokens": 9488,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 9011
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "summary": "",
+    "summarized_count": 0
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "map_state": {
+      "selected_field": {
+        "id": 7,
+        "name": "North field",
+        "crop": "winter_common_soft_wheat"
+      }
+    },
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "194ce748-a1b0-464a-b3ad-021d9b023a2a",
+    "run_id": "01a06174-365c-79b3-b103-32c9b36ca39d",
+    "source": "loop",
+    "step": 3,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "0caef4bb-a3a1-4b7f-bc96-cb59a85f3bdb"
+  },
+  "created_at": "2026-09-02T09:30:16.294846+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1a6b0e-80f0-620e-8003-b14208544783",
+    "thread_id": "194ce748-a1b0-464a-b3ad-021d9b023a2a",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1a6b0e-0fa2-6e76-8002-6a57acb8212d",
+    "thread_id": "194ce748-a1b0-464a-b3ad-021d9b023a2a",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1a6b0e-80f0-620e-8003-b14208544783",
+  "parent_checkpoint_id": "1f1a6b0e-0fa2-6e76-8002-6a57acb8212d"
+}

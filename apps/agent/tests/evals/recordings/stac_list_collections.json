@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "b1342555-f153-4b54-a4e7-523ba103387d"
+        "id": "940a8f6a-be3c-4e34-bba3-cff63dc65eef"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 6,
-            "prompt_tokens": 5447,
-            "total_tokens": 5453,
+            "prompt_tokens": 8819,
+            "total_tokens": 8825,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,45 +28,45 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4856,
+              "cached_tokens": 8308,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00033798,
+            "cost": 0.00041754,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00033798,
-              "upstream_inference_prompt_cost": 0.00032298,
+              "upstream_inference_cost": 0.00041754,
+              "upstream_inference_prompt_cost": 0.00040254,
               "upstream_inference_completions_cost": 1.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273231-3Y0nS9ISoAV82VTaIzxT",
-          "service_tier": "provisioned",
+          "id": "gen-1788341317-XbwCj17mG6raTeVRtmxh",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-816c-71c2-a2e3-353261b02da1-0",
+        "id": "lc_run--01a06172-ee16-7b02-9053-b36232931cf8-0",
         "tool_calls": [
           {
             "name": "stac_list_collections",
             "args": {},
-            "id": "tool_stac_list_collections_G4ZGbHgRRA72QceDlBMP",
+            "id": "tool_stac_list_collections_VSrn0M3Kd3hgAgJQD1mj",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5447,
+          "input_tokens": 8819,
           "output_tokens": 6,
-          "total_tokens": 5453,
+          "total_tokens": 8825,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4856
+            "cache_read": 8308
           },
           "output_token_details": {
             "audio": 0,
@@ -80,21 +80,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "stac_list_collections",
-        "id": "283838ce-de40-4b7f-9211-31413b481f73",
-        "tool_call_id": "tool_stac_list_collections_G4ZGbHgRRA72QceDlBMP",
+        "id": "276f7301-2b67-4183-ae9b-f9a7dead86b5",
+        "tool_call_id": "tool_stac_list_collections_VSrn0M3Kd3hgAgJQD1mj",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "You can search for a variety of satellite imagery collections, including:\n\n*   **Sentinel-2 Level-2A**: Global Sentinel-2 data from the Multispectral Instrument (MSI) onboard Sentinel-2.\n*   **NAIP: National Agriculture Imagery Program**: U.S.-wide, high-resolution aerial imagery with four spectral bands (R, G, B, IR).\n*   **Landsat Collection 2 Level-2**: Atmospherically corrected global Landsat data from Landsat 4, 5, 7, 8, and 9.\n*   **Sentinel-1 Level-1C Ground Range Detected (GRD)**: Global Sentinel-1 Synthetic Aperture Radar (SAR) data.\n*   **Copernicus DEM GLO-30/GLO-90**: Digital Surface Models (DSM) representing the Earth's surface at 30 and 90 meters resolution.",
+        "content": "You can search several satellite imagery collections, including:\n\n*   **Sentinel-2 Level-2A**: Global Sentinel-2 data from the Multispectral Instrument (MSI) onboard Sentinel-2. This is a good option for general agricultural monitoring due to its 10m resolution and frequent revisits.\n*   **Landsat Collection 2 Level-2**: Atmospherically corrected global Landsat Collection 2 Level-2 data from Landsat 4, 5, 7, 8 and 9. This collection provides a longer historical record, though at a coarser resolution (30m) than Sentinel-2.\n*   **NAIP: National Agriculture Imagery Program**: U.S.-wide, high-resolution aerial imagery with four spectral bands (R, G, B, IR). Data is captured at least once every three years for each state.\n*   **Sentinel-1 Level-1C Ground Range Detected (GRD)**: Synthetic Aperture Radar (SAR) imagery, which can see through clouds, making it useful for monitoring in all weather conditions.\n\nThere are also Copernicus DEM collections for digital elevation models.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 196,
-            "prompt_tokens": 6194,
-            "total_tokens": 6390,
+            "completion_tokens": 237,
+            "prompt_tokens": 9566,
+            "total_tokens": 9803,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -104,38 +104,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4897,
+              "cached_tokens": 8338,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00102601,
+            "cost": 0.00121104,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00102601,
-              "upstream_inference_prompt_cost": 0.00053601,
-              "upstream_inference_completions_cost": 0.00049
+              "upstream_inference_cost": 0.00121104,
+              "upstream_inference_prompt_cost": 0.00061854,
+              "upstream_inference_completions_cost": 0.0005925
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273234-fIEHqvqILe15iH01kOaQ",
-          "service_tier": "provisioned",
+          "id": "gen-1788341318-v731XhzDoBVlZQACCXEq",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-8c31-7f00-9550-6b9033d1cbb5-0",
+        "id": "lc_run--01a06172-f4b3-7372-86e2-a930fd9229a4-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 6194,
-          "output_tokens": 196,
-          "total_tokens": 6390,
+          "input_tokens": 9566,
+          "output_tokens": 237,
+          "total_tokens": 9803,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4897
+            "cache_read": 8338
           },
           "output_token_details": {
             "audio": 0,
@@ -143,7 +143,9 @@
           }
         }
       }
-    ]
+    ],
+    "summary": "",
+    "summarized_count": 0
   },
   "next": [],
   "tasks": [],
@@ -157,27 +159,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51783",
-    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
-    "run_id": "019ebc28-7d6c-74b0-8b64-2e1f4b1851a6",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "0980a761-59b7-49ac-af12-8859b51e68a5",
+    "run_id": "01a06172-ea15-7e42-a781-63226588ae56",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "6f1f63d1-eb5a-4011-90e8-d863b1df3224"
+    "langgraph_request_id": "882628e2-0b24-4c08-9bd7-def91eeb371a"
   },
-  "created_at": "2026-06-12T14:07:16.222046+00:00",
+  "created_at": "2026-09-02T09:28:40.628392+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f166680-46f2-6406-8003-e9a50ef5c51b",
-    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
+    "checkpoint_id": "1f1a6b0a-f097-66fb-8003-413023f184a0",
+    "thread_id": "0980a761-59b7-49ac-af12-8859b51e68a5",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f166680-35de-640e-8002-cfbb15a5f5e0",
-    "thread_id": "68b869f2-0060-4407-8cc4-b2bae05a2aa7",
+    "checkpoint_id": "1f1a6b0a-dec6-612f-8002-7764911c78c7",
+    "thread_id": "0980a761-59b7-49ac-af12-8859b51e68a5",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f166680-46f2-6406-8003-e9a50ef5c51b",
-  "parent_checkpoint_id": "1f166680-35de-640e-8002-cfbb15a5f5e0"
+  "checkpoint_id": "1f1a6b0a-f097-66fb-8003-413023f184a0",
+  "parent_checkpoint_id": "1f1a6b0a-dec6-612f-8002-7764911c78c7"
 }

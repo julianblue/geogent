@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "97d458e9-6d7e-481e-95b8-237d4077c1b4"
+        "id": "0736a524-9281-426c-8ac0-a64f2c78c0d6"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 62,
-            "prompt_tokens": 5560,
-            "total_tokens": 5622,
+            "prompt_tokens": 8932,
+            "total_tokens": 8994,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,47 +28,47 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4877,
+              "cached_tokens": 8328,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00050621,
+            "cost": 0.00058604,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00050621,
-              "upstream_inference_prompt_cost": 0.00035121,
+              "upstream_inference_cost": 0.00058604,
+              "upstream_inference_prompt_cost": 0.00043104,
               "upstream_inference_completions_cost": 0.000155
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273209-FYeWFUpAjcW73ESets8f",
-          "service_tier": "provisioned",
+          "id": "gen-1788341302-Ger2UWNQzBbLN3YZvg9x",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-2b2d-7021-aba9-0b7545fea81e-0",
+        "id": "lc_run--01a06172-b537-7f22-9da3-56a277e2b1d1-0",
         "tool_calls": [
           {
             "name": "features_within",
             "args": {
-              "geometry_wkt": "POLYGON ((2.2 48.8, 2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8))"
+              "geometry_wkt": "POLYGON ((2.5 48.8, 2.5 48.93, 2.2 48.93, 2.2 48.8, 2.5 48.8))"
             },
-            "id": "tool_features_within_sHaSNnVNLlhIeTkcs9OL",
+            "id": "tool_features_within_EQZ0xgmkGJOjuk7OP21M",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5560,
+          "input_tokens": 8932,
           "output_tokens": 62,
-          "total_tokens": 5622,
+          "total_tokens": 8994,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4877
+            "cache_read": 8328
           },
           "output_token_details": {
             "audio": 0,
@@ -82,21 +82,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "features_within",
-        "id": "752616f7-1059-4294-8f15-f1ea29c71056",
-        "tool_call_id": "tool_features_within_sHaSNnVNLlhIeTkcs9OL",
+        "id": "dc05b759-9d41-497f-91c1-88c9f85a11df",
+        "tool_call_id": "tool_features_within_EQZ0xgmkGJOjuk7OP21M",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "The features in the current map view are: Eiffel Tower, and Louvre Museum.",
+        "content": "The current map view contains two features: Eiffel Tower and Louvre Museum.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 16,
-            "prompt_tokens": 5638,
-            "total_tokens": 5654,
+            "completion_tokens": 14,
+            "prompt_tokens": 9010,
+            "total_tokens": 9024,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -110,31 +110,31 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0017314,
+            "cost": 0.002738,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0017314,
-              "upstream_inference_prompt_cost": 0.0016914,
-              "upstream_inference_completions_cost": 4e-05
+              "upstream_inference_cost": 0.002738,
+              "upstream_inference_prompt_cost": 0.002703,
+              "upstream_inference_completions_cost": 3.5e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273210-hGQw5dNGy8M0KJzLkNNc",
-          "service_tier": "provisioned",
+          "id": "gen-1788341303-ss39PwKqMc19RYD3mMm9",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-2ee2-7b60-ba73-99fc185ef564-0",
+        "id": "lc_run--01a06172-b9a4-7052-9570-bb6c27c41184-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5638,
-          "output_tokens": 16,
-          "total_tokens": 5654,
+          "input_tokens": 9010,
+          "output_tokens": 14,
+          "total_tokens": 9024,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -145,7 +145,9 @@
           }
         }
       }
-    ]
+    ],
+    "summary": "",
+    "summarized_count": 0
   },
   "next": [],
   "tasks": [],
@@ -172,27 +174,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51783",
-    "thread_id": "db865ab3-ed89-4127-adf1-3efdcfde348e",
-    "run_id": "019ebc28-2742-7482-bd5d-45433f19dc7b",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "df3a9564-7edd-48ff-91d6-91d099e16d47",
+    "run_id": "01a06172-b131-7012-b674-7d998c142b87",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "589a7236-c647-4f7e-9082-46555297f7dc"
+    "langgraph_request_id": "44136b88-81f7-4a59-b3ad-8cb4a0121681"
   },
-  "created_at": "2026-06-12T14:06:51.403389+00:00",
+  "created_at": "2026-09-02T09:28:24.556178+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f16667f-5a41-6d3a-8003-9402f28a6dbe",
-    "thread_id": "db865ab3-ed89-4127-adf1-3efdcfde348e",
+    "checkpoint_id": "1f1a6b0a-5750-6a34-8003-0fbe00b6831f",
+    "thread_id": "df3a9564-7edd-48ff-91d6-91d099e16d47",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f16667f-5210-656e-8002-722d9583aac3",
-    "thread_id": "db865ab3-ed89-4127-adf1-3efdcfde348e",
+    "checkpoint_id": "1f1a6b0a-4e99-6149-8002-cc4dea08a44f",
+    "thread_id": "df3a9564-7edd-48ff-91d6-91d099e16d47",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f16667f-5a41-6d3a-8003-9402f28a6dbe",
-  "parent_checkpoint_id": "1f16667f-5210-656e-8002-722d9583aac3"
+  "checkpoint_id": "1f1a6b0a-5750-6a34-8003-0fbe00b6831f",
+  "parent_checkpoint_id": "1f1a6b0a-4e99-6149-8002-cc4dea08a44f"
 }

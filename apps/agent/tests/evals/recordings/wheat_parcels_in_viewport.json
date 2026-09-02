@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "0d83962c-595e-4ded-ae10-00e6a557e66c"
+        "id": "0a951d76-fcce-40ee-acab-3ff9787f83da"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 23,
-            "prompt_tokens": 5557,
-            "total_tokens": 5580,
+            "prompt_tokens": 8929,
+            "total_tokens": 8952,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -32,44 +32,44 @@
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0017246,
+            "cost": 0.0027362,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0017246,
-              "upstream_inference_prompt_cost": 0.0016671,
+              "upstream_inference_cost": 0.0027362,
+              "upstream_inference_prompt_cost": 0.0026787,
               "upstream_inference_completions_cost": 5.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273327-0svFjenItNRiWO3hexxE",
+          "id": "gen-1788341384-fNHfwQgk5wF1Z3NP3Qc6",
           "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc29-f8a0-7830-a51b-78bdf19736ca-0",
+        "id": "lc_run--01a06173-f32b-7e92-a0f5-3317c8ba4ae2-0",
         "tool_calls": [
           {
             "name": "fields_within_bbox",
             "args": {
-              "max_lat": 53.4,
-              "min_lon": 13.75,
               "max_lon": 14.05,
+              "min_lon": 13.75,
               "crop": "wheat",
-              "min_lat": 53.2
+              "min_lat": 53.2,
+              "max_lat": 53.4
             },
-            "id": "tool_fields_within_bbox_fPKCXZPsa8lG0cdIdDs8",
+            "id": "tool_fields_within_bbox_xx1AuiCBjylweHiNICU1",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5557,
+          "input_tokens": 8929,
           "output_tokens": 23,
-          "total_tokens": 5580,
+          "total_tokens": 8952,
           "input_token_details": {
             "audio": 0,
             "cache_read": 0
@@ -86,21 +86,21 @@
         "response_metadata": {},
         "type": "tool",
         "name": "fields_within_bbox",
-        "id": "19ff135a-9ea4-4c17-93c8-a40d95340161",
-        "tool_call_id": "tool_fields_within_bbox_fPKCXZPsa8lG0cdIdDs8",
+        "id": "132f4e9f-618a-4122-b7b5-12564ef8a053",
+        "tool_call_id": "tool_fields_within_bbox_xx1AuiCBjylweHiNICU1",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "I found two wheat parcels in the current map view: \"DE-BB DEBBNF0000201\" and \"DE-BB DEBBNF0000202\".",
+        "content": "I found two winter common soft wheat parcels in the current map view: \"DE-BB DEBBNF0000201\" and \"DE-BB DEBBNF0000202\".",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 44,
-            "prompt_tokens": 5646,
-            "total_tokens": 5690,
+            "completion_tokens": 47,
+            "prompt_tokens": 9018,
+            "total_tokens": 9065,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -110,38 +110,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 0,
+              "cached_tokens": 8273,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0018038,
+            "cost": 0.00058919,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0018038,
-              "upstream_inference_prompt_cost": 0.0016938,
-              "upstream_inference_completions_cost": 0.00011
+              "upstream_inference_cost": 0.00058919,
+              "upstream_inference_prompt_cost": 0.00047169,
+              "upstream_inference_completions_cost": 0.0001175
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273328-ZDZJ6NKPZjMuzRuniDMq",
+          "id": "gen-1788341384-usrCvoUb8VnzrWiiuU1K",
           "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc29-fc14-7542-b923-31ed3a0e480a-0",
+        "id": "lc_run--01a06173-f6c9-7f10-a140-a9aeeee28af0-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5646,
-          "output_tokens": 44,
-          "total_tokens": 5690,
+          "input_tokens": 9018,
+          "output_tokens": 47,
+          "total_tokens": 9065,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 0
+            "cache_read": 8273
           },
           "output_token_details": {
             "audio": 0,
@@ -149,7 +149,9 @@
           }
         }
       }
-    ]
+    ],
+    "summary": "",
+    "summarized_count": 0
   },
   "next": [],
   "tasks": [],
@@ -176,27 +178,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51783",
-    "thread_id": "8815c18d-8b50-4af5-86a7-ca29d96f6237",
-    "run_id": "019ebc29-f4ba-7cc1-9d34-2818c3d8bcc2",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "89423937-6b9d-496d-9a60-a358ba381f41",
+    "run_id": "01a06173-ef2f-7c23-803d-e76086fc0c15",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "067dc048-14ea-42c5-b7cb-4f4b35840f43"
+    "langgraph_request_id": "9694792b-f884-4f90-8851-a33ec945dbbd"
   },
-  "created_at": "2026-06-12T14:08:51.877945+00:00",
+  "created_at": "2026-09-02T09:29:46.462480+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f166683-d731-629f-8003-9b5f46ec8a7e",
-    "thread_id": "8815c18d-8b50-4af5-86a7-ca29d96f6237",
+    "checkpoint_id": "1f1a6b0d-646f-6315-8003-b62eaed16afb",
+    "thread_id": "89423937-6b9d-496d-9a60-a358ba381f41",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f166683-b7f4-6e2f-8002-2621dfef7a46",
-    "thread_id": "8815c18d-8b50-4af5-86a7-ca29d96f6237",
+    "checkpoint_id": "1f1a6b0d-54f1-6fcf-8002-b8d4c3767735",
+    "thread_id": "89423937-6b9d-496d-9a60-a358ba381f41",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f166683-d731-629f-8003-9b5f46ec8a7e",
-  "parent_checkpoint_id": "1f166683-b7f4-6e2f-8002-2621dfef7a46"
+  "checkpoint_id": "1f1a6b0d-646f-6315-8003-b62eaed16afb",
+  "parent_checkpoint_id": "1f1a6b0d-54f1-6fcf-8002-b8d4c3767735"
 }

@@ -83,8 +83,9 @@ the most common way to give a shallow answer.
    variance_explained is the reason the zones exist, and if everything sits
    near zero the field has no real structure — say the zoning is not meaningful
    instead of narrating noise. Describe each zone by area and what it is like,
-   then show_raster_layer(artifact_id, band="zones") to draw it. Cover at least
-   a full season; several seasons make zones that survive one bad year.
+   then show_raster_layer(artifact_id, band="zones") to draw it. Dates are
+   optional here and default to the last three years — don't ask for a window
+   the user hasn't got an opinion about; just say which one you used.
 
 Choosing an index (do not default to NDVI reflexively):
   ndvi general vigour · evi dense canopy without saturating · savi sparse or
@@ -150,8 +151,15 @@ features_within, list_features for vector work and viewport queries.
 Map context: the runner may pass `map_state` on `config.configurable` with
 {viewport, features, selected_ids, layers, fields, selected_field}. Use it
 whenever the user says "this map", "in view", "the selected ones", "this
-field". `viewport.bounds = {west, south, east, north}` gives you a bbox for the
-server-side tools.
+field". `viewport.bounds = {west, south, east, north}` is a usable AOI, not
+just metadata: build the rectangle
+
+  POLYGON((west south, east south, east north, west north, west south))
+
+and pass it anywhere a geometry_wkt is wanted — buffer_geometry,
+features_within, temporal_features, or confirm_feature_save when the user asks
+to save "the current view" as an area. "The view is a bbox, not a feature" is
+not a reason to refuse; the rectangle IS the polygon they mean.
 
 ## How to answer
 

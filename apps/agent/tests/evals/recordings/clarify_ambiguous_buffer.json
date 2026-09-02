@@ -7,18 +7,18 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "28e8d894-8bd9-41dc-b91b-4c0562415562"
+        "id": "ada54115-3344-44b3-91a8-78efa7502f31"
       },
       {
-        "content": "What distance in meters should the buffer be?",
+        "content": "I can add a buffer, but \"around it\" is a bit vague. Do you mean around the current map view, or around a specific feature? If a feature, please tell me which one.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 9,
-            "prompt_tokens": 7201,
-            "total_tokens": 7210,
+            "completion_tokens": 41,
+            "prompt_tokens": 8813,
+            "total_tokens": 8854,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,38 +28,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 6488,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00043104,
+            "cost": 0.0027464,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00043104,
-              "upstream_inference_prompt_cost": 0.00040854,
-              "upstream_inference_completions_cost": 2.25e-05
+              "upstream_inference_cost": 0.0027464,
+              "upstream_inference_prompt_cost": 0.0026439,
+              "upstream_inference_completions_cost": 0.0001025
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781710906-QXnatnOsMAWyR0KZK4dA",
-          "service_tier": "provisioned",
+          "id": "gen-1788341393-OcHAqPLlESJt0ud5jO35",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ed63e-e25f-7651-a12a-bcc1803c05e6-0",
+        "id": "lc_run--01a06174-180e-7c42-8a30-ece1a4f4b028-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 7201,
-          "output_tokens": 9,
-          "total_tokens": 7210,
+          "input_tokens": 8813,
+          "output_tokens": 41,
+          "total_tokens": 8854,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 6488
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -83,27 +83,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:58197",
-    "run_id": "019ed63e-de62-7752-8de8-ef7b8241bba6",
-    "thread_id": "34c38af3-d49a-4494-a7d5-1f7f41a3d12c",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "ef25a655-cb30-4800-84e0-19ee8cc970ae",
+    "run_id": "01a06174-140a-7f83-8459-060675a3aee8",
     "source": "loop",
     "step": 1,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "49fcc3bf-ecff-4acb-8feb-838981d0dea4"
+    "langgraph_request_id": "7a1d30b5-71b2-4672-8924-d01bad650374"
   },
-  "created_at": "2026-06-17T15:41:46.800562+00:00",
+  "created_at": "2026-09-02T09:29:54.517138+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f16a630-c6d8-6165-8001-737f13c5df8b",
-    "thread_id": "34c38af3-d49a-4494-a7d5-1f7f41a3d12c",
+    "checkpoint_id": "1f1a6b0d-b13f-6e20-8001-69c03505e779",
+    "thread_id": "ef25a655-cb30-4800-84e0-19ee8cc970ae",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f16a630-be17-621a-8000-950e0456d125",
-    "thread_id": "34c38af3-d49a-4494-a7d5-1f7f41a3d12c",
+    "checkpoint_id": "1f1a6b0d-a631-6de0-8000-a7be8f6d4cc8",
+    "thread_id": "ef25a655-cb30-4800-84e0-19ee8cc970ae",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f16a630-c6d8-6165-8001-737f13c5df8b",
-  "parent_checkpoint_id": "1f16a630-be17-621a-8000-950e0456d125"
+  "checkpoint_id": "1f1a6b0d-b13f-6e20-8001-69c03505e779",
+  "parent_checkpoint_id": "1f1a6b0d-a631-6de0-8000-a7be8f6d4cc8"
 }

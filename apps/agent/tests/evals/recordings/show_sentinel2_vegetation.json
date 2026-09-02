@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "1a6a504d-9e42-4663-8d42-d045021910fe"
+        "id": "911ec894-c74e-43bd-a3fd-cda250b3514b"
       },
       {
         "content": "",
@@ -16,9 +16,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 34,
-            "prompt_tokens": 5481,
-            "total_tokens": 5515,
+            "completion_tokens": 36,
+            "prompt_tokens": 8853,
+            "total_tokens": 8889,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,64 +28,67 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4862,
+              "cached_tokens": 8314,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00041656,
+            "cost": 0.00050112,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00041656,
-              "upstream_inference_prompt_cost": 0.00033156,
-              "upstream_inference_completions_cost": 8.5e-05
+              "upstream_inference_cost": 0.00050112,
+              "upstream_inference_prompt_cost": 0.00041112,
+              "upstream_inference_completions_cost": 9e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273246-nMfPCy8rYVPpq9anPIBl",
-          "service_tier": "provisioned",
+          "id": "gen-1788341334-mAE7bStGcyvMwBsoGpkq",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-bba4-7231-8649-80217162414d-0",
+        "id": "lc_run--01a06173-309e-7542-a7c7-ab5e4cb6306a-0",
         "tool_calls": [
           {
             "name": "stac_search",
             "args": {
-              "query": {
-                "eo:cloud_cover": {
-                  "lt": 20
-                }
-              },
-              "bbox": [
-                2.25,
-                48.8,
-                2.42,
-                48.9
-              ],
-              "collections": "sentinel-2-l2a",
               "sortby": [
                 {
                   "field": "properties.datetime",
                   "direction": "desc"
                 }
+              ],
+              "query": {
+                "eo:cloud_cover": {
+                  "lt": 20
+                }
+              },
+              "collections": [
+                "sentinel-2-l2a"
+              ],
+              "limit": 1,
+              "bbox": [
+                2.25,
+                48.8,
+                2.42,
+                48.9
               ]
             },
-            "id": "tool_stac_search_aHJaKcp62GJQ9eBSaxUb",
+            "id": "tool_stac_search_Mic4ZTFOrmjnxHkEXEPM",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5481,
-          "output_tokens": 34,
-          "total_tokens": 5515,
+          "input_tokens": 8853,
+          "output_tokens": 36,
+          "total_tokens": 8889,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4862
+            "cache_read": 8314
           },
           "output_token_details": {
             "audio": 0,
@@ -94,15 +97,15 @@
         }
       },
       {
-        "content": "Tool raised ToolInvocationError: Error invoking tool 'stac_search' with kwargs {'query': {'eo:cloud_cover': {'lt': 20}}, 'bbox': [2.25, 48.8, 2.42, 48.9], 'collections': 'sentinel-2-l2a', 'sortby': [{'field': 'properties.datetime', 'direction': 'desc'}]} with error:\n collections: Input should be a valid list\n Please fix the error and try again.",
+        "content": "[{\"id\": \"S2A_31UDQ_20260812_1_L2A\", \"collection\": \"sentinel-2-l2a\", \"bbox\": [1.614286, 48.657929, 2.969159, 49.65271], \"properties\": {\"platform\": \"sentinel-2a\", \"constellation\": \"sentinel-2\", \"instruments\": [\"msi\"], \"eo:cloud_cover\": 0.027534, \"proj:epsg\": 32631, \"datetime\": \"2026-08-12T11:07:40.892000Z\"}, \"asset_keys\": [\"aot\", \"aot-jp2\", \"blue\", \"blue-jp2\", \"cloud\", \"coastal\", \"coastal-jp2\", \"granule_metadata\", \"green\", \"green-jp2\", \"nir\", \"nir-jp2\", \"nir08\", \"nir08-jp2\", \"nir09\", \"nir09-jp2\", \"product_metadata\", \"red\", \"red-jp2\", \"rededge1\", \"rededge1-jp2\", \"rededge2\", \"rededge2-jp2\", \"rededge3\", \"rededge3-jp2\", \"scl\", \"scl-jp2\", \"snow\", \"swir16\", \"swir16-jp2\", \"swir22\", \"swir22-jp2\", \"thumbnail\", \"tileinfo_metadata\", \"visual\", \"visual-jp2\", \"wvp\", \"wvp-jp2\"]}]",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "tool",
         "name": "stac_search",
-        "id": "446a99b5-8a81-42f1-88fb-044ef957e7d7",
-        "tool_call_id": "tool_stac_search_aHJaKcp62GJQ9eBSaxUb",
+        "id": "61096dcb-4855-4e9a-b17f-2f7575b5966b",
+        "tool_call_id": "tool_stac_search_Mic4ZTFOrmjnxHkEXEPM",
         "artifact": null,
-        "status": "error"
+        "status": "success"
       },
       {
         "content": "",
@@ -111,9 +114,9 @@
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 14,
-            "prompt_tokens": 5549,
-            "total_tokens": 5563,
+            "completion_tokens": 35,
+            "prompt_tokens": 9124,
+            "total_tokens": 9159,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -123,53 +126,48 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4797,
+              "cached_tokens": 0,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00040451,
+            "cost": 0.0028247,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00040451,
-              "upstream_inference_prompt_cost": 0.00036951,
-              "upstream_inference_completions_cost": 3.5e-05
+              "upstream_inference_cost": 0.0028247,
+              "upstream_inference_prompt_cost": 0.0027372,
+              "upstream_inference_completions_cost": 8.75e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273247-ImTsC3PWGn8BF3uLe3w4",
-          "service_tier": "provisioned",
+          "id": "gen-1788341336-4SRZ3nCiZPNQ3IybhQXt",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-bf99-7d90-80d8-bfddb79e3273-0",
+        "id": "lc_run--01a06173-377a-7161-9820-18b98c9b3327-0",
         "tool_calls": [
           {
             "name": "show_sentinel2_scene",
             "args": {
-              "bbox": [
-                2.25,
-                48.8,
-                2.42,
-                48.9
-              ],
+              "item_id": "S2A_31UDQ_20260812_1_L2A",
               "composite": "ndvi"
             },
-            "id": "tool_show_sentinel2_scene_43MLvVs7o4iZsL41sL13",
+            "id": "tool_show_sentinel2_scene_d5NDP1LxPVrjMItnaOvH",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5549,
-          "output_tokens": 14,
-          "total_tokens": 5563,
+          "input_tokens": 9124,
+          "output_tokens": 35,
+          "total_tokens": 9159,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4797
+            "cache_read": 0
           },
           "output_token_details": {
             "audio": 0,
@@ -178,26 +176,26 @@
         }
       },
       {
-        "content": "{\"ok\": true, \"item_id\": \"S2B_31UDQ_20260501_0_L2A\", \"datetime\": \"2026-05-01T10:30:00Z\", \"cloud_cover\": 4.2, \"composite\": \"ndvi\", \"field_id\": null}",
+        "content": "{\"ok\": true, \"item_id\": \"S2A_31UDQ_20260812_1_L2A\", \"datetime\": \"2026-05-01T10:30:00Z\", \"cloud_cover\": 4.2, \"composite\": \"ndvi\", \"field_id\": null}",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "tool",
         "name": "show_sentinel2_scene",
-        "id": "e52bcaa0-038e-44cf-8f90-a9ecae060fec",
-        "tool_call_id": "tool_show_sentinel2_scene_43MLvVs7o4iZsL41sL13",
+        "id": "413c61f9-8bf2-4081-ad08-babe473d7fe4",
+        "tool_call_id": "tool_show_sentinel2_scene_d5NDP1LxPVrjMItnaOvH",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "I've rendered the Sentinel-2 L2A scene S2B_31UDQ_20260501_0_L2A from May 1, 2026, over your specified bounding box. It has a cloud cover of 4.2% and is displayed with the NDVI composite to highlight vegetation.",
+        "content": "I found a Sentinel-2 scene from August 12, 2026, with only 0.03% cloud cover. I've displayed it on the map using the NDVI composite to highlight vegetation.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 74,
-            "prompt_tokens": 5629,
-            "total_tokens": 5703,
+            "completion_tokens": 46,
+            "prompt_tokens": 9225,
+            "total_tokens": 9271,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -207,38 +205,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4763,
+              "cached_tokens": 8168,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00058769,
+            "cost": 0.00067714,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00058769,
-              "upstream_inference_prompt_cost": 0.00040269,
-              "upstream_inference_completions_cost": 0.000185
+              "upstream_inference_cost": 0.00067714,
+              "upstream_inference_prompt_cost": 0.00056214,
+              "upstream_inference_completions_cost": 0.000115
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273249-EDrQtGYOPCe3MsItmfJz",
-          "service_tier": "provisioned",
+          "id": "gen-1788341338-MY6F7YQneECzY8GvXXWk",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-c689-7d82-a254-cb9119f82d45-0",
+        "id": "lc_run--01a06173-3f43-72e2-81d4-7035ac5bde48-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5629,
-          "output_tokens": 74,
-          "total_tokens": 5703,
+          "input_tokens": 9225,
+          "output_tokens": 46,
+          "total_tokens": 9271,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4763
+            "cache_read": 8168
           },
           "output_token_details": {
             "audio": 0,
@@ -246,7 +244,9 @@
           }
         }
       }
-    ]
+    ],
+    "summary": "",
+    "summarized_count": 0
   },
   "next": [],
   "tasks": [],
@@ -260,27 +260,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51783",
-    "thread_id": "18b170ae-3146-46d3-9665-272e3ee8a6e3",
-    "run_id": "019ebc28-c27e-75f2-8280-9e039c5d58d8",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "b08632a2-dfa0-4847-b592-9d0f0307debb",
+    "run_id": "01a06173-3b21-7a10-847e-84e09f69b6cb",
     "source": "loop",
     "step": 5,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "3d5d3129-f883-4e22-aaef-95245d82297e"
+    "langgraph_request_id": "e712fc41-a7c9-4f41-9251-f0187a69cc8e"
   },
-  "created_at": "2026-06-12T14:07:30.345558+00:00",
+  "created_at": "2026-09-02T09:28:58.781387+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f166680-cda3-67ba-8005-f3b6d7f2c234",
-    "thread_id": "18b170ae-3146-46d3-9665-272e3ee8a6e3",
+    "checkpoint_id": "1f1a6b0b-9db6-6452-8005-be042d4639fb",
+    "thread_id": "b08632a2-dfa0-4847-b592-9d0f0307debb",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f166680-c44f-6996-8004-d039ef7ae570",
-    "thread_id": "18b170ae-3146-46d3-9665-272e3ee8a6e3",
+    "checkpoint_id": "1f1a6b0b-94e9-64b1-8004-012d884db82b",
+    "thread_id": "b08632a2-dfa0-4847-b592-9d0f0307debb",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f166680-cda3-67ba-8005-f3b6d7f2c234",
-  "parent_checkpoint_id": "1f166680-c44f-6996-8004-d039ef7ae570"
+  "checkpoint_id": "1f1a6b0b-9db6-6452-8005-be042d4639fb",
+  "parent_checkpoint_id": "1f1a6b0b-94e9-64b1-8004-012d884db82b"
 }

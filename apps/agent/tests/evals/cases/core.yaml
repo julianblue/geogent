@@ -304,7 +304,6 @@
       - [show_sentinel2_scene, zonal_stats_for_field]
       - [zonal_stats_for_field, seasonal_index_time_series_for_field]
     max_steps: 12
-  xfail: "new multi-step case; not yet validated against the default eval model"
 
 # --- Agricultural depth: season interpretation, per-pixel history, zoning -----
 # Live cases against the backend stub. No recordings yet, so they soft-skip in

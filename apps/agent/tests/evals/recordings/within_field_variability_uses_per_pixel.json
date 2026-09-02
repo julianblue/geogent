@@ -1,0 +1,298 @@
+{
+  "values": {
+    "messages": [
+      {
+        "content": "Which parts of field 7 perform consistently well and which are erratic? Show me the map.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "87c27d5c-782c-45f3-987a-a154fb8f802c"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 37,
+            "prompt_tokens": 8883,
+            "total_tokens": 8920,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.0027574,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.0027574,
+              "upstream_inference_prompt_cost": 0.0026649,
+              "upstream_inference_completions_cost": 9.25e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1788341417-ERlctdUtRWVKrSBhYdLt",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--01a06174-75a3-7f12-9224-ba74c65010af-0",
+        "tool_calls": [
+          {
+            "name": "temporal_features",
+            "args": {
+              "field_id": 7,
+              "start_date": "2025-09-01",
+              "end_date": "2026-08-31",
+              "reducer": "field_memory"
+            },
+            "id": "tool_temporal_features_uwmgztz4CoIdQLhIm3Nd",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 8883,
+          "output_tokens": 37,
+          "total_tokens": 8920,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"id\": \"aaaa1111\", \"kind\": \"temporal_features\", \"status\": \"succeeded\", \"summary\": {\"reducer\": \"field_memory\", \"index\": \"ndvi\", \"collection\": \"sentinel-2-l2a\", \"n_scenes_used\": 24, \"n_scenes_cloud_masked\": 24, \"valid_obs\": {\"min\": 9, \"median\": 21, \"max\": 24}, \"outputs\": {\"productivity\": {\"mean\": 0.61, \"within_field_spread\": 0.14}, \"stability\": {\"mean\": 0.18, \"within_field_spread\": 0.06}}}, \"assets\": [{\"role\": \"productivity\", \"key\": \"productivity.tif\", \"url\": \"/x\"}], \"error\": null}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "temporal_features",
+        "id": "5a1e3fd7-77b8-4408-9f5d-6dfcd6ef91f4",
+        "tool_call_id": "tool_temporal_features_uwmgztz4CoIdQLhIm3Nd",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 35,
+            "prompt_tokens": 9006,
+            "total_tokens": 9041,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8236,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00056558,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00056558,
+              "upstream_inference_prompt_cost": 0.00047808,
+              "upstream_inference_completions_cost": 8.75e-05
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1788341419-YBGSSwFYix2e2E7PJZgM",
+          "service_tier": "default",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--01a06174-7c72-7581-bc92-cd9015ab71cd-0",
+        "tool_calls": [
+          {
+            "name": "show_raster_layer",
+            "args": {
+              "band": "productivity",
+              "label": "Productivity",
+              "artifact_id": "aaaa1111"
+            },
+            "id": "tool_show_raster_layer_qVhAVpFE7R625cgWXA4N",
+            "type": "tool_call"
+          },
+          {
+            "name": "show_raster_layer",
+            "args": {
+              "label": "Stability",
+              "band": "stability",
+              "artifact_id": "aaaa1111"
+            },
+            "id": "tool_show_raster_layer_14FxcTlbTioRQnwK3OHh",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 9006,
+          "output_tokens": 35,
+          "total_tokens": 9041,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 8236
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "{\"queued_field_memory\": true, \"artifact_id\": \"aaaa1111\", \"band\": \"productivity\", \"label\": \"Productivity\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "show_raster_layer",
+        "id": "275e85cd-aba5-439d-9bca-4907e94aaff1",
+        "tool_call_id": "tool_show_raster_layer_qVhAVpFE7R625cgWXA4N",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "{\"queued_field_memory\": true, \"artifact_id\": \"aaaa1111\", \"band\": \"stability\", \"label\": \"Stability\"}",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "show_raster_layer",
+        "id": "8542951a-3168-44c2-8e3f-713063182181",
+        "tool_call_id": "tool_show_raster_layer_14FxcTlbTioRQnwK3OHh",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "I've analyzed the productivity and stability of field 7 over the last season (September 2025 - August 2026) using the NDVI index from Sentinel-2 imagery.\n\nThe analysis shows that the field has a mean productivity (NDVI) of 0.61 with a within-field spread of 0.14, and a mean stability (temporal coefficient of variation) of 0.18 with a spread of 0.06. This indicates some variability within the field.\n\nI've displayed two new layers on your map: \"Productivity\" and \"Stability\". The \"Productivity\" layer shows areas that performed consistently well (higher NDVI values) and those that were less productive. The \"Stability\" layer highlights areas that were erratic (higher variability) versus those that were more stable over the season.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 177,
+            "prompt_tokens": 9088,
+            "total_tokens": 9265,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null,
+              "image_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8189,
+              "cache_write_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost": 0.00095787,
+            "is_byok": false,
+            "cost_details": {
+              "upstream_inference_cost": 0.00095787,
+              "upstream_inference_prompt_cost": 0.00051537,
+              "upstream_inference_completions_cost": 0.0004425
+            }
+          },
+          "model_provider": "openai",
+          "model_name": "google/gemini-2.5-flash",
+          "system_fingerprint": null,
+          "id": "gen-1788341420-DGBprTzIIS97QRMjkYO6",
+          "service_tier": "default",
+          "finish_reason": "stop",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": null,
+        "id": "lc_run--01a06174-8030-76e0-9d40-b5aec811e118-0",
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 9088,
+          "output_tokens": 177,
+          "total_tokens": 9265,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 8189
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "summary": "",
+    "summarized_count": 0
+  },
+  "next": [],
+  "tasks": [],
+  "metadata": {
+    "map_state": {
+      "selected_field": {
+        "id": 7,
+        "name": "North field",
+        "crop": "winter_common_soft_wheat"
+      }
+    },
+    "graph_id": "geogent",
+    "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db",
+    "user_id": "",
+    "created_by": "system",
+    "run_attempt": 1,
+    "langgraph_version": "1.1.8",
+    "langgraph_api_version": "0.8.0",
+    "langgraph_plan": "enterprise",
+    "langgraph_host": "self-hosted",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "c3b92918-ebf5-4a4b-b047-cd03b7f24d1a",
+    "run_id": "01a06174-7197-7731-ae01-b892f3e2e9fe",
+    "source": "loop",
+    "step": 5,
+    "parents": {},
+    "langgraph_auth_user_id": "",
+    "langgraph_request_id": "d58b9630-0a85-48f2-ae13-136af77746bc"
+  },
+  "created_at": "2026-09-02T09:30:22.366511+00:00",
+  "checkpoint": {
+    "checkpoint_id": "1f1a6b0e-bad7-6842-8005-50e05eab7a54",
+    "thread_id": "c3b92918-ebf5-4a4b-b047-cd03b7f24d1a",
+    "checkpoint_ns": ""
+  },
+  "parent_checkpoint": {
+    "checkpoint_id": "1f1a6b0e-a45f-6366-8004-00b3afe776e4",
+    "thread_id": "c3b92918-ebf5-4a4b-b047-cd03b7f24d1a",
+    "checkpoint_ns": ""
+  },
+  "interrupts": [],
+  "checkpoint_id": "1f1a6b0e-bad7-6842-8005-50e05eab7a54",
+  "parent_checkpoint_id": "1f1a6b0e-a45f-6366-8004-00b3afe776e4"
+}

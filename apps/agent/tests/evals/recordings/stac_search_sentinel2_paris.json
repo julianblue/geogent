@@ -7,7 +7,7 @@
         "response_metadata": {},
         "type": "human",
         "name": null,
-        "id": "2234b467-ede3-4254-ba1b-307a214e68e0"
+        "id": "bb9cfd22-4d88-4fa9-b855-4d59bef0f2af"
       },
       {
         "content": "",
@@ -17,8 +17,8 @@
         "response_metadata": {
           "token_usage": {
             "completion_tokens": 36,
-            "prompt_tokens": 5485,
-            "total_tokens": 5521,
+            "prompt_tokens": 8857,
+            "total_tokens": 8893,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -28,42 +28,39 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 4863,
+              "cached_tokens": 8315,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.00042249,
+            "cost": 0.00050205,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.00042249,
-              "upstream_inference_prompt_cost": 0.00033249,
+              "upstream_inference_cost": 0.00050205,
+              "upstream_inference_prompt_cost": 0.00041205,
               "upstream_inference_completions_cost": 9e-05
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273238-25Q5e6l2Hdy83kuxvt5m",
-          "service_tier": "provisioned",
+          "id": "gen-1788341321-VjzmOSBfIJ3454QXObh4",
+          "service_tier": "default",
           "finish_reason": "tool_calls",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-971d-7581-a8fc-f0d95a032df8-0",
+        "id": "lc_run--01a06172-ffe5-7880-bc94-a2e19c72ab1b-0",
         "tool_calls": [
           {
             "name": "stac_search",
             "args": {
-              "limit": 1,
-              "collections": [
-                "sentinel-2-l2a"
-              ],
               "query": {
                 "eo:cloud_cover": {
                   "lt": 20
                 }
               },
+              "limit": 1,
               "sortby": [
                 {
                   "direction": "desc",
@@ -75,20 +72,23 @@
                 48.8,
                 2.42,
                 48.9
+              ],
+              "collections": [
+                "sentinel-2-l2a"
               ]
             },
-            "id": "tool_stac_search_qus0znW2kxWRPKEMPe7C",
+            "id": "tool_stac_search_h446YeeVMHYhCifhfcSJ",
             "type": "tool_call"
           }
         ],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5485,
+          "input_tokens": 8857,
           "output_tokens": 36,
-          "total_tokens": 5521,
+          "total_tokens": 8893,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 4863
+            "cache_read": 8315
           },
           "output_token_details": {
             "audio": 0,
@@ -97,26 +97,26 @@
         }
       },
       {
-        "content": "[{\"id\": \"S2B_31UDQ_20260527_0_L2A\", \"collection\": \"sentinel-2-l2a\", \"bbox\": [1.614286, 48.657929, 2.979134, 49.652712], \"properties\": {\"platform\": \"sentinel-2b\", \"constellation\": \"sentinel-2\", \"instruments\": [\"msi\"], \"eo:cloud_cover\": 0.00289, \"proj:epsg\": 32631, \"datetime\": \"2026-05-27T11:07:19.332000Z\"}, \"asset_keys\": [\"aot\", \"aot-jp2\", \"blue\", \"blue-jp2\", \"cloud\", \"coastal\", \"coastal-jp2\", \"granule_metadata\", \"green\", \"green-jp2\", \"nir\", \"nir-jp2\", \"nir08\", \"nir08-jp2\", \"nir09\", \"nir09-jp2\", \"product_metadata\", \"red\", \"red-jp2\", \"rededge1\", \"rededge1-jp2\", \"rededge2\", \"rededge2-jp2\", \"rededge3\", \"rededge3-jp2\", \"scl\", \"scl-jp2\", \"snow\", \"swir16\", \"swir16-jp2\", \"swir22\", \"swir22-jp2\", \"thumbnail\", \"tileinfo_metadata\", \"visual\", \"visual-jp2\", \"wvp\", \"wvp-jp2\"]}]",
+        "content": "[{\"id\": \"S2A_31UDQ_20260812_1_L2A\", \"collection\": \"sentinel-2-l2a\", \"bbox\": [1.614286, 48.657929, 2.969159, 49.65271], \"properties\": {\"platform\": \"sentinel-2a\", \"constellation\": \"sentinel-2\", \"instruments\": [\"msi\"], \"eo:cloud_cover\": 0.027534, \"proj:epsg\": 32631, \"datetime\": \"2026-08-12T11:07:40.892000Z\"}, \"asset_keys\": [\"aot\", \"aot-jp2\", \"blue\", \"blue-jp2\", \"cloud\", \"coastal\", \"coastal-jp2\", \"granule_metadata\", \"green\", \"green-jp2\", \"nir\", \"nir-jp2\", \"nir08\", \"nir08-jp2\", \"nir09\", \"nir09-jp2\", \"product_metadata\", \"red\", \"red-jp2\", \"rededge1\", \"rededge1-jp2\", \"rededge2\", \"rededge2-jp2\", \"rededge3\", \"rededge3-jp2\", \"scl\", \"scl-jp2\", \"snow\", \"swir16\", \"swir16-jp2\", \"swir22\", \"swir22-jp2\", \"thumbnail\", \"tileinfo_metadata\", \"visual\", \"visual-jp2\", \"wvp\", \"wvp-jp2\"]}]",
         "additional_kwargs": {},
         "response_metadata": {},
         "type": "tool",
         "name": "stac_search",
-        "id": "fa9f9397-cd55-47a6-802b-5989dfdee246",
-        "tool_call_id": "tool_stac_search_qus0znW2kxWRPKEMPe7C",
+        "id": "5280dfee-0410-433a-94d7-f98ffddeafb1",
+        "tool_call_id": "tool_stac_search_h446YeeVMHYhCifhfcSJ",
         "artifact": null,
         "status": "success"
       },
       {
-        "content": "The most recent low-cloud Sentinel-2 scene for your area of interest is S2B_31UDQ_20260527_0_L2A.",
+        "content": "The most recent low-cloud Sentinel-2 scene within the bounding box [2.25, 48.80, 2.42, 48.90] is S2A_31UDQ_20260812_1_L2A, from 2026-08-12, with a cloud cover of 0.027534.",
         "additional_kwargs": {
           "refusal": null
         },
         "response_metadata": {
           "token_usage": {
-            "completion_tokens": 40,
-            "prompt_tokens": 5756,
-            "total_tokens": 5796,
+            "completion_tokens": 93,
+            "prompt_tokens": 9128,
+            "total_tokens": 9221,
             "completion_tokens_details": {
               "accepted_prediction_tokens": null,
               "audio_tokens": 0,
@@ -126,38 +126,38 @@
             },
             "prompt_tokens_details": {
               "audio_tokens": 0,
-              "cached_tokens": 0,
+              "cached_tokens": 8189,
               "cache_write_tokens": 0,
               "video_tokens": 0
             },
-            "cost": 0.0018268,
+            "cost": 0.00075987,
             "is_byok": false,
             "cost_details": {
-              "upstream_inference_cost": 0.0018268,
-              "upstream_inference_prompt_cost": 0.0017268,
-              "upstream_inference_completions_cost": 0.0001
+              "upstream_inference_cost": 0.00075987,
+              "upstream_inference_prompt_cost": 0.00052737,
+              "upstream_inference_completions_cost": 0.0002325
             }
           },
           "model_provider": "openai",
           "model_name": "google/gemini-2.5-flash",
           "system_fingerprint": null,
-          "id": "gen-1781273239-t7qIhGkA7BjCYKwCuRni",
-          "service_tier": "provisioned",
+          "id": "gen-1788341324-862hYfO9Gt7TR674bbWu",
+          "service_tier": "default",
           "finish_reason": "stop",
           "logprobs": null
         },
         "type": "ai",
         "name": null,
-        "id": "lc_run--019ebc28-9fba-7721-852d-dcea8e2f90af-0",
+        "id": "lc_run--01a06173-0907-77a0-99be-dc0f6a99989b-0",
         "tool_calls": [],
         "invalid_tool_calls": [],
         "usage_metadata": {
-          "input_tokens": 5756,
-          "output_tokens": 40,
-          "total_tokens": 5796,
+          "input_tokens": 9128,
+          "output_tokens": 93,
+          "total_tokens": 9221,
           "input_token_details": {
             "audio": 0,
-            "cache_read": 0
+            "cache_read": 8189
           },
           "output_token_details": {
             "audio": 0,
@@ -165,7 +165,9 @@
           }
         }
       }
-    ]
+    ],
+    "summary": "",
+    "summarized_count": 0
   },
   "next": [],
   "tasks": [],
@@ -179,27 +181,27 @@
     "langgraph_api_version": "0.8.0",
     "langgraph_plan": "enterprise",
     "langgraph_host": "self-hosted",
-    "langgraph_api_url": "http://127.0.0.1:51783",
-    "thread_id": "cbc68fc7-a07d-47d9-a803-6826792fb638",
-    "run_id": "019ebc28-932f-7151-88fb-eee3da53d15c",
+    "langgraph_api_url": "http://127.0.0.1:48993",
+    "thread_id": "400beab5-13a4-41c6-aabf-69b07e473b9e",
+    "run_id": "01a06172-fbdf-7333-8279-0e2e93a2b894",
     "source": "loop",
     "step": 3,
     "parents": {},
     "langgraph_auth_user_id": "",
-    "langgraph_request_id": "72290e2b-617f-49db-837c-96f0fe65562f"
+    "langgraph_request_id": "0a3a13e6-f7f1-4f38-b99a-d8b1f00beaf0"
   },
-  "created_at": "2026-06-12T14:07:20.301427+00:00",
+  "created_at": "2026-09-02T09:28:45.913433+00:00",
   "checkpoint": {
-    "checkpoint_id": "1f166680-6dd9-6ad1-8003-3db1e7fc5963",
-    "thread_id": "cbc68fc7-a07d-47d9-a803-6826792fb638",
+    "checkpoint_id": "1f1a6b0b-22fe-65f7-8003-09e2b2d2fbbc",
+    "thread_id": "400beab5-13a4-41c6-aabf-69b07e473b9e",
     "checkpoint_ns": ""
   },
   "parent_checkpoint": {
-    "checkpoint_id": "1f166680-6594-6860-8002-0c6cbd065c85",
-    "thread_id": "cbc68fc7-a07d-47d9-a803-6826792fb638",
+    "checkpoint_id": "1f1a6b0b-106a-6705-8002-0283525f1f65",
+    "thread_id": "400beab5-13a4-41c6-aabf-69b07e473b9e",
     "checkpoint_ns": ""
   },
   "interrupts": [],
-  "checkpoint_id": "1f166680-6dd9-6ad1-8003-3db1e7fc5963",
-  "parent_checkpoint_id": "1f166680-6594-6860-8002-0c6cbd065c85"
+  "checkpoint_id": "1f1a6b0b-22fe-65f7-8003-09e2b2d2fbbc",
+  "parent_checkpoint_id": "1f1a6b0b-106a-6705-8002-0283525f1f65"
 }
