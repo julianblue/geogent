@@ -24,9 +24,20 @@ api/v1/routes/*   thin HTTP handlers (validation, status codes, auth dep)
 Cross-cutting:
 
 - `geo/` — geometry, raster, and provider helpers: `operations.py` (PostGIS
-  buffer/distance/area/intersects/within), `indices.py` (NDVI/NDWI/EVI band
-  math), `raster.py` (rasterio/GDAL COG reads via `/vsicurl`), `stac.py` (Earth
+  buffer/distance/area/intersects/within), `indices.py` (band math for the eight
+  spectral indices), `collections.py` (per-sensor band aliases + scaling),
+  `masking.py` (per-pixel cloud/shadow masks: S2 SCL classes, Landsat QA_PIXEL
+  bits), `raster.py` (rasterio/GDAL COG reads via `/vsicurl` + zonal stats),
+  `cube.py` + `reducers.py` (multi-date cube and its per-pixel reductions),
+  `phenology.py` (season-shape metrics + baseline anomaly), `stac.py` (Earth
   Search over httpx), `routing.py` (OSRM/ORS/Nominatim over httpx).
+
+  **Masking is not optional in the read paths.** Both `raster.zonal_stats` and
+  `cube.build_reduction` apply the collection's `MaskSpec` before any statistic
+  is computed; unmasked cloud biases means low and inflates temporal CV into
+  fake instability. A change to that math needs a `_STAT_CACHE_VERSION` bump
+  (`services/raster_service.py`) and/or a `recipe_version` bump
+  (`schemas/artifact.py`), or stale results keep being served.
 - `schemas/` — Pydantic v2 request/response models.
 - `core/` — `security.py` (JWT encode/decode), `errors.py`, `logging.py`.
 - `db/` — engine/session.

@@ -59,9 +59,11 @@ compact summary + a render URL. Generalizes the existing `raster_stat_cache`
       **Load-bearing, not M2:** the spike dropped 20/40 scenes — half the season
       — on grid mismatch when this step was absent. See
       `apps/backend/spikes/cube_zones/DECISION.md`.
-- [ ] **Per-pixel SCL cloud masking** (drop classes 3/8/9/10/11), resampled to
-      the 10 m grid — without it, residual cloud/shadow inflates temporal CV and
-      fakes "instability". _(deferred within M1)_
+- [x] **Per-pixel cloud masking** — `geo/masking.py`: S2 SCL classes
+      (0/1/3/8/9/10/11) and Landsat QA_PIXEL bits, warped onto the read grid with
+      nearest resampling and applied in BOTH read paths (`raster.zonal_stats` and
+      `cube.build_reduction`) before any statistic. Cache/recipe versions bumped
+      so pre-mask results are not served.
 - [x] `temporal_features` recipe → per-pixel productivity (mean) + stability
       (temporal CV) → **two single-band field-memory GeoTIFF assets**
       (`productivity.tif`, `stability.tif`), via

@@ -228,36 +228,6 @@
     max_steps: 8
     final_contains_any: ["DEBBNF0000201", "DEBBNF0000202", "wheat"]
 
-# --- Routing / isochrones / geocoding (#55) ----------------------------------
-# Live cases: like geocode_place these hit the live OSM providers (Nominatim +
-# OSRM) through the backend, so keyword checks stay loose. No recordings yet.
-
-- id: route_paris_to_versailles
-  input: "Show me the driving route from Paris to Versailles, France."
-  configurable: {}
-  expect:
-    tools_required: [geocode_place, [route_between, add_route_layer]]
-    max_steps: 12
-
-- id: reverse_geocode_point
-  input: "What's at longitude 2.2945, latitude 48.8584? Give me the place name."
-  configurable: {}
-  expect:
-    tools_required: [reverse_geocode]
-    max_steps: 6
-    final_contains_any: ["paris", "champ de mars", "eiffel"]
-
-- id: isochrone_10min_drive
-  input: "What area is within a 10-minute drive of the Eiffel Tower?"
-  configurable: {}
-  expect:
-    tools_required: [geocode_place, [isochrone_for, add_isochrone_layer]]
-    max_steps: 12
-
-# --- deck.gl aggregation layers (#57) ----------------------------------------
-# Client-side tool: the agent selects it; the browser bins map features. The
-# map_state carries a couple of features so "these features" is grounded.
-
 - id: heatmap_of_features
   input: "Show me a heatmap of the features on the map."
   configurable:
@@ -335,13 +305,3 @@
       - [zonal_stats_for_field, seasonal_index_time_series_for_field]
     max_steps: 12
   xfail: "new multi-step case; not yet validated against the default eval model"
-
-# --- routing: travel-time matrix ---------------------------------------------
-
-- id: travel_time_matrix_three_cities
-  input: "Build a driving travel-time matrix between Paris, Lyon, and Marseille."
-  configurable: {}
-  expect:
-    tools_required: [geocode_place, travel_time_matrix]
-    max_steps: 12
-  xfail: "new matrix case; not yet validated against the default eval model"

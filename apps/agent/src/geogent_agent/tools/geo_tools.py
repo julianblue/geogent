@@ -16,6 +16,41 @@ _TIME_SERIES_POLL_TIMEOUT_SECONDS = 60.0
 _ARTIFACT_POLL_INTERVAL_SECONDS = 0.5
 _ARTIFACT_POLL_TIMEOUT_SECONDS = 180.0
 
+# Season analysis can read several years of scenes in one job (one window per
+# baseline year), so it gets the longest budget of the three.
+_SEASON_ANALYSIS_POLL_INTERVAL_SECONDS = 0.5
+_SEASON_ANALYSIS_POLL_TIMEOUT_SECONDS = 300.0
+
+
+def _resolve_aoi(
+    *,
+    field_id: int | None,
+    geometry_wkt: str | None,
+    bbox: list[float] | None,
+) -> dict:
+    """Normalize the three AOI forms into the recipe's single-AOI payload.
+
+    The backend enforces "exactly one of field_id / geometry_wkt / bbox" and
+    answers a violation with a 422. Checking here instead turns a model mistake
+    into a message it can actually act on (and keeps a half-specified request
+    from being sent as ``field_id: null``, which reads as a server error).
+    """
+    provided = {
+        "field_id": field_id,
+        "geometry_wkt": geometry_wkt,
+        "bbox": bbox,
+    }
+    given = {k: v for k, v in provided.items() if v is not None}
+    if len(given) != 1:
+        raise ValueError(
+            "Pass exactly one area of interest: field_id (a stored field), "
+            "geometry_wkt (a WGS84 polygon), or bbox "
+            f"[min_lon, min_lat, max_lon, max_lat]. Got: {sorted(given) or 'none'}."
+        )
+    if bbox is not None and len(bbox) != 4:
+        raise ValueError("bbox must be [min_lon, min_lat, max_lon, max_lat] (4 numbers).")
+    return given
+
 
 @tool
 async def list_features() -> list[dict]:
@@ -239,11 +274,25 @@ async def zonal_stats_for_field(
     max_cloud_cover: float = 20,
     histogram_bins: int = 20,
 ) -> dict:
-    """Compute per-field zonal stats for one raster scene.
+    """Compute per-field zonal stats (mean/min/max/std + histogram) for one scene.
 
-    ``index`` must be one of the backend-supported indices: ``ndvi``, ``ndwi``,
-    or ``evi``. Request/response field names mirror backend raster schemas for
-    #24 widgets.
+    The single-date view of a field: "how does it look right now". Cloud and
+    shadow pixels are masked out server-side, so the stats describe usable
+    ground, and ``stats.valid_pixels`` tells you how much of the field survived
+    the mask — a low count means a cloudy scene, not a bad field.
+
+    Indices (pick for the question, not by habit):
+      - ``ndvi`` — general vegetation vigour / biomass. The default.
+      - ``evi`` — like NDVI but resists saturation on dense canopy.
+      - ``savi`` — soil-adjusted; better on sparse/early-season canopy.
+      - ``ndre`` — red-edge; nitrogen/chlorophyll status in closed canopy
+        (Sentinel-2 only, Landsat has no red-edge band).
+      - ``ndmi`` — canopy moisture (drought/irrigation stress).
+      - ``nbr`` — burn severity / severe senescence.
+      - ``ndwi`` / ``mndwi`` — open water (ponding, flooding).
+
+    Omit ``scene_id`` to use the latest scene under ``max_cloud_cover``; pass
+    ``datetime`` (STAC instant or interval) to pin a date window instead.
     """
     async with get_backend_client() as client:
         r = await client.post(
@@ -270,11 +319,16 @@ async def seasonal_index_time_series_for_field(
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
-    """Fetch a field's seasonal index series by starting and polling a backend job.
+    """Fetch a field's per-scene index series over a date range (raw points).
 
-    ``index`` must be one of the backend-supported indices: ``ndvi``, ``ndwi``,
-    or ``evi``. Returns the backend ``TimeSeriesResultResponse`` shape for #24
-    chart widgets.
+    One point per usable scene: ``mean``/``min``/``max``/``std`` of the index
+    inside the field polygon, cloud-masked. Use this when the user wants the
+    actual observations or a chart of them.
+
+    Interpret the shape, don't just relay it: green-up, peak, senescence, and
+    any mid-season dip are the agronomic content of a series.
+
+    ``index`` accepts the same set as ``zonal_stats_for_field``.
     """
     async with get_backend_client() as client:
         start = await client.post(
@@ -309,10 +363,11 @@ async def seasonal_index_time_series_for_field(
 
 
 @tool
-async def field_memory_for_field(
+async def temporal_features(
     start_date: str,
     end_date: str,
     field_id: int | None = None,
+    geometry_wkt: str | None = None,
     bbox: list[float] | None = None,
     index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
     reducer: Literal["field_memory", "composite", "trend", "frequency"] = "field_memory",
@@ -321,37 +376,42 @@ async def field_memory_for_field(
     max_cloud_cover: float = 20,
     max_scenes: int = 60,
 ) -> dict:
-    """Build a multi-date data cube for an area and reduce it per pixel.
+    """Build a multi-date data cube over an area and reduce it PER PIXEL.
 
-    Stacks every low-cloud scene in [start_date, end_date] into a cube and
-    applies ``reducer`` to the time axis. Use this for questions about patterns
-    *over time per pixel* within an area, not a single-date or whole-area mean.
+    This is the "where inside this field, and how has it behaved over time"
+    tool — the within-field view that zonal stats (one number per field) and
+    the seasonal series (one number per date) both average away.
 
-    Pass EITHER ``field_id`` (a stored field) OR ``bbox``
-    ``[min_lon, min_lat, max_lon, max_lat]`` for an arbitrary area — exactly
-    one. Large bboxes are rejected (the engine is field/farm-scale); keep an
-    AOI within a few km.
+    AOI — pass EXACTLY ONE of:
+      - ``field_id`` — a stored field/parcel (preferred; use the id from
+        ``map_state.selected_field`` or ``fields_within_bbox``),
+      - ``geometry_wkt`` — an arbitrary polygon in WGS84 (e.g. a drawn AOI),
+      - ``bbox`` — ``[min_lon, min_lat, max_lon, max_lat]``.
+    The engine is field/farm-scale: oversized AOIs are rejected (422), so keep
+    an area within a few km across.
 
-    Reducers (each returns the named per-pixel output layers in ``summary``):
+    Reducers — each writes the named per-pixel layers into ``summary.outputs``:
+      - ``field_memory`` (default) → ``productivity`` (multi-date mean) and
+        ``stability`` (temporal CV). "Consistently good vs erratic" — the
+        management-zone view, and the input to ``delineate_management_zones``.
+      - ``composite`` → ``composite``: median index, a typical cloud-free value.
+      - ``trend`` → ``slope``: change per year (greening / browning / decline).
+      - ``frequency`` → ``frequency``: fraction of dates above ``threshold``
+        (waterlogging, bare-soil frequency, cover persistence). Set ``threshold``.
 
-    - ``field_memory`` (default) → ``productivity`` (multi-date mean) +
-      ``stability`` (temporal CV). The "where is consistently good vs erratic"
-      management-zone view.
-    - ``composite`` → ``composite``: the median index (a typical, cloud-free value).
-    - ``trend`` → ``slope``: per-pixel change per year (greening/browning, decline).
-    - ``frequency`` → ``frequency``: fraction of dates the index exceeds
-      ``threshold`` (e.g. water/snow/vegetation frequency). Set ``threshold``.
+    Give it a long enough window to be meaningful: one full season for
+    ``field_memory``/``composite``, several seasons for ``trend``.
 
-    Returns ``{artifact_id, status, summary, ...}``. ``summary.outputs`` holds
-    per-output stats incl. ``within_field_spread`` — near-zero means uniform (no
-    zones worth drawing), larger means real structure. Answer from ``summary``;
-    pass ``artifact_id`` (and the output name) to ``show_field_memory`` to draw
-    it. The heavy pixels are never returned to you.
-
-    ``index`` must be one of ``ndvi``, ``ndwi``, ``evi``.
+    Returns ``{artifact_id, status, summary, ...}``. Read
+    ``summary.outputs[<name>].within_field_spread`` first: near-zero means the
+    field is uniform and there is nothing worth zoning; larger means real
+    structure. Also check ``summary.valid_obs`` — few valid observations per
+    pixel (a cloudy season) makes the layers noisy, and you should say so.
+    Then call ``show_temporal_layer(artifact_id, band=<output name>)`` to put it
+    on the map. The pixels themselves are never returned to you.
     """
     reducer_params = {"threshold": threshold} if threshold is not None else {}
-    aoi: dict = {"bbox": bbox} if bbox is not None else {"field_id": field_id}
+    aoi = _resolve_aoi(field_id=field_id, geometry_wkt=geometry_wkt, bbox=bbox)
     async with get_backend_client() as client:
         start = await client.post(
             "/api/v1/analytics/temporal-features",
@@ -379,10 +439,89 @@ async def field_memory_for_field(
             if status == "succeeded":
                 return result
             if status == "failed":
-                error = result.get("error") or f"field-memory build {artifact_id} failed"
+                error = result.get("error") or f"temporal-features build {artifact_id} failed"
                 raise RuntimeError(str(error))
             if time.monotonic() >= deadline:
                 raise TimeoutError(
-                    f"field-memory build {artifact_id} did not finish before timeout"
+                    f"temporal-features build {artifact_id} did not finish before timeout"
                 )
             await asyncio.sleep(_ARTIFACT_POLL_INTERVAL_SECONDS)
+
+
+@tool
+async def analyze_index_season(
+    field_id: int,
+    start_date: str,
+    end_date: str,
+    index: Literal["ndvi", "ndwi", "evi", "nbr", "ndmi", "mndwi", "ndre", "savi"] = "ndvi",
+    baseline_years: int = 0,
+    max_cloud_cover: float = 20,
+    max_scenes: int = 60,
+) -> dict:
+    """Interpret a field's season: phenology metrics, and how it compares to past years.
+
+    This is the analytical step above ``seasonal_index_time_series_for_field``.
+    That tool hands you raw per-scene means; this one fits the season's shape and
+    returns the numbers an agronomist actually reads:
+
+    - ``phenology``: ``start_of_season``, ``peak_date`` / ``peak_value``,
+      ``end_of_season``, ``season_length_days``, ``amplitude``,
+      ``seasonal_integral`` (cumulative canopy — the best single proxy for
+      biomass, far better than peak alone), ``greenup_rate_per_day`` and
+      ``senescence_rate_per_day``.
+    - ``anomaly`` (only when ``baseline_years`` > 0): the same window pulled from
+      each of the N previous years and compared day-by-day —
+      ``mean_difference``, ``mean_z_score``,
+      ``fraction_of_season_below_baseline``, and the dates of the largest
+      shortfall and surplus. This is how you answer "is this year bad, or does
+      this field always look like this?".
+    - ``curve``: the smoothed daily curve, downsampled — pass it to
+      ``render_dashboard`` as a timeseries panel.
+    - ``points``: the underlying per-scene observations.
+
+    Use it for: "how is the season going", "when did it green up", "is it
+    behind", "how does this compare to last year", "did the crop mature early".
+
+    Choose the window to cover the whole season, including bare soil at both
+    ends — the metrics are defined against that baseline. For a winter crop,
+    that means starting the previous autumn; baseline years are aligned by
+    position in the window, not calendar date, so winter seasons compare
+    correctly.
+
+    ``baseline_years`` multiplies the imagery read (and the wait), so use 0 when
+    the user only asks about this season, 2-3 for a comparison. Capped at 5.
+
+    Check ``phenology.status`` first: ``insufficient_data`` means too few clear
+    scenes to read a shape, and ``max_gap_days`` tells you whether the curve
+    spans a long cloudy hole. Say so rather than reporting metrics as solid.
+    """
+    async with get_backend_client() as client:
+        start = await client.post(
+            "/api/v1/analytics/season-analysis",
+            json={
+                "field_id": field_id,
+                "index": index,
+                "start_date": start_date,
+                "end_date": end_date,
+                "baseline_years": baseline_years,
+                "max_cloud_cover": max_cloud_cover,
+                "max_scenes": max_scenes,
+            },
+        )
+        start.raise_for_status()
+        job_id = start.json()["job_id"]
+        deadline = time.monotonic() + _SEASON_ANALYSIS_POLL_TIMEOUT_SECONDS
+
+        while True:
+            poll = await client.get(f"/api/v1/analytics/season-analysis/{job_id}")
+            poll.raise_for_status()
+            result = poll.json()
+            status = result.get("status")
+            if status == "succeeded":
+                return result
+            if status == "failed":
+                error = result.get("error") or f"season-analysis job {job_id} failed"
+                raise RuntimeError(str(error))
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"season-analysis job {job_id} did not finish before timeout")
+            await asyncio.sleep(_SEASON_ANALYSIS_POLL_INTERVAL_SECONDS)

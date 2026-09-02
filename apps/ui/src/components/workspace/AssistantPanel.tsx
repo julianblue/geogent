@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Thread } from "@/components/assistant/Thread";
 import { FlyToTool } from "@/components/assistant/tools/FlyToTool";
 import { BufferLayerTool } from "@/components/assistant/tools/BufferLayerTool";
-import { RouteLayerTool } from "@/components/assistant/tools/RouteLayerTool";
-import { IsochroneLayerTool } from "@/components/assistant/tools/IsochroneLayerTool";
 import { AggregationLayerTool } from "@/components/assistant/tools/AggregationLayerTool";
 import { FieldMemoryLayerTool } from "@/components/assistant/tools/FieldMemoryLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
@@ -59,8 +57,6 @@ export function AssistantPanel() {
 
       <FlyToTool />
       <BufferLayerTool />
-      <RouteLayerTool />
-      <IsochroneLayerTool />
       <AggregationLayerTool />
       <FieldMemoryLayerTool />
       <FeaturesInViewportTool />

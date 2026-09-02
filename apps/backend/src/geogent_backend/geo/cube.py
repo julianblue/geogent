@@ -33,7 +33,7 @@ from shapely.geometry import shape
 
 from geogent_backend.geo.collections import COLLECTIONS, CollectionName, CollectionSpec
 from geogent_backend.geo.indices import IndexName, get_spec
-from geogent_backend.geo.raster import GDAL_ENV, _band_href
+from geogent_backend.geo.raster import GDAL_ENV, _band_href, read_validity_mask
 from geogent_backend.geo.reducers import ReducerName
 from geogent_backend.geo.reducers import get_spec as get_reducer_spec
 
@@ -152,6 +152,7 @@ def build_reduction(
     layers: list[np.ndarray] = []
     dates: list[str] = []
     failed = 0
+    masked_scenes = 0
 
     try:
         with rasterio.Env(**GDAL_ENV):
@@ -174,6 +175,13 @@ def build_reduction(
                             # DN -> reflectance per collection (sensor-agnostic indices).
                             bands.append(vrt.read(1).astype("float32") * coll.scale + coll.offset)
                     values = spec.compute(*bands)
+                    # Drop cloud/shadow/snow BEFORE stacking. This is what keeps
+                    # the stability layer honest: unmasked cloud swings show up
+                    # as temporal variance and fake within-field instability.
+                    valid = read_validity_mask(item, coll, vrt_opts)
+                    if valid is not None:
+                        values = np.where(valid, values, np.nan).astype("float32")
+                        masked_scenes += 1
                     values = np.where(polygon_mask, values, np.nan).astype("float32")
                     layers.append(values)
                     props = item.get("properties") or {}
@@ -210,6 +218,7 @@ def build_reduction(
         "n_scenes_found": len(scene_items),
         "n_scenes_used": len(layers),
         "n_scenes_failed": failed,
+        "n_scenes_cloud_masked": masked_scenes,
         "time_span": [used_dates[0], used_dates[-1]] if used_dates else None,
         "grid": {
             "epsg": target_epsg,

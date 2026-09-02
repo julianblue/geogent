@@ -54,6 +54,11 @@ database (see `README.md` for ports and the compose stack):
 
 ## Design principles (the load-bearing ones)
 
+0. **The agent is an agricultural raster analyst, not a general GIS bot.** The
+   tool surface is curated for that: imagery, fields, and the analytics over
+   them, at four deliberate altitudes (one date → a raw series → an interpreted
+   season → per-pixel over time). Breadth that doesn't serve that story is a
+   liability — every extra tool costs selection accuracy on the ones that matter.
 1. **Thin, stateless agent tools → auth-gated backend.** The agent never holds
    provider URLs, API keys, or DB access. Each data capability is a backend
    `/api/v1` endpoint plus a thin agent tool that calls it with a service-user
@@ -89,12 +94,19 @@ database (see `README.md` for ports and the compose stack):
 - **Fields/parcels** — field model + **EuroCrops** (Brandenburg) ingestion;
   bbox/crop queries and crop-stats.
 - **Raster / imagery** — STAC search (Earth Search), Sentinel-2 L2A COG
-  rendering (deck.gl), per-field **zonal stats** and **seasonal index
-  time-series** (NDVI/NDWI/EVI).
+  rendering (deck.gl), per-field **zonal stats**, **seasonal index time-series**,
+  and **season analysis** (phenology metrics + anomaly vs previous years) over
+  eight indices across Sentinel-2 and Landsat. Cloud/shadow/snow is masked
+  per-pixel (S2 SCL, Landsat QA_PIXEL) before any statistic is computed.
+- **Data cubes / field memory** — multi-date cubes reduced per pixel
+  (`field_memory`, `composite`, `trend`, `frequency`) into content-addressed
+  server-side artifacts the agent handles as ids, never pixels.
 - **Agriculture pack (flagship)** — field selection, zonal stats, NDVI series,
   composite rendering, and agent-composed dashboards.
-- **Routing / geocoding (#55)** — point-to-point routing, travel-time matrix,
-  isochrones, forward/reverse geocoding (OSRM · OpenRouteService · Nominatim).
+- **Routing / geocoding (#55)** — backend endpoints for routing, travel-time
+  matrix, isochrones and geocoding (OSRM · OpenRouteService · Nominatim). The
+  *agent* keeps only forward geocoding: the tool surface was narrowed to the
+  agricultural workflows so tool selection stays sharp.
 - **Analytics viz (#57)** — deck.gl heatmap & hexbin aggregation layers over the
   feature/field set.
 - **Map workspace** — layer manager (visibility/opacity/reorder/remove),

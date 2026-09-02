@@ -40,6 +40,37 @@ class RasterComputeError(Exception):
     """A windowed COG read or zonal reduction failed (upstream/data problem)."""
 
 
+def _optional_band_href(scene_item: dict, key: str) -> str | None:
+    """Href for an optional asset (e.g. the QA band), or None if absent."""
+    asset = (scene_item.get("assets") or {}).get(key)
+    href = asset.get("href") if asset else None
+    return href or None
+
+
+def read_validity_mask(
+    scene_item: dict,
+    coll: CollectionSpec,
+    vrt_opts: dict,
+) -> np.ndarray | None:
+    """Read the collection's quality band onto the target grid → usable-pixel mask.
+
+    Returns None when the collection declares no mask or the item is missing the
+    quality asset; callers then proceed unmasked and report it, rather than
+    failing an otherwise good scene. Nearest-neighbour resampling is deliberate:
+    class codes and bit flags must not be interpolated.
+    """
+    if coll.mask is None:
+        return None
+    href = _optional_band_href(scene_item, coll.mask.asset_key)
+    if href is None:
+        return None
+    with (
+        rasterio.open(href) as src,
+        WarpedVRT(src, **{**vrt_opts, "resampling": Resampling.nearest}) as vrt,
+    ):
+        return coll.mask.valid(vrt.read(1))
+
+
 def _band_href(scene_item: dict, key: str) -> str:
     assets = scene_item.get("assets") or {}
     asset = assets.get(key)
@@ -59,14 +90,19 @@ def zonal_stats(
 
     BLOCKING: opens band COGs and reads windows. Call via ``to_thread``.
 
-    Returns ``{mean, min, max, std, valid_pixels, nodata_pixels, histogram:
-    {bin_edges, counts}}``.
+    Cloud, shadow and snow pixels are dropped first (see ``masking.py``), so
+    the statistics describe usable ground; ``valid_pixels`` is what survived and
+    ``cloud_masked`` says whether a quality band was actually applied.
+
+    Returns ``{mean, min, max, std, valid_pixels, nodata_pixels, cloud_masked,
+    histogram: {bin_edges, counts}}``.
     """
     spec = get_spec(index)
     coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
     band_arrays: list[np.ndarray] = []
     geom_proj: dict | None = None
     win_transform = None
+    valid_mask: np.ndarray | None = None
 
     try:
         with rasterio.Env(**GDAL_ENV):
@@ -104,6 +140,10 @@ def zonal_stats(
                     # Scale DN -> reflectance per collection so the index kernels
                     # (esp. EVI/SAVI) are sensor-agnostic.
                     band_arrays.append(vrt.read(1).astype("float32") * coll.scale + coll.offset)
+
+            # Cloud/shadow mask on the same grid. Without it a shadowed corner
+            # of the polygon silently drags the field mean down.
+            valid_mask = read_validity_mask(scene_item, coll, vrt_opts)
     except RasterComputeError:
         raise
     except Exception as exc:  # rasterio / GDAL / network failures
@@ -113,6 +153,8 @@ def zonal_stats(
         raise RasterComputeError("Polygon does not overlap the scene (empty read window).")
 
     values = spec.compute(*band_arrays)
+    if valid_mask is not None:
+        values = np.where(valid_mask, values, np.nan).astype("float32")
     h, w = values.shape
 
     assert geom_proj is not None and win_transform is not None
@@ -130,7 +172,10 @@ def zonal_stats(
     nodata_pixels = int(inside.size - valid_pixels)
 
     if valid_pixels == 0:
-        raise RasterComputeError("No valid pixels inside the polygon (all masked or nodata).")
+        raise RasterComputeError(
+            "No usable pixels inside the polygon — the field is fully clouded, "
+            "shadowed or outside the scene. Try another date or raise max_cloud_cover."
+        )
 
     counts, bin_edges = np.histogram(valid, bins=histogram_bins)
 
@@ -141,6 +186,7 @@ def zonal_stats(
         "std": float(np.std(valid)),
         "valid_pixels": valid_pixels,
         "nodata_pixels": nodata_pixels,
+        "cloud_masked": valid_mask is not None,
         "histogram": {
             "bin_edges": [float(x) for x in bin_edges.tolist()],
             "counts": [int(x) for x in counts.tolist()],

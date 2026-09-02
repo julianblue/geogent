@@ -1,7 +1,10 @@
 # apps/agent — CLAUDE.md
 
-LangGraph ReAct agent: the geospatial analyst. Owns the system prompt and the
-tool set; calls the backend for data and emits UI actions for the browser.
+LangGraph ReAct agent: the **agricultural raster analyst**. Owns the system
+prompt and the tool set; calls the backend for data and emits UI actions for the
+browser. The tool surface is deliberately narrow — imagery, fields, and the
+analytics over them — so tool selection stays sharp; general-purpose routing /
+isochrone tools were removed (their backend endpoints remain).
 
 > Big picture: `../../CONTEXT.md`. CI gate commands: root `../../CLAUDE.md`
 > (`ruff format --check` is a separate gate from `ruff check`; `mypy` advisory;
@@ -33,14 +36,20 @@ what the model receives. Keep this property if you touch the node or state.
 The `TOOLS` list in `tools/__init__.py` is the registry. Two families:
 
 1. **Backend-data tools** — thin async wrappers that call the auth-gated backend
-   via `get_backend_client()` and **return data to the model**. Examples:
-   `geo_tools.py` (`/analytics/*`, `/fields/*`), `routing_tools.py` (`/routing/*`,
-   `/geocode/reverse`). `backend_client` logs in as a service user and caches the
-   JWT (auto-refresh once on a 401) — **the agent never holds provider URLs or
-   keys.**
+   via `get_backend_client()` and **return data to the model** (`geo_tools.py` →
+   `/analytics/*`, `/fields/*`). `backend_client` logs in as a service user and
+   caches the JWT (auto-refresh once on a 401) — **the agent never holds provider
+   URLs or keys.**
+
+   The four raster tools sit at four deliberately different altitudes, and the
+   prompt teaches the model to pick between them: `zonal_stats_for_field` (one
+   field, one date) → `seasonal_index_time_series_for_field` (raw per-scene
+   series) → `analyze_index_season` (phenology metrics + anomaly vs previous
+   years) → `temporal_features` (per-pixel reduction over a cube). Adding a
+   fifth without a clear altitude of its own is how this surface goes blurry.
 2. **Frontend-action tools** (`frontend_actions.py`) — either **client tools**
    (return an ack only; the browser executes + renders, e.g. `fly_to`,
-   `add_buffer_layer`, `add_route_layer`, `add_aggregation_layer`) or
+   `add_buffer_layer`, `add_aggregation_layer`, `show_temporal_layer`) or
    **LangGraph `interrupt()` tools** for HITL (`confirm_feature_save`,
    `show_sentinel2_scene`) that pause until the UI resumes the graph.
 
@@ -73,8 +82,8 @@ kept direct so committed eval recordings stay stable.
   renaming/removing a tool can break replay; changing a tool's *implementation*
   generally does not. New live cases are CI-safe (they self-skip without the key;
   a missing recording is a soft skip).
-- **Unit tests** mock the backend with `httpx.MockTransport`
-  (`test_tools.py`, `test_routing_tools.py`).
+- **Unit tests** mock the backend with `httpx.MockTransport` (`test_tools.py`,
+  `test_stac_tools.py`).
 
 ## Gotchas
 

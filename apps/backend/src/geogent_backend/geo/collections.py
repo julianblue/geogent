@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from geogent_backend.geo.indices import IndexName, band_keys_for
+from geogent_backend.geo.masking import LANDSAT_QA_PIXEL, SENTINEL2_SCL, MaskSpec
 
 
 class CollectionName(str, Enum):  # noqa: UP042 — str-mixin keeps JSON value as the bare string
@@ -28,6 +29,9 @@ class CollectionSpec:
     scale: float  # DN -> reflectance multiplier
     offset: float  # DN -> reflectance offset
     available: frozenset[str]  # logical bands this sensor provides
+    # Per-pixel cloud/shadow mask, or None for a sensor without a quality band
+    # (e.g. SAR). Applied by the read paths before any statistic is computed.
+    mask: MaskSpec | None = None
 
     def asset_key(self, logical: str) -> str:
         return self.band_aliases.get(logical, logical)
@@ -45,6 +49,7 @@ COLLECTIONS: dict[CollectionName, CollectionSpec] = {
         scale=1.0 / 10000.0,
         offset=0.0,
         available=frozenset(_S2_BANDS),
+        mask=SENTINEL2_SCL,
     ),
     # Landsat C2 L2 surface reflectance: nir is "nir08", no red-edge, and a
     # different scale/offset (USGS Collection 2 Level-2 scaling).
@@ -55,6 +60,7 @@ COLLECTIONS: dict[CollectionName, CollectionSpec] = {
         scale=0.0000275,
         offset=-0.2,
         available=frozenset(_LANDSAT_BANDS),
+        mask=LANDSAT_QA_PIXEL,
     ),
 }
 

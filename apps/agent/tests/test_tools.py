@@ -10,18 +10,19 @@ import httpx
 import pytest
 
 from geogent_agent.tools import (
+    analyze_index_season,
     area_of,
     buffer_geometry,
     crop_stats_within_bbox,
     distance_between,
     features_within,
-    field_memory_for_field,
     fields_within_bbox,
     geo_tools,
     geometries_intersect,
     list_features,
     list_fields,
     seasonal_index_time_series_for_field,
+    temporal_features,
     zonal_stats_for_field,
 )
 
@@ -378,7 +379,7 @@ async def test_field_memory_builds_and_polls_until_succeeded(
     captured = _install_mock_backend(monkeypatch, handler)
     monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
 
-    result = await field_memory_for_field.ainvoke(
+    result = await temporal_features.ainvoke(
         {
             "field_id": 7,
             "index": "ndvi",
@@ -406,7 +407,7 @@ async def test_field_memory_raises_on_failed_build(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
 
     with pytest.raises(RuntimeError, match="no scenes"):
-        await field_memory_for_field.ainvoke(
+        await temporal_features.ainvoke(
             {"field_id": 7, "start_date": "2024-04-01", "end_date": "2025-09-30"}
         )
 
@@ -502,3 +503,111 @@ async def test_crop_stats_within_bbox(monkeypatch: pytest.MonkeyPatch) -> None:
     assert captured["path"] == "/api/v1/fields/crop-stats"
     assert "crop" not in captured["params"]
     assert result == stats
+
+
+@pytest.mark.asyncio
+async def test_temporal_features_accepts_a_wkt_aoi(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An arbitrary polygon AOI reaches the recipe as geometry_wkt (M1.5)."""
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            captured["start_body"] = json.loads(request.content)
+            return httpx.Response(
+                202, json={"artifact_id": "a1", "kind": "temporal_features", "status": "pending"}
+            )
+        return httpx.Response(
+            200,
+            json={"id": "a1", "status": "succeeded", "summary": {"outputs": {}}, "assets": []},
+        )
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
+
+    wkt = "POLYGON((13.9 53.3, 13.91 53.3, 13.91 53.31, 13.9 53.31, 13.9 53.3))"
+    await temporal_features.ainvoke(
+        {"geometry_wkt": wkt, "start_date": "2025-04-01", "end_date": "2025-09-30"}
+    )
+
+    assert captured["start_body"]["geometry_wkt"] == wkt
+    assert "field_id" not in captured["start_body"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "aoi",
+    [
+        {},
+        {"field_id": 7, "bbox": [13.9, 53.3, 13.91, 53.31]},
+    ],
+    ids=["no-aoi", "two-aois"],
+)
+async def test_temporal_features_requires_exactly_one_aoi(aoi: dict) -> None:
+    """Zero or multiple AOIs fail in the tool with an actionable message rather
+    than as an opaque backend 422."""
+    with pytest.raises(ValueError, match="exactly one area of interest"):
+        await temporal_features.ainvoke(
+            {"start_date": "2025-04-01", "end_date": "2025-09-30", **aoi}
+        )
+
+
+@pytest.mark.asyncio
+async def test_analyze_index_season_submits_and_polls(monkeypatch: pytest.MonkeyPatch) -> None:
+    polls = {"n": 0}
+
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            captured["start_body"] = json.loads(request.content)
+            return httpx.Response(202, json={"job_id": "job-1", "status": "pending"})
+        polls["n"] += 1
+        if polls["n"] == 1:
+            return httpx.Response(200, json={"job_id": "job-1", "status": "running"})
+        return httpx.Response(
+            200,
+            json={
+                "job_id": "job-1",
+                "status": "succeeded",
+                "field_id": 7,
+                "index": "ndvi",
+                "params": {},
+                "points": [],
+                "curve": [{"date": "2025-06-01", "value": 0.71}],
+                "phenology": {"status": "ok", "peak_date": "2025-06-20", "peak_value": 0.83},
+                "anomaly": {"status": "ok", "mean_difference": -0.06},
+                "error": None,
+            },
+        )
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_SEASON_ANALYSIS_POLL_INTERVAL_SECONDS", 0)
+
+    result = await analyze_index_season.ainvoke(
+        {
+            "field_id": 7,
+            "start_date": "2025-03-01",
+            "end_date": "2025-10-31",
+            "baseline_years": 2,
+        }
+    )
+
+    assert captured["start_body"]["baseline_years"] == 2
+    assert polls["n"] == 2  # polled past "running"
+    assert result["phenology"]["peak_date"] == "2025-06-20"
+    assert result["anomaly"]["mean_difference"] == -0.06
+
+
+@pytest.mark.asyncio
+async def test_analyze_index_season_raises_on_failed_job(monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request, _captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            return httpx.Response(202, json={"job_id": "job-2", "status": "pending"})
+        return httpx.Response(
+            200, json={"job_id": "job-2", "status": "failed", "error": "Season analysis failed."}
+        )
+
+    _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_SEASON_ANALYSIS_POLL_INTERVAL_SECONDS", 0)
+
+    with pytest.raises(RuntimeError, match="Season analysis failed"):
+        await analyze_index_season.ainvoke(
+            {"field_id": 7, "start_date": "2025-03-01", "end_date": "2025-10-31"}
+        )

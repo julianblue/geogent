@@ -25,7 +25,7 @@ from pathlib import Path
 
 import httpx
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 
 # tests/harness.py -> tests/ -> apps/agent
 AGENT_DIR = Path(__file__).resolve().parents[1]
@@ -253,99 +253,6 @@ def build_backend_stub() -> FastAPI:
                 },
             ],
             "error": None,
-        }
-
-    # --- routing / geocoding (#55): mirror apps/backend response shapes -------
-
-    @app.post("/api/v1/routing/route")
-    def route(payload: dict) -> dict:
-        coords = payload.get("coordinates") or []
-        # Mirror the backend's RouteRequest validation (coordinates min_length=2)
-        # so a malformed agent request surfaces as a 422 here too, not a fake route.
-        if len(coords) < 2:
-            raise HTTPException(status_code=422, detail="coordinates must have at least 2 points")
-        first = coords[0]
-        last = coords[-1]
-
-        def _pt(c: object) -> list[float]:
-            if isinstance(c, dict):
-                return [c.get("longitude", 0.0), c.get("latitude", 0.0)]
-            return list(c)  # type: ignore[arg-type]
-
-        return {
-            "distance_m": 21340.0,
-            "duration_s": 1530.0,
-            "profile": payload.get("profile", "driving"),
-            "geometry": {"type": "LineString", "coordinates": [_pt(first), _pt(last)]},
-        }
-
-    @app.post("/api/v1/routing/matrix")
-    def matrix(payload: dict) -> dict:
-        n = len(payload.get("coordinates") or [])
-        # Backend MatrixRequest requires coordinates min_length=2.
-        if n < 2:
-            raise HTTPException(status_code=422, detail="coordinates must have at least 2 points")
-        durations = [[0.0 if i == j else 1200.0 for j in range(n)] for i in range(n)]
-        distances = [[0.0 if i == j else 25000.0 for j in range(n)] for i in range(n)]
-        return {
-            "durations_s": durations,
-            "distances_m": distances,
-            "profile": payload.get("profile", "driving"),
-        }
-
-    @app.post("/api/v1/routing/isochrone")
-    def isochrone(payload: dict) -> dict:
-        ranges = payload.get("range_minutes") or []
-        # Backend IsochroneRequest: range_minutes min_length=1, each value gt=0.
-        if not ranges or any(r <= 0 for r in ranges):
-            raise HTTPException(status_code=422, detail="range_minutes must be non-empty and > 0")
-        lon = payload.get("longitude", 0.0)
-        lat = payload.get("latitude", 0.0)
-        d = 0.05
-        ring = [
-            [lon - d, lat - d],
-            [lon + d, lat - d],
-            [lon + d, lat + d],
-            [lon - d, lat + d],
-            [lon - d, lat - d],
-        ]
-        return {
-            "profile": payload.get("profile", "driving"),
-            "range_minutes": ranges,
-            "geojson": {
-                "type": "FeatureCollection",
-                "features": [
-                    {
-                        "type": "Feature",
-                        "properties": {},
-                        "geometry": {"type": "Polygon", "coordinates": [ring]},
-                    }
-                ],
-            },
-        }
-
-    @app.get("/api/v1/geocode")
-    def geocode(q: str, limit: int = 5) -> dict:
-        return {
-            "results": [
-                {
-                    "display_name": f"{q}, France",
-                    "longitude": 2.3522,
-                    "latitude": 48.8566,
-                    "type": "city",
-                    "bbox": [2.2, 48.8, 2.5, 48.9],
-                }
-            ]
-        }
-
-    @app.get("/api/v1/geocode/reverse")
-    def reverse_geocode(lon: float, lat: float) -> dict:
-        return {
-            "display_name": "Champ de Mars, 5 Avenue Anatole France, Paris, France",
-            "longitude": lon,
-            "latitude": lat,
-            "type": "tourism",
-            "address": {"city": "Paris", "country": "France"},
         }
 
     return app

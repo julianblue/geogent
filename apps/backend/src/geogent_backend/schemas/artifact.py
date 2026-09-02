@@ -43,7 +43,9 @@ class TemporalFeaturesRecipe(BaseModel):
     "field memory" layers (productivity = mean index, stability = temporal CV)."""
 
     kind: Literal[ArtifactKind.temporal_features] = ArtifactKind.temporal_features
-    recipe_version: int = 1
+    # 2 = per-pixel cloud/shadow masking (#65 M1). Part of the recipe hash, so
+    # the bump retires cubes built before masking instead of serving them.
+    recipe_version: int = 2
     # Area of interest — exactly one of these. field_id resolves to a stored
     # field's polygon; geometry_wkt / bbox let any caller pass an arbitrary AOI.
     field_id: int | None = None

@@ -34,4 +34,8 @@ def test_different_index_changes_hash() -> None:
 
 
 def test_recipe_version_busts_hash() -> None:
-    assert recipe_hash(_recipe()) != recipe_hash(_recipe(recipe_version=2))
+    """A math change bumps recipe_version so previously-built artifacts are not
+    served for the new recipe. Compared against the *current* default rather
+    than a literal, so this keeps testing the mechanism after each bump."""
+    current = _recipe().recipe_version
+    assert recipe_hash(_recipe()) != recipe_hash(_recipe(recipe_version=current + 1))

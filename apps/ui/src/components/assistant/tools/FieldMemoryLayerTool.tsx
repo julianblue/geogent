@@ -8,7 +8,7 @@ import { DEFAULT_COLORMAP } from "@/lib/raster-modules";
 import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
 
 const fieldMemorySchema = z.object({
-  artifact_id: z.string().describe("Artifact id returned by field_memory_for_field."),
+  artifact_id: z.string().describe("Artifact id returned by temporal_features."),
   band: z
     .string()
     .optional()
@@ -28,7 +28,7 @@ export function FieldMemoryLayerTool() {
   const { upsertLayer } = useMapState();
 
   useAssistantTool<FieldMemoryArgs, FieldMemoryResult>({
-    toolName: "show_field_memory",
+    toolName: "show_temporal_layer",
     description:
       "Render a built cube-reduction layer (productivity, stability, trend, …) as a colored COG overlay on the map.",
     parameters: fieldMemorySchema,
