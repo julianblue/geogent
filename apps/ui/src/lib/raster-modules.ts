@@ -264,6 +264,36 @@ export const SEQUENTIAL_MODULE: RasterModule = {
 };
 
 /**
+ * ZONES (#65 M3): a management-zone map. Unlike every other module here the
+ * value is CATEGORICAL — a 1-based zone id, not a magnitude — so it gets a
+ * discrete palette with no interpolation between classes. Zone 1 is always the
+ * weakest ground (the backend relabels by ascending productivity), so the ramp
+ * runs red → amber → green and reads the same on every field.
+ * Composite: `{r: "value"}`.
+ */
+export const ZONES_MODULE: RasterModule = {
+  module: {
+    name: "managementZones",
+    inject: {
+      "fs:DECKGL_FILTER_COLOR": /* glsl */ `
+        float v = color.r;
+        if (v != v) { discard; }          // NaN == outside / unzoned
+        int zone = int(floor(v + 0.5));
+        if (zone < 1) { discard; }
+        vec3 rgb;
+        if (zone == 1)      { rgb = vec3(0.84, 0.19, 0.15); }  // weakest
+        else if (zone == 2) { rgb = vec3(0.96, 0.60, 0.26); }
+        else if (zone == 3) { rgb = vec3(0.99, 0.91, 0.51); }
+        else if (zone == 4) { rgb = vec3(0.65, 0.79, 0.38); }
+        else if (zone == 5) { rgb = vec3(0.31, 0.66, 0.29); }
+        else                { rgb = vec3(0.10, 0.45, 0.20); }  // strongest
+        color = vec4(rgb, 1.0);
+      `,
+    },
+  },
+};
+
+/**
  * Colormap registry (#65 M1.5): a reducer output's `colormap` id selects the
  * GLSL ramp + the on-map legend. Adding a reducer needs no UI change if it
  * reuses one of these ids.
@@ -273,6 +303,7 @@ export const COLORMAP_MODULES: Record<string, RasterModule> = {
   stability: STABILITY_MODULE,
   diverging: DIVERGING_MODULE,
   sequential: SEQUENTIAL_MODULE,
+  zones: ZONES_MODULE,
 };
 
 export type ColormapLegend = { stops: string[]; low: string; high: string };
@@ -297,6 +328,13 @@ export const COLORMAP_LEGENDS: Record<string, ColormapLegend> = {
     stops: ["rgb(247,250,204)", "rgb(64,166,166)", "rgb(15,51,107)"],
     low: "low",
     high: "high",
+  },
+  // Categorical, but the legend still reads left-to-right weakest -> strongest
+  // because zone ids are assigned in that order.
+  zones: {
+    stops: ["rgb(214,48,38)", "rgb(252,232,130)", "rgb(26,115,51)"],
+    low: "zone 1",
+    high: "highest zone",
   },
 };
 

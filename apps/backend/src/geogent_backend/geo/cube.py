@@ -19,6 +19,7 @@ out so they unit-test offline.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 
 import numpy as np
 import rasterio
@@ -48,7 +49,7 @@ def _target_epsg(scene_item: dict) -> int | None:
     return int(epsg) if epsg is not None else None
 
 
-def _decimal_years(dates: list[str]) -> np.ndarray:
+def decimal_years(dates: list[str]) -> np.ndarray:
     """ISO ``YYYY-MM-DD`` dates → decimal years, aligned with the cube's time
     axis (used by the trend reducer for an index-units-per-year slope)."""
     import datetime as _dt
@@ -113,31 +114,50 @@ def write_single_band_cog(
         return bytes(mem.read())
 
 
-def build_reduction(
-    geom_4326: dict,
-    scene_items: list[dict],
-    index: IndexName,
-    reducer: ReducerName,
-    resolution_m: float = 10.0,
-    params: dict | None = None,
-    collection: CollectionSpec | None = None,
-) -> tuple[dict, dict[str, bytes]]:
-    """Build the season cube and apply ``reducer`` to it per pixel.
+@dataclass(frozen=True)
+class CubeGrid:
+    """The canonical grid every scene in a cube is warped onto.
 
-    BLOCKING: opens band COGs and warps each onto the canonical grid. Call via
-    ``to_thread``. Returns ``(summary_dict, {output_name: cog_bytes})`` — one
-    single-band GeoTIFF per reducer output.
+    Shared by every cube built for the same AOI/resolution, which is what lets
+    several index cubes stack into one aligned feature matrix (management
+    zones) without a second alignment step.
     """
-    params = params or {}
-    if not scene_items:
-        raise CubeError("No scenes to build a cube from.")
 
-    spec = get_spec(index)
-    rspec = get_reducer_spec(reducer)
-    coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
+    epsg: int
+    crs: CRS
+    transform: Affine
+    width: int
+    height: int
+    polygon_mask: np.ndarray  # True inside the AOI polygon
 
-    # Canonical grid: the first scene's UTM zone, the field's bounds, at the
-    # requested resolution. Every scene is warped onto exactly this grid.
+    @property
+    def pixel_area_m2(self) -> float:
+        return abs(self.transform.a * self.transform.e)
+
+
+@dataclass(frozen=True)
+class Cube:
+    """A ``(time, y, x)`` index cube plus the provenance of how it got here."""
+
+    values: np.ndarray
+    dates: list[str]
+    grid: CubeGrid
+    index: IndexName
+    collection_id: str
+    n_scenes_found: int
+    n_scenes_used: int
+    n_scenes_failed: int
+    n_scenes_cloud_masked: int
+
+    @property
+    def valid_obs_per_pixel(self) -> np.ndarray:
+        return np.sum(np.isfinite(self.values), axis=0).astype("int32")
+
+
+def _grid_for(
+    geom_4326: dict, scene_items: list[dict], resolution_m: float
+) -> tuple[CubeGrid, dict]:
+    """Canonical grid: the first scene's UTM zone, the AOI bounds, at ``resolution_m``."""
     target_epsg = _target_epsg(scene_items[0])
     if target_epsg is None:
         raise CubeError("First scene has no proj:epsg; cannot define a target grid.")
@@ -148,6 +168,44 @@ def build_reduction(
     width = max(1, math.ceil((maxx - minx) / resolution_m))
     height = max(1, math.ceil((maxy - miny) / resolution_m))
     transform = Affine(resolution_m, 0.0, minx, 0.0, -resolution_m, maxy)
+    polygon_mask = geometry_mask(
+        [geom_proj], out_shape=(height, width), transform=transform, invert=True
+    )
+    return (
+        CubeGrid(
+            epsg=target_epsg,
+            crs=target_crs,
+            transform=transform,
+            width=width,
+            height=height,
+            polygon_mask=polygon_mask,
+        ),
+        geom_proj,
+    )
+
+
+def build_cube(
+    geom_4326: dict,
+    scene_items: list[dict],
+    index: IndexName,
+    resolution_m: float = 10.0,
+    collection: CollectionSpec | None = None,
+    grid: CubeGrid | None = None,
+) -> Cube:
+    """Read every scene onto one grid and stack them into a ``(time, y, x)`` cube.
+
+    BLOCKING: opens band COGs and warps each onto the canonical grid. Call via
+    ``to_thread``. Pass ``grid`` to force a cube onto an existing grid — that is
+    how several indices end up perfectly co-registered for zone clustering.
+    """
+    if not scene_items:
+        raise CubeError("No scenes to build a cube from.")
+
+    spec = get_spec(index)
+    coll = collection or COLLECTIONS[CollectionName.sentinel_2_l2a]
+
+    if grid is None:
+        grid, _ = _grid_for(geom_4326, scene_items, resolution_m)
 
     layers: list[np.ndarray] = []
     dates: list[str] = []
@@ -156,14 +214,12 @@ def build_reduction(
 
     try:
         with rasterio.Env(**GDAL_ENV):
-            polygon_mask = geometry_mask(
-                [geom_proj], out_shape=(height, width), transform=transform, invert=True
-            )
+            polygon_mask = grid.polygon_mask
             vrt_opts = {
-                "crs": target_crs,
-                "transform": transform,
-                "width": width,
-                "height": height,
+                "crs": grid.crs,
+                "transform": grid.transform,
+                "width": grid.width,
+                "height": grid.height,
                 "resampling": Resampling.nearest,
             }
             for item in scene_items:
@@ -195,43 +251,78 @@ def build_reduction(
     if not layers:
         raise CubeError("All scenes failed to read; cube is empty.")
 
-    cube = np.stack(layers, axis=0)
-    n_obs = np.sum(np.isfinite(cube), axis=0).astype("int32")
-    outputs = rspec.reduce(cube, _decimal_years(dates), params)
+    return Cube(
+        values=np.stack(layers, axis=0),
+        dates=dates,
+        grid=grid,
+        index=index,
+        collection_id=coll.stac_id,
+        n_scenes_found=len(scene_items),
+        n_scenes_used=len(layers),
+        n_scenes_failed=failed,
+        n_scenes_cloud_masked=masked_scenes,
+    )
 
-    inside = polygon_mask & (n_obs > 0)
+
+def cube_provenance(cube: Cube, resolution_m: float) -> dict:
+    """The "how much data is behind this" block every artifact summary carries."""
+    n_obs = cube.valid_obs_per_pixel
+    inside = cube.grid.polygon_mask & (n_obs > 0)
     obs_in = n_obs[inside]
     valid_obs = (
-        {
-            "min": int(obs_in.min()),
-            "median": int(np.median(obs_in)),
-            "max": int(obs_in.max()),
-        }
+        {"min": int(obs_in.min()), "median": int(np.median(obs_in)), "max": int(obs_in.max())}
         if obs_in.size
         else {"min": 0, "median": 0, "max": 0}
     )
-    used_dates = sorted(d for d in dates if d)
-    summary = {
-        "reducer": reducer.value,
-        "index": index.value,
-        "collection": coll.stac_id,
-        "n_scenes_found": len(scene_items),
-        "n_scenes_used": len(layers),
-        "n_scenes_failed": failed,
-        "n_scenes_cloud_masked": masked_scenes,
+    used_dates = sorted(d for d in cube.dates if d)
+    return {
+        "index": cube.index.value,
+        "collection": cube.collection_id,
+        "n_scenes_found": cube.n_scenes_found,
+        "n_scenes_used": cube.n_scenes_used,
+        "n_scenes_failed": cube.n_scenes_failed,
+        "n_scenes_cloud_masked": cube.n_scenes_cloud_masked,
         "time_span": [used_dates[0], used_dates[-1]] if used_dates else None,
         "grid": {
-            "epsg": target_epsg,
+            "epsg": cube.grid.epsg,
             "resolution_m": resolution_m,
-            "width": width,
-            "height": height,
+            "width": cube.grid.width,
+            "height": cube.grid.height,
         },
         "valid_obs": valid_obs,
-        "outputs": {out.name: _feature_stats(outputs[out.name], inside) for out in rspec.outputs},
     }
 
+
+def build_reduction(
+    geom_4326: dict,
+    scene_items: list[dict],
+    index: IndexName,
+    reducer: ReducerName,
+    resolution_m: float = 10.0,
+    params: dict | None = None,
+    collection: CollectionSpec | None = None,
+) -> tuple[dict, dict[str, bytes]]:
+    """Build the season cube and apply ``reducer`` to it per pixel.
+
+    BLOCKING: call via ``to_thread``. Returns ``(summary_dict,
+    {output_name: cog_bytes})`` — one single-band GeoTIFF per reducer output.
+    """
+    params = params or {}
+    rspec = get_reducer_spec(reducer)
+    cube = build_cube(geom_4326, scene_items, index, resolution_m, collection)
+
+    outputs = rspec.reduce(cube.values, decimal_years(cube.dates), params)
+    inside = cube.grid.polygon_mask & (cube.valid_obs_per_pixel > 0)
+
+    summary = {
+        "reducer": reducer.value,
+        **cube_provenance(cube, resolution_m),
+        "outputs": {out.name: _feature_stats(outputs[out.name], inside) for out in rspec.outputs},
+    }
     cogs = {
-        out.name: write_single_band_cog(outputs[out.name], target_crs, transform, out.name)
+        out.name: write_single_band_cog(
+            outputs[out.name], cube.grid.crs, cube.grid.transform, out.name
+        )
         for out in rspec.outputs
     }
     return summary, cogs

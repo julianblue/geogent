@@ -87,25 +87,26 @@ def add_aggregation_layer(
 
 
 @tool
-def show_temporal_layer(
+def show_raster_layer(
     artifact_id: str,
     band: str = "productivity",
     label: str | None = None,
 ) -> dict:
-    """Render one per-pixel layer of a built temporal-features artifact on the map.
+    """Render one raster layer of a built artifact on the user's map.
 
-    The browser fetches the artifact's GeoTIFF for the chosen ``band`` and
-    paints it with the colormap the reducer declared. Returns only an
-    acknowledgement — it reads no data back to you. Build the artifact with
-    ``temporal_features`` first and answer from its ``summary``; pass the
-    returned ``artifact_id`` and an output name here only to display it.
+    Works for any artifact that produced a raster — ``temporal_features``
+    outputs and ``delineate_management_zones`` maps alike. The browser fetches
+    the GeoTIFF for the chosen ``band`` and paints it with the colormap the
+    artifact declared. Returns only an acknowledgement — it reads no data back
+    to you, so answer from the building tool's ``summary`` and use this only to
+    display.
 
     Args:
-        artifact_id: The id returned by ``temporal_features``.
-        band: Which reducer output to display — an output name from
-            ``summary.outputs`` (e.g. ``productivity``, ``stability``,
-            ``slope``, ``frequency``, ``composite``). Defaults to
-            ``productivity``.
+        artifact_id: The id returned by the tool that built the artifact.
+        band: Which layer to display. For temporal_features, an output name
+            from ``summary.outputs`` (``productivity``, ``stability``,
+            ``slope``, ``frequency``, ``composite``). For a zone map, use
+            ``"zones"``.
         label: Optional layer label shown in the Layer Manager.
     """
     return {

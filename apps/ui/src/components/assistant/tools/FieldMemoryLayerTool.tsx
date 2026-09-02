@@ -28,9 +28,9 @@ export function FieldMemoryLayerTool() {
   const { upsertLayer } = useMapState();
 
   useAssistantTool<FieldMemoryArgs, FieldMemoryResult>({
-    toolName: "show_temporal_layer",
+    toolName: "show_raster_layer",
     description:
-      "Render a built cube-reduction layer (productivity, stability, trend, …) as a colored COG overlay on the map.",
+      "Render a raster layer of a built artifact — a cube reduction (productivity, stability, trend, …) or a management-zone map — as a colored COG overlay.",
     parameters: fieldMemorySchema,
     execute: async ({ artifact_id, band, label }) => {
       const wanted = band ?? "productivity";

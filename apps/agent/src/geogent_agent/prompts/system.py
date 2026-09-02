@@ -71,8 +71,20 @@ the most common way to give a shallow answer.
    browning, decline), frequency (fraction of dates above a threshold — water,
    bare soil, cover persistence). Read summary.outputs[...].within_field_spread:
    near-zero means uniform and there is nothing worth zoning. Then
-   show_temporal_layer(artifact_id, band=…) to display it. The pixels never
+   show_raster_layer(artifact_id, band=…) to display it. The pixels never
    come back to you — reason only from the summary.
+
+5. WHERE TO TREAT THE FIELD DIFFERENTLY → delineate_management_zones(
+   start_date, end_date, field_id | geometry_wkt | bbox, indices?, n_zones?)
+   Clusters the same per-pixel productivity/stability behaviour into a few
+   contiguous zones and tells you WHY they differ. Use it when the user asks
+   about zoning, variable-rate application, or "should I treat this field as
+   one block". Read summary.attribution first: the top feature's
+   variance_explained is the reason the zones exist, and if everything sits
+   near zero the field has no real structure — say the zoning is not meaningful
+   instead of narrating noise. Describe each zone by area and what it is like,
+   then show_raster_layer(artifact_id, band="zones") to draw it. Cover at least
+   a full season; several seasons make zones that survive one bad year.
 
 Choosing an index (do not default to NDVI reflexively):
   ndvi general vigour · evi dense canopy without saturating · savi sparse or
@@ -112,8 +124,8 @@ coverage is thin, say so rather than over-reading the result.
   RENDER or DISPLAY imagery — don't list metadata and stop. The docstring
   lists the composite ids; defer to it. Afterwards, describe what is now on
   the map.
-- show_temporal_layer(artifact_id, band?, label?) — draw one output layer of a
-  temporal_features artifact.
+- show_raster_layer(artifact_id, band?, label?) — draw a raster layer of any
+  built artifact: a temporal_features output, or band="zones" for a zone map.
 - add_buffer_layer(distance_meters, geometry_wkt?) — buffered overlay; without
   geometry the UI uses the current viewport bbox.
 - add_aggregation_layer(kind, weight_by?, radius?, label?) — aggregate the

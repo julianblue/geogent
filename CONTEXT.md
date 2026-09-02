@@ -101,6 +101,10 @@ database (see `README.md` for ports and the compose stack):
 - **Data cubes / field memory** — multi-date cubes reduced per pixel
   (`field_memory`, `composite`, `trend`, `frequency`) into content-addressed
   server-side artifacts the agent handles as ids, never pixels.
+- **Management zones (#65 M3)** — the cube feature stack clustered into
+  contiguous agronomic zones with per-zone stats and **driver attribution**
+  (which input layer explains the split), shipped as a zone raster plus
+  exportable GeoJSON boundaries.
 - **Agriculture pack (flagship)** — field selection, zonal stats, NDVI series,
   composite rendering, and agent-composed dashboards.
 - **Routing / geocoding (#55)** — backend endpoints for routing, travel-time

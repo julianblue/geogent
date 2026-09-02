@@ -71,7 +71,12 @@ def build_backend_stub() -> FastAPI:
     cleanly; the values are canned so tests can assert on them.
     """
     app = FastAPI()
-    state: dict[str, object] = {"features": [], "time_series_polls": {}}
+    state: dict[str, object] = {
+        "features": [],
+        "time_series_polls": {},
+        "artifacts": {},
+        "season_polls": {},
+    }
 
     @app.post("/api/v1/auth/login")
     def login(_: dict) -> dict:
@@ -254,6 +259,140 @@ def build_backend_stub() -> FastAPI:
             ],
             "error": None,
         }
+
+    # --- season analysis: phenology + anomaly (mirrors the backend shapes) ---
+
+    @app.post("/api/v1/analytics/season-analysis", status_code=202)
+    def start_season_analysis(_: dict) -> dict:
+        job_id = "22222222-2222-2222-2222-222222222222"
+        polls: dict[str, int] = state["season_polls"]  # type: ignore[assignment]
+        polls[job_id] = 0
+        return {"job_id": job_id, "status": "pending"}
+
+    @app.get("/api/v1/analytics/season-analysis/{job_id}")
+    def get_season_analysis(job_id: str) -> dict:
+        return {
+            "job_id": job_id,
+            "status": "succeeded",
+            "field_id": 7,
+            "index": "ndvi",
+            "params": {},
+            "points": [],
+            "curve": [
+                {"date": "2025-04-15", "value": 0.31},
+                {"date": "2025-06-20", "value": 0.82},
+                {"date": "2025-08-30", "value": 0.35},
+            ],
+            "phenology": {
+                "status": "ok",
+                "n_observations": 22,
+                "peak_value": 0.82,
+                "peak_date": "2025-06-20",
+                "start_of_season": "2025-04-08",
+                "end_of_season": "2025-09-02",
+                "season_length_days": 147,
+                "amplitude": 0.55,
+                "seasonal_integral": 52.4,
+                "greenup_rate_per_day": 0.0078,
+                "senescence_rate_per_day": 0.0074,
+                "max_gap_days": 11,
+                "observed_span_days": 180,
+            },
+            "anomaly": {
+                "status": "ok",
+                "baseline_years": [2023, 2024],
+                "n_days_compared": 160,
+                "mean_difference": -0.07,
+                "mean_z_score": -1.4,
+                "fraction_of_season_below_baseline": 0.81,
+                "largest_shortfall": {"date": "2025-07-05", "difference": -0.16},
+                "largest_surplus": {"date": "2025-04-20", "difference": 0.02},
+            },
+            "error": None,
+        }
+
+    # --- artifacts: temporal features + management zones ---------------------
+
+    def _artifact(artifact_id: str, kind: str, summary: dict, assets: list[dict]) -> dict:
+        artifacts: dict[str, dict] = state["artifacts"]  # type: ignore[assignment]
+        artifacts[artifact_id] = {
+            "id": artifact_id,
+            "kind": kind,
+            "status": "succeeded",
+            "summary": summary,
+            "assets": assets,
+            "error": None,
+        }
+        return {"artifact_id": artifact_id, "kind": kind, "status": "pending", "cached": False}
+
+    @app.post("/api/v1/analytics/temporal-features", status_code=202)
+    def create_temporal_features(_: dict) -> dict:
+        return _artifact(
+            "aaaa1111",
+            "temporal_features",
+            {
+                "reducer": "field_memory",
+                "index": "ndvi",
+                "collection": "sentinel-2-l2a",
+                "n_scenes_used": 24,
+                "n_scenes_cloud_masked": 24,
+                "valid_obs": {"min": 9, "median": 21, "max": 24},
+                "outputs": {
+                    "productivity": {"mean": 0.61, "within_field_spread": 0.14},
+                    "stability": {"mean": 0.18, "within_field_spread": 0.06},
+                },
+            },
+            [{"role": "productivity", "key": "productivity.tif", "url": "/x"}],
+        )
+
+    @app.post("/api/v1/analytics/management-zones", status_code=202)
+    def create_management_zones(_: dict) -> dict:
+        return _artifact(
+            "bbbb2222",
+            "management_zones",
+            {
+                "n_zones": 3,
+                "clustered_pixels": 11840,
+                "features": ["ndvi_productivity", "ndvi_stability"],
+                "zones": [
+                    {
+                        "zone": 1,
+                        "area_ha": 3.9,
+                        "share_of_area": 0.24,
+                        "features": {"ndvi_productivity": 0.41, "ndvi_stability": 0.27},
+                    },
+                    {
+                        "zone": 2,
+                        "area_ha": 6.2,
+                        "share_of_area": 0.39,
+                        "features": {"ndvi_productivity": 0.60, "ndvi_stability": 0.18},
+                    },
+                    {
+                        "zone": 3,
+                        "area_ha": 5.8,
+                        "share_of_area": 0.37,
+                        "features": {"ndvi_productivity": 0.74, "ndvi_stability": 0.12},
+                    },
+                ],
+                "attribution": [
+                    {"feature": "ndvi_productivity", "variance_explained": 0.79},
+                    {"feature": "ndvi_stability", "variance_explained": 0.31},
+                ],
+                "zone_count_selection": [
+                    {"n_zones": 2, "score": 1840.2},
+                    {"n_zones": 3, "score": 2104.7},
+                    {"n_zones": 4, "score": 1993.1},
+                ],
+            },
+            [{"role": "zones", "key": "zones.tif", "url": "/x", "colormap": "zones"}],
+        )
+
+    @app.get("/api/v1/analytics/artifacts/{artifact_id}")
+    def get_artifact(artifact_id: str) -> dict:
+        artifacts: dict[str, dict] = state["artifacts"]  # type: ignore[assignment]
+        return artifacts.get(
+            artifact_id, {"id": artifact_id, "status": "failed", "error": "unknown artifact"}
+        )
 
     return app
 

@@ -14,14 +14,15 @@ from geogent_agent.tools.frontend_actions import (
     fly_to,
     list_features_in_viewport,
     render_dashboard,
+    show_raster_layer,
     show_sentinel2_scene,
-    show_temporal_layer,
 )
 from geogent_agent.tools.geo_tools import (
     analyze_index_season,
     area_of,
     buffer_geometry,
     crop_stats_within_bbox,
+    delineate_management_zones,
     distance_between,
     features_within,
     fields_within_bbox,
@@ -49,6 +50,7 @@ TOOLS = [
     seasonal_index_time_series_for_field,
     analyze_index_season,
     temporal_features,
+    delineate_management_zones,
     # --- imagery discovery ------------------------------------------------
     stac_list_collections,
     stac_search,
@@ -69,7 +71,7 @@ TOOLS = [
     list_features_in_viewport,
     confirm_feature_save,
     show_sentinel2_scene,
-    show_temporal_layer,
+    show_raster_layer,
     render_dashboard,
 ]
 
@@ -82,6 +84,7 @@ __all__ = [
     "buffer_geometry",
     "confirm_feature_save",
     "crop_stats_within_bbox",
+    "delineate_management_zones",
     "distance_between",
     "features_within",
     "fields_within_bbox",
@@ -94,7 +97,7 @@ __all__ = [
     "render_dashboard",
     "seasonal_index_time_series_for_field",
     "show_sentinel2_scene",
-    "show_temporal_layer",
+    "show_raster_layer",
     "stac_get_item",
     "stac_list_collections",
     "stac_search",

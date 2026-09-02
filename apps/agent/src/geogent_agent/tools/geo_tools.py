@@ -407,7 +407,7 @@ async def temporal_features(
     field is uniform and there is nothing worth zoning; larger means real
     structure. Also check ``summary.valid_obs`` — few valid observations per
     pixel (a cloudy season) makes the layers noisy, and you should say so.
-    Then call ``show_temporal_layer(artifact_id, band=<output name>)`` to put it
+    Then call ``show_raster_layer(artifact_id, band=<output name>)`` to put it
     on the map. The pixels themselves are never returned to you.
     """
     reducer_params = {"threshold": threshold} if threshold is not None else {}
@@ -525,3 +525,83 @@ async def analyze_index_season(
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"season-analysis job {job_id} did not finish before timeout")
             await asyncio.sleep(_SEASON_ANALYSIS_POLL_INTERVAL_SECONDS)
+
+
+@tool
+async def delineate_management_zones(
+    start_date: str,
+    end_date: str,
+    field_id: int | None = None,
+    geometry_wkt: str | None = None,
+    bbox: list[float] | None = None,
+    indices: list[str] | None = None,
+    n_zones: int | None = None,
+    collection: Literal["sentinel-2-l2a", "landsat-c2-l2"] = "sentinel-2-l2a",
+    max_cloud_cover: float = 20,
+    max_scenes: int = 60,
+) -> dict:
+    """Split an area into management zones and explain what separates them.
+
+    Clusters multi-date per-pixel behaviour — productivity and stability for
+    each requested index — into a few contiguous zones, then reports what each
+    zone is like and which input layer actually drove the split. This is the
+    answer to "should I treat this field uniformly?" and the basis for
+    variable-rate planning.
+
+    AOI: pass exactly one of ``field_id``, ``geometry_wkt``, ``bbox``.
+
+    ``indices`` defaults to ``["ndvi"]``. Add a second (max 3) when the question
+    calls for it — ``ndmi`` brings moisture into the split, ``ndre`` nitrogen
+    status. Each index costs another pass over the imagery.
+
+    ``n_zones`` defaults to automatic (a variance-ratio criterion picks 2-6);
+    set it when the user names a number, e.g. three rates for a spreader.
+
+    Cover at least one full season; several seasons make the zones more
+    trustworthy because a one-off weather event stops dominating them.
+
+    Returns ``{artifact_id, status, summary, ...}``. In ``summary``:
+      - ``zones``: per zone, area_ha, share_of_area, and the mean of every
+        input feature — this is what you describe to the user.
+      - ``attribution``: per feature, ``variance_explained`` (0-1). The top
+        entry is *why* the zones exist. If everything is near zero, the field
+        has no real structure and you should say the zoning isn't meaningful
+        rather than narrating noise.
+      - ``zone_count_selection``: the score per candidate count, so you can say
+        how clear-cut the choice was.
+      - ``inputs``: per index, how many scenes and observations backed it.
+
+    Then call ``show_raster_layer(artifact_id, band="zones")`` to draw the map.
+    """
+    aoi = _resolve_aoi(field_id=field_id, geometry_wkt=geometry_wkt, bbox=bbox)
+    async with get_backend_client() as client:
+        start = await client.post(
+            "/api/v1/analytics/management-zones",
+            json={
+                **aoi,
+                "indices": indices or ["ndvi"],
+                "n_zones": n_zones,
+                "collection": collection,
+                "start_date": start_date,
+                "end_date": end_date,
+                "max_cloud_cover": max_cloud_cover,
+                "max_scenes": max_scenes,
+            },
+        )
+        start.raise_for_status()
+        artifact_id = start.json()["artifact_id"]
+        deadline = time.monotonic() + _ARTIFACT_POLL_TIMEOUT_SECONDS
+
+        while True:
+            status_resp = await client.get(f"/api/v1/analytics/artifacts/{artifact_id}")
+            status_resp.raise_for_status()
+            result = status_resp.json()
+            status = result.get("status")
+            if status == "succeeded":
+                return result
+            if status == "failed":
+                error = result.get("error") or f"zone delineation {artifact_id} failed"
+                raise RuntimeError(str(error))
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"zone delineation {artifact_id} did not finish before timeout")
+            await asyncio.sleep(_ARTIFACT_POLL_INTERVAL_SECONDS)

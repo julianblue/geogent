@@ -23,6 +23,7 @@ from geogent_backend.schemas.raster import JobStatus
 __all__ = [
     "ArtifactKind",
     "TemporalFeaturesRecipe",
+    "ManagementZonesRecipe",
     "ArtifactRecipe",
     "GridInfo",
     "FeatureStats",
@@ -36,6 +37,7 @@ __all__ = [
 
 class ArtifactKind(str, Enum):  # noqa: UP042 — str-mixin keeps JSON value as the bare string
     temporal_features = "temporal_features"
+    management_zones = "management_zones"
 
 
 class TemporalFeaturesRecipe(BaseModel):
@@ -74,8 +76,51 @@ class TemporalFeaturesRecipe(BaseModel):
         return self
 
 
-# Discriminated union grows as M2/M3 add cube / terrain / zone_map recipes.
-ArtifactRecipe = TemporalFeaturesRecipe
+class ManagementZonesRecipe(BaseModel):
+    """Cluster multi-season per-pixel behaviour into contiguous management zones.
+
+    The feature stack is built from the same cube machinery as
+    ``temporal_features``: for each requested index, the season's productivity
+    (multi-date mean) and stability (temporal CV). Terrain fusion (M2) will add
+    layers to this stack without changing the recipe's shape.
+    """
+
+    kind: Literal[ArtifactKind.management_zones] = ArtifactKind.management_zones
+    recipe_version: int = 1
+    field_id: int | None = None
+    geometry_wkt: str | None = None
+    bbox: tuple[float, float, float, float] | None = None
+    collection: CollectionName = CollectionName.sentinel_2_l2a
+    # One cube is read per index, so this is capped: it is the main cost driver.
+    indices: list[IndexName] = Field(default_factory=lambda: [IndexName.ndvi], max_length=3)
+    start_date: date
+    end_date: date
+    #: None asks the engine to choose the cluster count by validity index.
+    n_zones: int | None = Field(default=None, ge=2, le=6)
+    max_cloud_cover: float = Field(default=20, ge=0, le=100)
+    max_scenes: int = Field(default=60, gt=0, le=200)
+
+    @model_validator(mode="after")
+    def _check(self) -> ManagementZonesRecipe:
+        if self.end_date < self.start_date:
+            raise ValueError("end_date must be on or after start_date")
+        provided = [self.field_id is not None, self.geometry_wkt is not None, self.bbox is not None]
+        if sum(provided) != 1:
+            raise ValueError("provide exactly one of field_id, geometry_wkt, bbox")
+        if not self.indices:
+            raise ValueError("at least one index is required")
+        if len(set(self.indices)) != len(self.indices):
+            raise ValueError("indices must be unique")
+        for index in self.indices:
+            if not supports_index(self.collection, index):
+                raise ValueError(
+                    f"{self.collection.value} does not provide the bands for {index.value}"
+                )
+        return self
+
+
+# Discriminated union grows as M2 adds terrain recipes.
+ArtifactRecipe = TemporalFeaturesRecipe | ManagementZonesRecipe
 
 
 class GridInfo(BaseModel):

@@ -23,7 +23,8 @@ from shapely.geometry import box, mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.config import get_settings
-from geogent_backend.geo import collections, cube, reducers, stac
+from geogent_backend.geo import collections, cube, reducers, stac, zones
+from geogent_backend.geo.reducers import ReducerName
 from geogent_backend.models.artifact import Artifact
 from geogent_backend.repositories.artifact_repo import ArtifactRepository
 from geogent_backend.repositories.field_repo import FieldRepository
@@ -31,6 +32,7 @@ from geogent_backend.schemas.artifact import (
     ArtifactAsset,
     ArtifactKind,
     ArtifactResponse,
+    ManagementZonesRecipe,
     TemporalFeaturesRecipe,
 )
 from geogent_backend.schemas.raster import JobStatus
@@ -40,13 +42,16 @@ from geogent_backend.storage.artifact_store import ArtifactStore, get_artifact_s
 logger = logging.getLogger(__name__)
 
 _ASSET_MEDIA_TYPE = "image/tiff; application=geotiff"
+_GEOJSON_MEDIA_TYPE = "application/geo+json"
 
 
 class AOITooLargeError(Exception):
     """The requested AOI would exceed the in-process pixel budget (-> 422)."""
 
 
-async def _resolve_geometry(session: AsyncSession, recipe: TemporalFeaturesRecipe) -> dict:
+async def _resolve_geometry(
+    session: AsyncSession, recipe: TemporalFeaturesRecipe | ManagementZonesRecipe
+) -> dict:
     """Resolve the recipe's AOI to a WGS84 GeoJSON geometry."""
     if recipe.field_id is not None:
         row = await FieldRepository(session).get(recipe.field_id)
@@ -68,7 +73,7 @@ def _estimate_pixels(geom_4326: dict, resolution_m: float) -> int:
     return math.ceil(width_m / resolution_m) * math.ceil(height_m / resolution_m)
 
 
-def recipe_hash(recipe: TemporalFeaturesRecipe) -> str:
+def recipe_hash(recipe: TemporalFeaturesRecipe | ManagementZonesRecipe) -> str:
     """Stable content hash of a recipe. Canonical (sorted keys), version-aware
     (``recipe_version`` busts the cache on a math change)."""
     payload = recipe.model_dump(mode="json")
@@ -93,6 +98,74 @@ def _build(
         recipe.reducer_params,
         collection=collections.get_spec(recipe.collection),
     )
+
+
+def _build_zones(
+    geom_4326: dict,
+    scenes: list[dict],
+    recipe: ManagementZonesRecipe,
+    resolution_m: float,
+) -> tuple[dict, dict[str, bytes]]:
+    """Blocking zone delineation: one cube per index, then cluster the stack.
+
+    Every cube after the first is forced onto the FIRST cube's grid, so the
+    feature layers are co-registered by construction rather than by luck — that
+    alignment is what makes stacking indices into one clustering input valid.
+    """
+    coll = collections.get_spec(recipe.collection)
+    features: list[zones.FeatureLayer] = []
+    provenance: dict[str, dict] = {}
+    grid = None
+    observed = None
+
+    reducer = reducers.get_spec(ReducerName.field_memory)
+    for index in recipe.indices:
+        built = cube.build_cube(geom_4326, scenes, index, resolution_m, coll, grid=grid)
+        grid = built.grid
+        outputs = reducer.reduce(built.values, cube.decimal_years(built.dates), {})
+        for name, layer in outputs.items():
+            features.append(zones.FeatureLayer(name=f"{index.value}_{name}", values=layer))
+        provenance[index.value] = cube.cube_provenance(built, resolution_m)
+        seen = built.valid_obs_per_pixel > 0
+        observed = seen if observed is None else (observed & seen)
+
+    assert grid is not None and observed is not None
+    result, polygons = zones.delineate(
+        features,
+        grid.polygon_mask & observed,
+        grid.transform,
+        grid.crs,
+        n_zones=recipe.n_zones,
+    )
+
+    summary = {
+        "n_zones": result.n_zones,
+        "zones": result.zones,
+        "attribution": result.attribution,
+        "zone_count_selection": result.selection,
+        "clustered_pixels": result.n_pixels,
+        "features": [f.name for f in features],
+        "inputs": provenance,
+    }
+    assets = {
+        "zones.tif": cube.write_single_band_cog(result.labels, grid.crs, grid.transform, "zones"),
+        "zones.geojson": json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": polygons[z["zone"]],
+                        "properties": {k: v for k, v in z.items() if k != "zone"}
+                        | {"zone": z["zone"]},
+                    }
+                    for z in result.zones
+                    if z["zone"] in polygons
+                ],
+            }
+        ).encode("utf-8"),
+    }
+    return summary, assets
 
 
 def _to_response(row: Artifact) -> ArtifactResponse:
@@ -123,13 +196,20 @@ class ArtifactService:
         self._store = store or get_artifact_store()
         self._settings = get_settings()
 
-    async def create_temporal_features(
-        self, recipe: TemporalFeaturesRecipe, background_tasks: BackgroundTasks
+    async def _create(
+        self,
+        kind: ArtifactKind,
+        recipe: TemporalFeaturesRecipe | ManagementZonesRecipe,
+        build_task,
+        background_tasks: BackgroundTasks,
     ) -> tuple[Artifact, bool]:
-        """Return the artifact for this recipe (building it if new). The bool is
-        whether it was a cache hit."""
-        # Resolve the AOI up front so a missing field is a 404 (not a failed job)
-        # and an oversized AOI is a 422 before any work is dispatched.
+        """Content-address a recipe and dispatch its build if it is new.
+
+        Shared by every artifact kind: resolve the AOI up front so a missing
+        field is a 404 (not a failed job) and an oversized AOI a 422 before any
+        work is dispatched; then dedup on the recipe hash. The bool is whether
+        this was a cache hit.
+        """
         geom_4326 = await _resolve_geometry(self._session, recipe)
         pixels = _estimate_pixels(geom_4326, self._settings.cube_resolution_m)
         if pixels > self._settings.cube_max_pixels:
@@ -145,16 +225,32 @@ class ArtifactService:
 
         artifact_id = uuid4().hex
         row = await self._repo.create_or_get(
-            artifact_id,
-            ArtifactKind.temporal_features.value,
-            h,
-            recipe.model_dump(mode="json"),
-            self._owner,
+            artifact_id, kind.value, h, recipe.model_dump(mode="json"), self._owner
         )
         if row.id == artifact_id:  # we won the insert race -> build it
-            background_tasks.add_task(self._build_temporal_features, artifact_id, recipe)
+            background_tasks.add_task(build_task, artifact_id, recipe)
             return row, False
         return row, True  # someone else created it first
+
+    async def create_temporal_features(
+        self, recipe: TemporalFeaturesRecipe, background_tasks: BackgroundTasks
+    ) -> tuple[Artifact, bool]:
+        return await self._create(
+            ArtifactKind.temporal_features,
+            recipe,
+            self._build_temporal_features,
+            background_tasks,
+        )
+
+    async def create_management_zones(
+        self, recipe: ManagementZonesRecipe, background_tasks: BackgroundTasks
+    ) -> tuple[Artifact, bool]:
+        return await self._create(
+            ArtifactKind.management_zones,
+            recipe,
+            self._build_management_zones,
+            background_tasks,
+        )
 
     async def get(self, artifact_id: str) -> ArtifactResponse | None:
         row = await self._repo.get(artifact_id)
@@ -162,16 +258,20 @@ class ArtifactService:
             return None
         return _to_response(row)
 
-    async def get_asset(self, artifact_id: str, key: str) -> bytes | None:
+    async def get_asset(self, artifact_id: str, key: str) -> tuple[bytes, str] | None:
+        """Bytes plus the asset's declared media type (rasters and GeoJSON differ)."""
         row = await self._repo.get(artifact_id)
         if row is None or row.owner != self._owner:
             return None
         # Only serve keys this artifact actually declared — never read arbitrary
         # files under its directory, even for an owner who knows the id.
-        declared = {a.get("key") for a in (row.assets or [])}
+        declared = {a.get("key"): a for a in (row.assets or [])}
         if key not in declared:
             return None
-        return await self._store.get(artifact_id, key)
+        data = await self._store.get(artifact_id, key)
+        if data is None:
+            return None
+        return data, str(declared[key].get("media_type") or _ASSET_MEDIA_TYPE)
 
     async def _build_temporal_features(
         self, artifact_id: str, recipe: TemporalFeaturesRecipe
@@ -230,3 +330,64 @@ class ArtifactService:
             except Exception:
                 logger.exception("Artifact build %s failed", artifact_id)
                 await repo.set_error(artifact_id, "Artifact build failed.")
+
+    async def _build_management_zones(
+        self, artifact_id: str, recipe: ManagementZonesRecipe
+    ) -> None:
+        from geogent_backend.db.session import SessionLocal
+
+        async with SessionLocal() as session:
+            repo = ArtifactRepository(session)
+            try:
+                await repo.set_status(artifact_id, JobStatus.running.value)
+
+                geom_4326 = await _resolve_geometry(session, recipe)
+                bbox = list(shape(geom_4326).bounds)
+                max_scenes = min(recipe.max_scenes, self._settings.cube_max_scenes)
+                coll = collections.get_spec(recipe.collection)
+                # One scene search shared by every index — same AOI, same window,
+                # so the cubes see the same acquisitions and stay comparable.
+                scenes = await stac.search_scenes(
+                    bbox,
+                    recipe.start_date,
+                    recipe.end_date,
+                    max_cloud_cover=recipe.max_cloud_cover,
+                    limit=max_scenes,
+                    collection=coll.stac_id,
+                    cloud_field=coll.cloud_field,
+                )
+
+                summary, payloads = await anyio.to_thread.run_sync(
+                    _build_zones,
+                    geom_4326,
+                    scenes,
+                    recipe,
+                    self._settings.cube_resolution_m,
+                )
+
+                assets: list[dict] = []
+                for key, data in payloads.items():
+                    await self._store.put(artifact_id, key, data)
+                    is_raster = key.endswith(".tif")
+                    assets.append(
+                        ArtifactAsset(
+                            # The raster is what the map renders (discrete
+                            # "zones" ramp); the GeoJSON is the exportable
+                            # boundary set the VRA path (M4) will build on.
+                            role="zones" if is_raster else "zones_geojson",
+                            key=key,
+                            url=_asset_url(artifact_id, key),
+                            media_type=_ASSET_MEDIA_TYPE if is_raster else _GEOJSON_MEDIA_TYPE,
+                            colormap="zones",
+                            label="Management zones",
+                            bands=["zones"] if is_raster else [],
+                        ).model_dump()
+                    )
+                await repo.set_result(artifact_id, summary, assets)
+            except FieldNotFoundError as exc:
+                await repo.set_error(artifact_id, str(exc))
+            except (cube.CubeError, zones.ZoneError) as exc:
+                await repo.set_error(artifact_id, str(exc))
+            except Exception:
+                logger.exception("Zone build %s failed", artifact_id)
+                await repo.set_error(artifact_id, "Management-zone build failed.")

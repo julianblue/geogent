@@ -111,15 +111,25 @@ re-architecting; each piece reuses the cube/artifact/render scaffold.
 
 ### M3 — Management zones + explanation
 
-- [ ] `geo/zones.py` — standardize features → cluster (k-means / fuzzy c-means)
-      with validity-index cluster-count selection → smooth/sieve → vectorize.
-- [ ] Recipe tool `delineate_management_zones(field/aoi, years, indices,
-extra_layers, n_zones="auto", mask)` → zone COG + per-zone stats.
-- [ ] `attribute_zones` — driver attribution (mutual information / per-zone
-      distributions); LLM writes the causal narrative.
-- [ ] HITL save via `interrupt()` + `ApprovalWidget`.
-- [ ] UI: discrete colormap + `{ kind: "zones" }` `LayerSource` + curated
-      `management-zones` widget (legend + stats table + attribution narrative).
+- [x] `geo/zones.py` — standardize → k-means (k-means++ seeding, fixed seed for
+      reproducible maps) with Calinski-Harabasz cluster-count selection →
+      majority filter + `rasterio.features.sieve` → vectorize to WGS84. Zones
+      are relabelled by ascending primary-feature mean, so "zone 1" is the
+      weakest ground on every field.
+- [x] `management_zones` artifact kind + `POST /api/v1/analytics/management-zones`
+      → `zones.tif` (discrete colormap) **and** `zones.geojson` (the exportable
+      boundaries M4's VRA path builds on). One scene search, one grid, one cube
+      per index, so multi-index feature stacks are co-registered by construction.
+- [x] Driver attribution in-line (per-feature eta²: the share of variance that
+      lies between zones) rather than as a separate `attribute_zones` call — the
+      "why" ships with the map, and the agent writes the narrative from it.
+- [x] Agent tool `delineate_management_zones(field/aoi, indices, n_zones="auto")`.
+- [ ] HITL save via `interrupt()` + `ApprovalWidget` — deferred with M4's export;
+      there is nothing to persist until a prescription exists.
+- [x] UI: discrete `zones` colormap in the shared registry; the existing
+      artifact-raster overlay renders it, so no new layer kind was needed.
+- [ ] Curated `management-zones` widget (legend + stats table + narrative) —
+      today the agent presents zone stats through `render_dashboard`.
 
 ### M4 — Close the loop
 
@@ -130,7 +140,9 @@ extra_layers, n_zones="auto", mask)` → zone COG + per-zone stats.
 ## Evals
 
 - [ ] Trajectory scoring for the recipe path (multi-step pipeline).
-- [ ] Numeric correctness for zone outputs vs a synthetic planted-gradient field.
+- [x] Numeric correctness for zone outputs vs synthetic planted fields
+      (`tests/geo/test_zones.py`: two-patch recovery, auto-k on a three-level
+      field, attribution, determinism, speckle removal, area accounting).
 - [ ] Recordings store handles + summaries only — never cubes.
 
 ## Out of scope (tracked, not built here)

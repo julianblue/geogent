@@ -41,12 +41,19 @@ The `TOOLS` list in `tools/__init__.py` is the registry. Two families:
    caches the JWT (auto-refresh once on a 401) — **the agent never holds provider
    URLs or keys.**
 
-   The four raster tools sit at four deliberately different altitudes, and the
-   prompt teaches the model to pick between them: `zonal_stats_for_field` (one
-   field, one date) → `seasonal_index_time_series_for_field` (raw per-scene
-   series) → `analyze_index_season` (phenology metrics + anomaly vs previous
-   years) → `temporal_features` (per-pixel reduction over a cube). Adding a
-   fifth without a clear altitude of its own is how this surface goes blurry.
+   The raster tools sit at deliberately different altitudes, and the prompt
+   teaches the model to pick between them: `zonal_stats_for_field` (one field,
+   one date) → `seasonal_index_time_series_for_field` (raw per-scene series) →
+   `analyze_index_season` (phenology metrics + anomaly vs previous years) →
+   `temporal_features` (per-pixel reduction over a cube) →
+   `delineate_management_zones` (that stack clustered into zones + attribution).
+   Adding one without a clear altitude of its own is how this surface goes
+   blurry.
+
+   The two heavy ones (`temporal_features`, `delineate_management_zones`)
+   submit a recipe and poll an **artifact**; the agent only ever sees the
+   `summary` and passes the `artifact_id` to `show_raster_layer` to display it.
+   Pixels never enter the context.
 2. **Frontend-action tools** (`frontend_actions.py`) — either **client tools**
    (return an ack only; the browser executes + renders, e.g. `fly_to`,
    `add_buffer_layer`, `add_aggregation_layer`, `show_temporal_layer`) or

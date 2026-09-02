@@ -305,3 +305,56 @@
       - [zonal_stats_for_field, seasonal_index_time_series_for_field]
     max_steps: 12
   xfail: "new multi-step case; not yet validated against the default eval model"
+
+# --- Agricultural depth: season interpretation, per-pixel history, zoning -----
+# Live cases against the backend stub. No recordings yet, so they soft-skip in
+# offline replay; they exist to pin TOOL SELECTION between the four raster
+# altitudes, which is the thing most likely to regress as the surface grows.
+
+- id: season_anomaly_vs_previous_years
+  # The trap: seasonal_index_time_series_for_field also "answers" this, by
+  # handing over raw points for the model to eyeball. The comparison question
+  # is what analyze_index_season exists for.
+  input: >-
+    How is the 2025 season going on field 7 compared with the last two years?
+  configurable:
+    map_state:
+      selected_field: {id: 7, name: "North field", crop: "winter_common_soft_wheat"}
+  expect:
+    tools_required: [analyze_index_season]
+    args:
+      analyze_index_season:
+        field_id: {equals: 7}
+        baseline_years: {between: [1, 5]}
+    max_steps: 8
+
+- id: within_field_variability_uses_per_pixel
+  # "Where inside the field" cannot be answered by a whole-field mean, so the
+  # per-pixel reducer is the only correct altitude here.
+  input: >-
+    Which parts of field 7 perform consistently well and which are erratic?
+    Show me the map.
+  configurable:
+    map_state:
+      selected_field: {id: 7, name: "North field", crop: "winter_common_soft_wheat"}
+  expect:
+    tools_required: [temporal_features, show_raster_layer]
+    args:
+      temporal_features:
+        field_id: {equals: 7}
+    max_steps: 10
+
+- id: management_zones_with_attribution
+  input: >-
+    Split field 7 into management zones for variable-rate nitrogen and tell me
+    what drives the difference between them.
+  configurable:
+    map_state:
+      selected_field: {id: 7, name: "North field", crop: "winter_common_soft_wheat"}
+  expect:
+    tools_required: [delineate_management_zones]
+    args:
+      delineate_management_zones:
+        field_id: {equals: 7}
+    max_steps: 10
+    final_contains_any: ["zone", "productivity"]

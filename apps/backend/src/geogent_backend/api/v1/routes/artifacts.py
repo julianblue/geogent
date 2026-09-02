@@ -13,6 +13,7 @@ from geogent_backend.schemas.artifact import (
     ArtifactCreateResponse,
     ArtifactKind,
     ArtifactResponse,
+    ManagementZonesRecipe,
     TemporalFeaturesRecipe,
 )
 from geogent_backend.schemas.raster import JobStatus
@@ -49,6 +50,32 @@ async def create_temporal_features(
     )
 
 
+@router.post(
+    "/management-zones",
+    response_model=ArtifactCreateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def create_management_zones(
+    payload: ManagementZonesRecipe,
+    session: DbSession,
+    user: CurrentUser,
+    background_tasks: BackgroundTasks,
+) -> ArtifactCreateResponse:
+    service = ArtifactService(session, owner=str(user.id))
+    try:
+        row, cached = await service.create_management_zones(payload, background_tasks)
+    except FieldNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AOITooLargeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    return ArtifactCreateResponse(
+        artifact_id=row.id,
+        kind=ArtifactKind(row.kind),
+        status=JobStatus(row.status),
+        cached=cached,
+    )
+
+
 @router.get("/artifacts/{artifact_id}", response_model=ArtifactResponse)
 async def get_artifact(artifact_id: str, session: DbSession, user: CurrentUser) -> ArtifactResponse:
     result = await ArtifactService(session, owner=str(user.id)).get(artifact_id)
@@ -63,9 +90,12 @@ async def get_artifact_asset(
 ) -> Response:
     service = ArtifactService(session, owner=str(user.id))
     try:
-        data = await service.get_asset(artifact_id, key)
+        found = await service.get_asset(artifact_id, key)
     except ArtifactStoreError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Asset not found") from exc
-    if data is None:
+    if found is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Artifact not found")
-    return Response(content=data, media_type="image/tiff")
+    # Media type comes from the asset the artifact declared: a zone map ships a
+    # raster AND its vectorized polygons, which are not both image/tiff.
+    data, media_type = found
+    return Response(content=data, media_type=media_type)

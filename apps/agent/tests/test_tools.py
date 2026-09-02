@@ -14,6 +14,7 @@ from geogent_agent.tools import (
     area_of,
     buffer_geometry,
     crop_stats_within_bbox,
+    delineate_management_zones,
     distance_between,
     features_within,
     fields_within_bbox,
@@ -610,4 +611,59 @@ async def test_analyze_index_season_raises_on_failed_job(monkeypatch: pytest.Mon
     with pytest.raises(RuntimeError, match="Season analysis failed"):
         await analyze_index_season.ainvoke(
             {"field_id": 7, "start_date": "2025-03-01", "end_date": "2025-10-31"}
+        )
+
+
+@pytest.mark.asyncio
+async def test_delineate_management_zones_returns_the_summary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def handler(request: httpx.Request, captured: dict) -> httpx.Response:
+        if request.method == "POST":
+            captured["start_body"] = json.loads(request.content)
+            return httpx.Response(
+                202, json={"artifact_id": "z1", "kind": "management_zones", "status": "pending"}
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": "z1",
+                "kind": "management_zones",
+                "status": "succeeded",
+                "summary": {
+                    "n_zones": 3,
+                    "zones": [{"zone": 1, "area_ha": 4.2, "share_of_area": 0.31}],
+                    "attribution": [
+                        {"feature": "ndvi_productivity", "variance_explained": 0.82},
+                        {"feature": "ndvi_stability", "variance_explained": 0.11},
+                    ],
+                },
+                "assets": [{"role": "zones", "key": "zones.tif", "url": "/x"}],
+                "error": None,
+            },
+        )
+
+    captured = _install_mock_backend(monkeypatch, handler)
+    monkeypatch.setattr(geo_tools, "_ARTIFACT_POLL_INTERVAL_SECONDS", 0)
+
+    result = await delineate_management_zones.ainvoke(
+        {
+            "field_id": 7,
+            "start_date": "2023-04-01",
+            "end_date": "2025-09-30",
+            "indices": ["ndvi", "ndmi"],
+        }
+    )
+
+    assert captured["start_body"]["indices"] == ["ndvi", "ndmi"]
+    assert captured["start_body"]["n_zones"] is None  # auto by default
+    assert result["summary"]["n_zones"] == 3
+    assert result["summary"]["attribution"][0]["feature"] == "ndvi_productivity"
+
+
+@pytest.mark.asyncio
+async def test_delineate_management_zones_requires_one_aoi() -> None:
+    with pytest.raises(ValueError, match="exactly one area of interest"):
+        await delineate_management_zones.ainvoke(
+            {"start_date": "2023-04-01", "end_date": "2025-09-30"}
         )
