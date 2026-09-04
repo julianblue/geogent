@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from functools import partial
 from typing import Any
 
-from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 
 from geogent_agent.config import get_settings
@@ -72,14 +72,39 @@ def _today_block() -> str:
     return f"\n\nToday's date is {datetime.now(UTC):%Y-%m-%d} (UTC). Trust STAC datetimes."
 
 
+def _tool_steps_this_turn(messages: list[AnyMessage]) -> int:
+    """Count AI-turn round-trips since the last human message.
+
+    Backstops a runaway tool-calling loop independent of whatever
+    ``recursion_limit`` a caller's config does or doesn't supply: in practice a
+    LangGraph Platform worker has been observed re-invoking this node ~550
+    times over 18 minutes for one turn without ever raising
+    ``GraphRecursionError``, so the graph needs its own cap rather than
+    trusting the framework's.
+    """
+    count = 0
+    for message in reversed(messages):
+        if isinstance(message, HumanMessage):
+            break
+        if isinstance(message, AIMessage):
+            count += 1
+    return count
+
+
 async def agent_node(state: GraphState, config: RunnableConfig | None = None) -> dict:
     """Invoke the chat model with tools, the system prompt, and any UI map context."""
     configurable = (config or {}).get("configurable") or {}
-    model = (
-        get_chat_model()
-        .bind_tools(TOOLS)
-        .with_config(**build_tracing_config(configurable, architecture="langgraph_react"))
-    )
+    settings = get_settings()
+    tracing_config = build_tracing_config(configurable, architecture="langgraph_react")
+
+    steps = _tool_steps_this_turn(state["messages"])
+    at_step_cap = steps >= settings.agent_max_tool_steps
+    if at_step_cap:
+        # No tools bound: whatever the model says next, tools_condition routes
+        # straight to END, so this call cannot extend the loop further.
+        model = get_chat_model().with_config(**tracing_config)
+    else:
+        model = get_chat_model().bind_tools(TOOLS).with_config(**tracing_config)
 
     system_content = SYSTEM_PROMPT + _today_block()
     map_state = configurable.get("map_state")
@@ -90,7 +115,6 @@ async def agent_node(state: GraphState, config: RunnableConfig | None = None) ->
     # pruned (the UI renders it); we only shape what the model receives. When
     # summarization is enabled, dropped turns are folded into a running summary;
     # otherwise they're trimmed away (drop-only).
-    settings = get_settings()
     budget = settings.agent_max_history_tokens
     update: dict[str, Any] = {}
     if settings.agent_history_summarize:
@@ -107,6 +131,14 @@ async def agent_node(state: GraphState, config: RunnableConfig | None = None) ->
             system_content += f"\n\nSummary of earlier turns (condensed):\n{summary}"
     else:
         history = trim_history(state["messages"], budget)
+
+    if at_step_cap:
+        system_content += (
+            f"\n\nYou have made {steps} tool calls on this request without reaching a "
+            "final answer. Tools are disabled for this reply — give the best answer "
+            "you can from what you've already found, and say plainly if you could "
+            "not finish the request."
+        )
 
     messages = [SystemMessage(content=system_content), *history]
     response = await model.ainvoke(messages)

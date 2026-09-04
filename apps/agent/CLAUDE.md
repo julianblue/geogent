@@ -22,6 +22,16 @@ exceptions are formatted back to the LLM as `tool` messages
 payload** instead of crashing the run. `nodes/agent_node.py` binds `TOOLS` and
 the system prompt to the model.
 
+**Step cap, not just `recursion_limit`.** `agent_node` counts AI-turn
+round-trips since the last human message (`_tool_steps_this_turn`) and stops
+binding tools once `AGENT_MAX_TOOL_STEPS` (default 20) is reached — the model's
+next reply is then structurally final, since `tools_condition` can't route to
+`tools` without tool calls. This exists because LangGraph's `recursion_limit`
+turned out not to be a reliable backstop here: an eval run observed a
+LangGraph Platform dev-server worker re-invoke this node ~550 times over 18
+minutes for one turn without ever raising `GraphRecursionError`. Don't remove
+this cap on the assumption the framework already handles it.
+
 **Context control (`utils/context.py`).** Before each model call, `agent_node`
 bounds history to `AGENT_MAX_HISTORY_TOKENS` (deterministic ~4-chars/token
 trim, anchored on a human turn so tool-call pairs stay intact). With

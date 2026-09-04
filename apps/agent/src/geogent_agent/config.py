@@ -26,6 +26,16 @@ class Settings(BaseSettings):
     # turns. Bounds token cost/latency on long threads. Set <= 0 to disable.
     agent_max_history_tokens: int = Field(default=12000)
 
+    # Hard cap on tool-calling round-trips within a single turn, independent of
+    # whatever `recursion_limit` (if any) the caller's config supplies. Not
+    # theoretical: observed in eval runs where a LangGraph Platform dev-server
+    # worker re-invoked the agent node ~550 times over 18 minutes without ever
+    # raising GraphRecursionError. Once reached, the node still runs but binds
+    # no tools, so the model is structurally forced to a final answer. The
+    # richest golden case needs ~8 steps; this leaves generous headroom above
+    # legitimate multi-tool workflows while stopping a genuine runaway cheaply.
+    agent_max_tool_steps: int = Field(default=20)
+
     # When true, history that exceeds the budget is folded into a running LLM
     # summary (one extra, incremental model call per over-budget turn) rather
     # than silently dropped, so older context survives in condensed form. When
