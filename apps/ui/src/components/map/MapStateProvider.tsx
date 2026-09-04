@@ -52,8 +52,6 @@ export type MapField = {
  */
 export type LayerSource =
   | { kind: "buffer"; wkt: string }
-  | { kind: "route"; geometry: GeoJSON.Geometry }
-  | { kind: "isochrone"; data: GeoJSON.FeatureCollection }
   | {
       // deck.gl aggregation layer (#57). The binned points ride along so the
       // surface can be rebuilt by AggregationOverlay on thread reopen.

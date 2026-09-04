@@ -39,7 +39,7 @@ database (see `README.md` for ports and the compose stack):
        └────────────────────────────────────▶ ┌──────────────┐
                                                │   Backend    │──▶ PostGIS
                                                │   FastAPI    │──▶ STAC / Sentinel-2 COGs
-                                               └──────────────┘──▶ OSRM · ORS · Nominatim
+                                               └──────────────┘
 ```
 
 - **`apps/ui`** — Next.js App Router. Hosts the chat (assistant-ui over a
@@ -107,10 +107,13 @@ database (see `README.md` for ports and the compose stack):
   exportable GeoJSON boundaries.
 - **Agriculture pack (flagship)** — field selection, zonal stats, NDVI series,
   composite rendering, and agent-composed dashboards.
-- **Routing / geocoding (#55)** — backend endpoints for routing, travel-time
-  matrix, isochrones and geocoding (OSRM · OpenRouteService · Nominatim). The
-  *agent* keeps only forward geocoding: the tool surface was narrowed to the
-  agricultural workflows so tool selection stays sharp.
+- **Routing / geocoding (#55)** — shipped, then removed (agents-capabilities
+  review): the backend's OSRM/ORS/Nominatim endpoints and the UI's proxy
+  routes/overlays had zero callers once the agent's routing tools were cut, so
+  the whole vertical was deleted rather than kept as unreachable code. The
+  *agent* keeps only forward geocoding (`geocode_place`, direct to Nominatim)
+  — the tool surface was narrowed to the agricultural workflows so tool
+  selection stays sharp.
 - **Analytics viz (#57)** — deck.gl heatmap & hexbin aggregation layers over the
   feature/field set.
 - **Map workspace** — layer manager (visibility/opacity/reorder/remove),

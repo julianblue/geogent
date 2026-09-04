@@ -108,26 +108,6 @@ function parseViewport(raw: unknown): WorkspaceSnapshot["viewport"] {
   return null;
 }
 
-function isGeoJsonGeometry(v: unknown): v is GeoJSON.Geometry {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    !Array.isArray(v) &&
-    typeof (v as Record<string, unknown>).type === "string" &&
-    "coordinates" in (v as object)
-  );
-}
-
-function isFeatureCollection(v: unknown): v is GeoJSON.FeatureCollection {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    !Array.isArray(v) &&
-    (v as Record<string, unknown>).type === "FeatureCollection" &&
-    Array.isArray((v as Record<string, unknown>).features)
-  );
-}
-
 function isAggregationSource(src: Record<string, unknown>): boolean {
   return (
     (src.aggKind === "heatmap" || src.aggKind === "hexagon") &&
@@ -161,10 +141,6 @@ function parseLayers(raw: unknown): MapLayer[] {
       // addSource during restore (which would throw and break hydration).
       if (src.kind === "buffer" && typeof src.wkt === "string") {
         layer.source = { kind: "buffer", wkt: src.wkt };
-      } else if (src.kind === "route" && isGeoJsonGeometry(src.geometry)) {
-        layer.source = { kind: "route", geometry: src.geometry };
-      } else if (src.kind === "isochrone" && isFeatureCollection(src.data)) {
-        layer.source = { kind: "isochrone", data: src.data };
       } else if (src.kind === "aggregation" && isAggregationSource(src)) {
         layer.source = {
           kind: "aggregation",

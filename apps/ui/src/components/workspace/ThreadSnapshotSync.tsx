@@ -5,12 +5,7 @@ import { useEffect, useRef } from "react";
 import { useActiveThread } from "@/components/workspace/ActiveThreadProvider";
 import { useMapState } from "@/components/map/MapStateProvider";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
-import {
-  addBufferOverlay,
-  addIsochroneOverlay,
-  addRouteOverlay,
-  removeOverlay,
-} from "@/components/map/overlays";
+import { addBufferOverlay, removeOverlay } from "@/components/map/overlays";
 import {
   buildSnapshot,
   readSnapshot,
@@ -97,10 +92,6 @@ export function ThreadSnapshotSync() {
       for (const layer of nextLayers) {
         if (layer.source?.kind === "buffer") {
           addBufferOverlay(mapRef.current, layer.id, layer.source.wkt);
-        } else if (layer.source?.kind === "route") {
-          addRouteOverlay(mapRef.current, layer.id, layer.source.geometry);
-        } else if (layer.source?.kind === "isochrone") {
-          addIsochroneOverlay(mapRef.current, layer.id, layer.source.data);
         }
       }
       replaceLayers(nextLayers);

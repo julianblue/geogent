@@ -109,29 +109,31 @@ describe("parseSnapshot", () => {
     expect(parsed?.workspace.activeWidgetId).toBeNull();
   });
 
-  it("restores route and isochrone layer sources (#55)", () => {
-    const line: GeoJSON.Geometry = {
-      type: "LineString",
-      coordinates: [
-        [2.35, 48.86],
-        [2.13, 48.8],
-      ],
-    };
-    const fc: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+  it("degrades a retired route/isochrone layer source gracefully (#55 removed)", () => {
+    // The "route" and "isochrone" LayerSource kinds were retired along with
+    // the routing tools. An older thread's persisted snapshot can still carry
+    // one on reopen — parseSnapshot must keep the layer entry (so the Layer
+    // Manager still shows it) but drop the unrecognized source, exactly like
+    // any other corrupt/cross-version source kind. It must not throw.
     const parsed = parseSnapshot({
       v: 1,
       layers: [
-        { id: "route-1", label: "Route", source: { kind: "route", geometry: line } },
-        { id: "iso-1", label: "Isochrone", source: { kind: "isochrone", data: fc } },
-        { id: "route-bad", label: "No geom", source: { kind: "route" } },
+        {
+          id: "route-1",
+          label: "Route",
+          source: { kind: "route", geometry: { type: "LineString", coordinates: [] } },
+        },
+        {
+          id: "iso-1",
+          label: "Isochrone",
+          source: { kind: "isochrone", data: { type: "FeatureCollection", features: [] } },
+        },
       ],
       workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
     });
     expect(parsed?.layers).toEqual([
-      { id: "route-1", label: "Route", visible: true, source: { kind: "route", geometry: line } },
-      { id: "iso-1", label: "Isochrone", visible: true, source: { kind: "isochrone", data: fc } },
-      // Missing geometry → source dropped, layer kept.
-      { id: "route-bad", label: "No geom", visible: true },
+      { id: "route-1", label: "Route", visible: true },
+      { id: "iso-1", label: "Isochrone", visible: true },
     ]);
   });
 

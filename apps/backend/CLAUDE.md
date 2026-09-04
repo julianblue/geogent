@@ -30,7 +30,7 @@ Cross-cutting:
   bits), `raster.py` (rasterio/GDAL COG reads via `/vsicurl` + zonal stats),
   `cube.py` + `reducers.py` (multi-date cube and its per-pixel reductions),
   `phenology.py` (season-shape metrics + baseline anomaly), `stac.py` (Earth
-  Search over httpx), `routing.py` (OSRM/ORS/Nominatim over httpx).
+  Search over httpx).
 
   **Masking is not optional in the read paths.** Both `raster.zonal_stats` and
   `cube.build_reduction` apply the collection's `MaskSpec` before any statistic
@@ -52,17 +52,16 @@ Cross-cutting:
   without a token; `POST /features` still requires `CurrentUser`). Use
   `Depends(get_current_user)` (per-route or router-level, e.g.
   `APIRouter(dependencies=[Depends(get_current_user)])`). A new router that
-  forgets this is a security bug — mirror `routes/routing.py`.
+  forgets this is a security bug — mirror `routes/raster.py`.
 - **Keep routes thin.** Logic lives in `services/` (DB-backed) or `geo/`
   (geometry/providers). Routes map inputs → call → response/status.
 - **External calls go through a `geo/` provider module** (`httpx`, mirror
-  `stac.py`/`routing.py`): explicit timeout from settings, a typed error class
-  (`StacError`, `RoutingError`), response normalization. Map provider failure to
-  an `HTTPException` in the route — convention: **502** upstream failure, **503**
-  when a provider is unconfigured (see the ORS-key path in `routing.py`).
+  `stac.py`): explicit timeout from settings, a typed error class (`StacError`),
+  response normalization. Map provider failure to an `HTTPException` in the
+  route — convention: **502** upstream failure, **503** when a provider is
+  unconfigured.
 - **SSRF guard:** validate any caller-supplied value that becomes a URL path
-  segment (`stac.py:_safe_segment`); numeric-only path params (routing coords)
-  are formatted from floats so they can't inject.
+  segment (`stac.py:_safe_segment`).
 - **Validate at the schema, not downstream.** Use Pydantic v2 constraints
   (`ge`/`le`/`gt`, `min_length`, element-level `Field(gt=0)`) so bad input is a
   **422**, not a 5xx from a provider/DB.
@@ -77,8 +76,9 @@ Cross-cutting:
 - **Unit tests monkeypatch the service or geo layer** —
   `monkeypatch.setattr(routes.X.Service, "method", fake)` (see
   `test_fields.py`, `test_raster_time_series.py`) or, for provider modules,
-  drive `httpx` via `httpx.MockTransport` (`tests/geo/test_routing.py`). When a
-  provider test changes env, call `get_settings.cache_clear()`.
+  drive `httpx` via `httpx.MockTransport` (mirror `tests/geo/test_indices.py`
+  style unit tests). When a provider test changes env, call
+  `get_settings.cache_clear()`.
 - **Auth-boundary tests** strip the override (pop `get_current_user`) to
   exercise the bearer guard — expect **403** (missing header) or **401**
   (invalid token). See `test_*_auth.py`.

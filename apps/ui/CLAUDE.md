@@ -22,7 +22,7 @@ Recharts · vitest/jsdom · pnpm.
 - **REST ↔ backend:** `/api/proxy/*` route handlers call the backend via
   `lib/api.ts` (`proxyJson`/`backendFetch`), attaching the session JWT. Add a new
   backend call as a **per-endpoint** `route.ts` under `app/api/proxy/...` (mirror
-  `proxy/routing/route/route.ts`).
+  `proxy/fields/in-bbox/route.ts`).
 
 ## Map state & overlays
 
@@ -31,10 +31,13 @@ viewport, `features`, `fields`, `layers` (`MapLayer[]` with a `LayerSource`
 union), `sentinel2Scene`, selected field. Everything map-related reads/writes
 here. Two overlay mechanisms:
 
-1. **Imperative MapLibre overlays** (`map/overlays.ts`) — buffer / route /
-   isochrone, drawn as `${id}-fill` / `${id}-outline` layers. `LayerSync.tsx`
+1. **Imperative MapLibre overlays** (`map/overlays.ts`) — currently just
+   buffer, drawn as `${id}-fill` / `${id}-outline` layers. `LayerSync.tsx`
    applies visibility/opacity/z-order keyed off those suffixes;
-   `ThreadSnapshotSync` repaints them from `LayerSource` on reopen.
+   `ThreadSnapshotSync` repaints it from `LayerSource` on reopen. (Route and
+   isochrone overlays existed here through #55; removed with the agent's
+   routing tools — `parseSnapshot` still degrades an old thread's persisted
+   `route`/`isochrone` source gracefully rather than crashing on reopen.)
 2. **Data-driven deck.gl overlays** (`Sentinel2Overlay.tsx`,
    `AggregationOverlay.tsx`) — each owns a `MapboxOverlay`, attaches on
    `mapReady`, and **reacts to MapState** (no imperative add; visibility/opacity
@@ -43,19 +46,19 @@ here. Two overlay mechanisms:
 
 The **Layer Manager** (`LayerManager.tsx`) is generic over `MapLayer[]`, so any
 layer registered via `upsertLayer` gets visibility/opacity/reorder/remove for
-free. Namespace layer ids by kind (`buffer-`/`route-`/`isochrone-`/
-`aggregation-`) to avoid collisions.
+free. Namespace layer ids by kind (`buffer-`/`aggregation-`/`fieldMemory-`) to
+avoid collisions.
 
 ## Agent tool integration — the blessed patterns
 
 See the header of `components/assistant-ui/thread.tsx` (which predates the
-routing/aggregation client tools). Three patterns, and **do not** use the
-deprecated `makeAssistantToolUI`:
+aggregation client tool). Three patterns, and **do not** use the deprecated
+`makeAssistantToolUI`:
 
 - **A — Client tool** (`useAssistantTool` with `execute` + `render`): browser
   performs the side effect and renders inline progress/result (`FlyToTool`,
-  `BufferLayerTool`, `FeaturesInViewportTool`, `RenderDashboardTool`; plus the
-  newer `RouteLayerTool` / `IsochroneLayerTool` / `AggregationLayerTool`).
+  `BufferLayerTool`, `FeaturesInViewportTool`, `RenderDashboardTool`,
+  `AggregationLayerTool`, `FieldMemoryLayerTool`).
 - **B — LangGraph interrupt** (`useLangGraphInterruptState` +
   `useLangGraphSendCommand`): agent calls `interrupt()`, the browser renders an
   approval/render widget and resumes (`ConfirmFeatureSaveTool`,
