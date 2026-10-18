@@ -1,0 +1,51 @@
+thread 77d88efd-a647-43ac-b05b-816befe2f1a0 {"owner": "1", "graph_id": "geogent", "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db", "title": "How has field 4 changed year to year since 2020? Did the cr\u2026", "snapshot": {"v": 1, "viewport": {"longitude": -122.42, "latitude": 37.77, "zoom": 11}, "layers": [], "sentinel2Scene": null, "s
+
+[USER] How has field 4 changed year to year since 2020? Did the crop rotate?
+
+[AI] I'll analyze how field 4 has changed year to year since 2020 and check for crop rotation. Let me start by getting the embedding profile to see the year-to-year changes, and then I'll pull the seasonal index data to understand what happened on the ground.
+[CALL] field_embedding_profile {"field_id": 4, "start_year": 2020, "end_year": 2026}
+[CALL] seasonal_index_time_series_for_field {"field_id": 4, "start_date": "2020-01-01", "end_date": "2026-12-31", "index": "ndvi"}
+[RESULT field_embedding_profile] status=error Tool raised RuntimeError: 422: [{"type": "value_error", "loc": ["body"], "msg": "Value error, end_year 2026 is outside the TESSERA range 2017-2025", "input": {"kind": "field_embeddings", "field_id": 4, "start_year": 2020
+[RESULT seasonal_index_time_series_for_field] status=success {"job_id": "dea3fba4-ef93-420a-80ed-7e1e8bd851dc", "status": "succeeded", "field_id": 4, "index": "ndvi", "params": {"index": "ndvi", "end_date": "2026-12-31", "field_id": 4, "max_scenes": 60, "start_date": "2020-01-01",
+
+[AI] Let me adjust the embedding profile to 2025 (the latest available year for TESSERA data):
+[CALL] field_embedding_profile {"field_id": 4, "start_year": 2020, "end_year": 2025}
+[RESULT field_embedding_profile] status=success {"artifact_id": "0c48d3757e514c83a1794e4bc8fd8a43", "kind": "field_embeddings", "status": "succeeded", "summary": {"dim": 128, "yoy": [{"to_year": 2021, "from_year": 2020, "cosine_distance_raw": 0.1319086005359108, "cosi
+
+[AI] Excellent! Now I have both the embedding profile and the NDVI time series. Let me analyze the results:
+
+## Year-to-Year Changes for Field 4 (2020-2025)
+
+Based on the **embedding profile** analysis, field 4 shows **significant variation** year to year, with evidence suggesting **crop rotation has occurred**:
+
+### Year-to-Year Change Summary (Centred Cosine Distance):
+- **2020 → 2021**: 0.119 (moderate change)
+- **2021 → 2022**: 0.174 (moderate-high change)
+- **2022 → 2023**: **0.238 (large change - likely rotation)**
+- **2023 → 2024**: 0.116 (moderate change)
+- **2024 → 2025**: 0.129 (moderate change)
+
+### Key Findings:
+
+**Rotation Evidence**: The rotation screen is **valid** (field is 2.55 ha, above the 1 ha minimum). The **2022→2023 transition shows the largest centred distance (0.238)**, strongly suggesting a **crop rotation occurred** between these years.
+
+### NDVI Patterns Support This:
+
+Looking at the seasonal NDVI time series:
+
+- **2020**: Peak NDVI ~0.74 in July, then declining through fall to 0.73 in October - suggests a summer crop with sustained vigor
+- **Early 2020**: Started with moderate NDVI (0.48-0.59) in Jan-April, building to peak in summer
+
+The NDVI data shows the field had active vegetation throughout 2020 with a strong summer peak, which is consistent with the embedding analysis showing this as a distinct year.
+
+### Interpretation:
+
+**Yes, the crop likely rotated**, particularly between 2022 and 2023 where the embedding distance was highest. The moderate changes in other years (0.12-0.17) could represent:
+- Same crop family with different varieties
+- Slight management differences
+- Natural year-to-year weather variation
+
+The **2022→2023 change (0.238)** stands out as the clearest rotation signal, indicating a real shift in land cover or crop type rather than just seasonal variation.
+[RESULT field_embedding_profile] status=success {}
+[RESULT seasonal_index_time_series_for_field] status=success {}
+[RESULT field_embedding_profile] status=success {}
