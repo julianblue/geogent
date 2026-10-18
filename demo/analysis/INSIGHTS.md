@@ -99,3 +99,27 @@ Units: the 2024 parcel geometries, tracked over 2019–2025 and labelled each ye
 - Calendar-year embeddings: winter crops straddle two years (sown in autumn of Y−1).
 - The fixed-unit rotation analysis assumes 2024 parcel shapes hold back to 2019; units whose largest overlapping parcel covers <80% of them were dropped.
 - The TESSERA license (CC0 vs CC-BY-SA) is unresolved, so no imagery is included here.
+
+## 6. Two crop cycles in one season (2024)
+
+Ground truth comes from Sentinel-2 L2A NDVI rather than declarations (`s2_ndvi.py`, `cycles.py`):
+- 45 dates in 2024; SCL classes 4–5 count as clear; per-parcel mean NDVI.
+- A parcel-date is kept if ≥80% of its pixels are clear.
+- The series is interpolated to 5-day steps and smoothed (Savitzky–Golay).
+- 1,257 parcels have usable series.
+- Embedding probes use 2-km spatial-block cross-validation.
+
+| Definition | Share of parcels | AUC, declared crop only | AUC, embedding only |
+|---|---|---|---|
+| ≥2 NDVI peaks (≥0.5, prominence ≥0.2) anywhere in the calendar year | 38% | 0.77 | **0.97** |
+| ≥2 **complete** in-season cycles (each peaks Mar–Oct and declines before year end) | 8% | 0.72 | **0.91** |
+
+- **The loose definition is mostly *winter green after harvest*, not a second crop.** For wheat the median second "peak" is 15 Dec, at the end of the series. That is either a cover crop or next season's autumn-sown crop emerging.
+  - Within a single crop the embedding still separates it almost perfectly: durum AUC 0.995, soft wheat 0.985.
+  - So *post-harvest cover / autumn sowing* is a practice the embeddings encode very well.
+  - Telling cover crop from next season's winter crop needs the next year's declaration.
+- **The strict definition is true double cropping.**
+  - Timing patterns: spring + late summer (48), spring + summer (42), summer + autumn (12).
+  - Declared "processing vegetables, multi-cultured" parcels are 81% two-cycle, against 0–9% for every other crop. That independently validates the NDVI labelling.
+  - The embedding finds double-cropped parcels much better than the crop label does (AUC 0.91 vs 0.72). Balanced accuracy at p = 0.5 is 0.71 because of the 8% prevalence, so the threshold should be tuned.
+- **Caveat:** TESSERA is itself trained on S1/S2 time series, so this shows the 128-d vector *retains* intra-season cycle structure. The NDVI labels are not independent evidence of anything new. The practical gain is cost: one read per pixel-year instead of ~45 scenes.
