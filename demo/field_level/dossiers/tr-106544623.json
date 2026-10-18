@@ -142,7 +142,7 @@
    "year": 2020,
    "sos_doy": 161.0,
    "peak_doy": 191.0,
-   "harvest_doy": 286.0,
+   "harvest_doy": 301.0,
    "season_len_d": 115.0,
    "n_cycles": 2.0,
    "winter_cover": "n/a",
@@ -162,9 +162,9 @@
   },
   {
    "year": 2022,
-   "sos_doy": 96.0,
-   "peak_doy": 136.0,
-   "harvest_doy": 201.0,
+   "sos_doy": 95.0,
+   "peak_doy": 135.0,
+   "harvest_doy": 205.0,
    "season_len_d": 95.0,
    "n_cycles": 1.0,
    "winter_cover": "green",
@@ -173,10 +173,10 @@
   },
   {
    "year": 2023,
-   "sos_doy": 256.0,
-   "peak_doy": 271.0,
-   "harvest_doy": 291.0,
-   "season_len_d": 30.0,
+   "sos_doy": 210.0,
+   "peak_doy": 215.0,
+   "harvest_doy": 230.0,
+   "season_len_d": 20.0,
    "n_cycles": 2.0,
    "winter_cover": "n/a",
    "winter_green_kind": null,
@@ -195,9 +195,9 @@
   },
   {
    "year": 2025,
-   "sos_doy": 86.0,
-   "peak_doy": 136.0,
-   "harvest_doy": 196.0,
+   "sos_doy": 84.0,
+   "peak_doy": 119.0,
+   "harvest_doy": 194.0,
    "season_len_d": 105.0,
    "n_cycles": 1.0,
    "winter_cover": "bare",
@@ -222,7 +222,7 @@
     "crop": "SILO CORN",
     "indvi_season": 71.4,
     "pct_vs_peers": 0.73,
-    "z_peer": 0.79,
+    "z_peer": 0.45,
     "peak_ndvi_pct": 0.55,
     "peak_timing_vs_peers_z": -0.4,
     "n_peers": 11
@@ -231,36 +231,36 @@
     "year": 2022,
     "crop": "WINTER SOFT WHEAT",
     "indvi_season": 61.8,
-    "pct_vs_peers": 0.88,
-    "z_peer": 1.2,
-    "peak_ndvi_pct": 0.53,
+    "pct_vs_peers": 0.9,
+    "z_peer": 1.33,
+    "peak_ndvi_pct": 0.51,
     "peak_timing_vs_peers_z": 0.0,
     "n_peers": 101
    },
    {
     "year": 2023,
     "crop": "WINTER RAPE",
-    "indvi_season": 20.9,
+    "indvi_season": 5.1,
     "pct_vs_peers": 0.0,
-    "z_peer": -2.63,
-    "peak_ndvi_pct": 1.0,
-    "peak_timing_vs_peers_z": 16.19,
+    "z_peer": -8.89,
+    "peak_ndvi_pct": 0.0,
+    "peak_timing_vs_peers_z": 8.77,
     "n_peers": 9
    },
    {
     "year": 2025,
     "crop": "WINTER SOFT WHEAT",
-    "indvi_season": 68.5,
-    "pct_vs_peers": 0.88,
-    "z_peer": 1.36,
-    "peak_ndvi_pct": 0.6,
-    "peak_timing_vs_peers_z": -0.67,
+    "indvi_season": 68.9,
+    "pct_vs_peers": 0.8,
+    "z_peer": 0.8,
+    "peak_ndvi_pct": 0.56,
+    "peak_timing_vs_peers_z": -3.37,
     "n_peers": 106
    }
   ],
   "summary": {
    "n_years": 5,
-   "mean_pct": 0.6,
+   "mean_pct": 0.59,
    "years_bottom_quartile": 1,
    "years_top_quartile": 2,
    "caveat": "field effect is weak (A3 ICC ~0.1) and does not carry across crop changes; read single-year percentiles as season outcomes"
@@ -284,9 +284,10 @@
  "anomalies": [
   {
    "year": 2023,
-   "traj_dev_season_z": 3.82,
+   "traj_dev_season_z": 0.67,
    "emb_dev_z": 4.05,
    "events": [
+    "low_peak",
     "delayed_resown"
    ]
   }
@@ -309,5 +310,5 @@
   "anomalies": "A5 (blinded curve review; in-season score)",
   "boundary": "A6 (PRUE vs declared)"
  },
- "narrative": "Declared 2019 winter soft wheat -> 2020 silo corn -> 2022 winter soft wheat -> 2023 winter rape -> 2024 clover grass / silo corn -> 2025 winter soft wheat. Untracked years inferred from embeddings (LOYO group acc ~0.9): 2021 ~sugar beet. 4 crops in 6 declared years, cereal share 50%, longest same-crop run 1y; 0 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 2/3 seasons (2019 cover/catch, 2022 autumn-sown next crop). Season greenness vs same-crop peers within 5 km: mean percentile 0.60 over 5 years (1 bottom-quartile, 2 top-quartile); weak persistence (A3), treat as season outcomes. Within-field: a stable pattern (year-to-year rho 0.57, 5 seasons); 21% of the field is low-vigour in >=60% of seasons (chance 5.8%), concentrated N. Vigour rises toward lower ground (rho -0.81 vs rotated-DEM null 0.65, relief 6.1 m). Screen flags (unverified, ~27% in-season precision outside vegetables): 2023 delayed_resown."
+ "narrative": "Declared 2019 winter soft wheat -> 2020 silo corn -> 2022 winter soft wheat -> 2023 winter rape -> 2024 clover grass / silo corn -> 2025 winter soft wheat. Untracked years inferred from embeddings (LOYO group acc ~0.9): 2021 ~sugar beet. 4 crops in 6 declared years, cereal share 50%, longest same-crop run 1y; 0 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 2/3 seasons (2019 cover/catch, 2022 autumn-sown next crop). Season greenness vs same-crop peers within 5 km: mean percentile 0.59 over 5 years (1 bottom-quartile, 2 top-quartile); weak persistence (A3), treat as season outcomes. Within-field: a stable pattern (year-to-year rho 0.57, 5 seasons); 21% of the field is low-vigour in >=60% of seasons (chance 5.8%), concentrated N. Vigour rises toward lower ground (rho -0.81 vs rotated-DEM null 0.65, relief 6.1 m). Screen flags (unverified, ~27% in-season precision outside vegetables): 2023 low_peak, delayed_resown."
 }

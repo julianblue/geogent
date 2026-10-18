@@ -53,7 +53,8 @@ F["ev_low_peak"] = ar & (F.peak_ndvi_zpeer <= -3)
 F["ev_delayed_resown"] = ar & (F.peak_doy_zpeer >= 3) & ((F.peak_doy - (F.peak_doy - 0)).notna())
 pk = F.groupby(["year", "hcat"]).peak_doy.transform("median")
 F["ev_delayed_resown"] = ar & (F.peak_doy_zpeer >= 3) & (F.peak_doy - pk >= 25)
-F["ev_no_harvest"] = ar & F.peak_ndvi.notna() & F.harvest_doy.isna()
+# no main-crop cycle inside the declared crop's window (cycles_ts.py), else no harvest drop after it
+F["ev_no_harvest"] = ar & F.peak_ndvi.notna() & ((F.main_cycle_found == False) | F.harvest_doy.isna()) if "main_cycle_found" in F else ar & F.peak_ndvi.notna() & F.harvest_doy.isna()  # noqa: E712
 F.to_csv(f"{D}/{name}/anomaly.csv", index=False)
 R = dict(n_scored=int(F.anomaly.notna().sum()), top2pct_threshold=round(float(F.anomaly.quantile(.98)), 2),
          spearman_traj_vs_emb=round(F[["traj_dev", "emb_dev"]].corr("spearman").iloc[0, 1], 3),

@@ -1,6 +1,7 @@
 """Declared parcels (FTW harmonized, every year) + FTW model-predicted boundaries for a window.
 
 usage: python labels.py <window> <outdir>  ->  <outdir>/<window>/parcels_utm.json, predicted_utm.json
+       python labels.py <window> <outdir> 2015 2016 ...  ->  parcels_utm_hist.json (those years only)
 Geometries are reprojected to the window's UTM; bbox pruning runs in each file's own CRS."""
 
 import json
@@ -18,6 +19,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from windows import FTW_YEARS, PRED_COUNTRY, WINDOWS  # noqa: E402
 
 name, out = sys.argv[1], sys.argv[2]
+HIST = [int(y) for y in sys.argv[3:]]
 W = WINDOWS[name]
 os.makedirs(f"{out}/{name}", exist_ok=True)
 con = duckdb.connect()
@@ -50,11 +52,13 @@ def fetch(url, cols, full_inside=True):
 
 cc = W["cc"]
 P = {}
-for y in FTW_YEARS[cc]:
+for y in HIST or FTW_YEARS[cc]:
     rows = fetch(f"{BASE}/harmonized-field-data/{cc}/year={y}/{cc}-{y}.parquet", 'id, "crop:name", "hcat:name_en", "hcat:code"')
     P[y] = [dict(id=str(r[0]), crop=r[1], hcat=r[2], hcat_code=r[3], wkt=g.wkt, ha=g.area / 1e4) for r, g in rows if g.is_valid or g.buffer(0).is_valid]
     print(name, y, len(P[y]), "parcels", round(sum(f["ha"] for f in P[y])), "ha", flush=True)
-json.dump(P, open(f"{out}/{name}/parcels_utm.json", "w"))
+json.dump(P, open(f"{out}/{name}/parcels_utm{'_hist' if HIST else ''}.json", "w"))
+if HIST:
+    sys.exit(0)
 
 u = f"{BASE}/global-data/predictions/vectors/alpha/results-by-admin-conf/admin:country_code={PRED_COUNTRY[cc]}.parquet"
 rows = fetch(u, 'id, confidence, "determination:datetime"')

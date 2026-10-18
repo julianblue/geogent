@@ -1,0 +1,97 @@
+{
+ "n": 405,
+ "by_class": {
+  "cereal": {
+   "n": 207,
+   "z_greenness": [
+    -0.416,
+    -0.602,
+    -0.242
+   ],
+   "z_peak": [
+    -0.69,
+    -0.934,
+    -0.453
+   ]
+  },
+  "early non-cereal": {
+   "n": 131,
+   "z_greenness": [
+    0.518,
+    0.378,
+    0.657
+   ],
+   "z_peak": [
+    0.083,
+    -0.085,
+    0.239
+   ]
+  },
+  "late row crop": {
+   "n": 67,
+   "z_greenness": [
+    -0.514,
+    -0.88,
+    -0.135
+   ],
+   "z_peak": [
+    -0.689,
+    -1.075,
+    -0.332
+   ]
+  }
+ },
+ "late_rowcrop_harvest_doy_vs_z": {
+  "n": 67,
+  "spearman": -0.295,
+  "p": 0.015510128754273506,
+  "harvest_doy_iqr": [
+   266.0,
+   290.0
+  ]
+ },
+ "by_year": [
+  {
+   "year": 2020,
+   "p_winter": 203.3,
+   "p_winter_pct": 0.66,
+   "late_minus_early": -1.078,
+   "n_late": 16,
+   "n_early": 31
+  },
+  {
+   "year": 2021,
+   "p_winter": 183.8,
+   "p_winter_pct": 0.55,
+   "late_minus_early": -2.095,
+   "n_late": 10,
+   "n_early": 29
+  },
+  {
+   "year": 2022,
+   "p_winter": 202.1,
+   "p_winter_pct": 0.66,
+   "late_minus_early": -1.583,
+   "n_late": 19,
+   "n_early": 37
+  },
+  {
+   "year": 2023,
+   "p_winter": 188.0,
+   "p_winter_pct": 0.62,
+   "late_minus_early": -0.118,
+   "n_late": 22,
+   "n_early": 34
+  }
+ ],
+ "late_penalty_vs_winter_precip": {
+  "n_years": 4,
+  "spearman": 0.4
+ },
+ "top_preceding_late": {
+  "Silage maize (as staple feed)": 25,
+  "Corn (biogas)": 18,
+  "Sugar beet": 12,
+  "Corn without silage maize": 10
+ }
+}

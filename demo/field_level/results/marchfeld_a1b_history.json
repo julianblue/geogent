@@ -1,0 +1,42 @@
+{
+ "history_years": [
+  2015,
+  2016,
+  2017,
+  2018,
+  2019,
+  2020,
+  2021,
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "tessera_hist_years": [
+  2018
+ ],
+ "rotation_holdout_2018_2019": {
+  "n": 876,
+  "changed": 0.771,
+  "auc": 0.943,
+  "precision": 0.953,
+  "recall": 0.902
+ },
+ "group_holdout_2018": {
+  "n": 936,
+  "acc": 0.908,
+  "majority": 0.348
+ },
+ "profiles_full_vs_recent": {
+  "n_units": 788,
+  "years_full": 11,
+  "monoculture_run_ge3_full": 0.08,
+  "monoculture_run_ge3_recent": 0.058,
+  "run_longer_in_full": 0.133,
+  "cereal_share_abs_diff_median": 0.056,
+  "cereal_ge_0_6_full": 0.127,
+  "cereal_ge_0_6_recent": 0.103,
+  "n_crops_median_full": 6.0,
+  "n_crops_median_recent": 5.0
+ }
+}

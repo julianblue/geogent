@@ -120,10 +120,10 @@
   },
   {
    "year": 2020,
-   "sos_doy": 111.0,
+   "sos_doy": -34.0,
    "peak_doy": 141.0,
    "harvest_doy": 201.0,
-   "season_len_d": 65.0,
+   "season_len_d": 210.0,
    "n_cycles": 1.0,
    "winter_cover": "green",
    "winter_green_kind": "autumn-sown next crop",
@@ -131,13 +131,13 @@
   },
   {
    "year": 2021,
-   "sos_doy": 236.0,
-   "peak_doy": 286.0,
-   "harvest_doy": null,
-   "season_len_d": 65.0,
+   "sos_doy": 100.0,
+   "peak_doy": 150.0,
+   "harvest_doy": 180.0,
+   "season_len_d": 75.0,
    "n_cycles": 1.0,
-   "winter_cover": "n/a",
-   "winter_green_kind": null,
+   "winter_cover": "green",
+   "winter_green_kind": "cover/catch",
    "bare_soil_days": 15.0
   },
   {
@@ -178,21 +178,21 @@
    {
     "year": 2020,
     "crop": "Winter soft wheat",
-    "indvi_season": 41.1,
-    "pct_vs_peers": 0.06,
-    "z_peer": -1.42,
-    "peak_ndvi_pct": 0.4,
+    "indvi_season": 95.3,
+    "pct_vs_peers": 0.6,
+    "z_peer": 0.29,
+    "peak_ndvi_pct": 0.41,
     "peak_timing_vs_peers_z": 0.67,
     "n_peers": 77
    },
    {
     "year": 2021,
     "crop": "Winter barley",
-    "indvi_season": 33.8,
-    "pct_vs_peers": 0.09,
-    "z_peer": -2.53,
+    "indvi_season": 33.3,
+    "pct_vs_peers": 0.0,
+    "z_peer": -8.42,
     "peak_ndvi_pct": 0.0,
-    "peak_timing_vs_peers_z": 34.37,
+    "peak_timing_vs_peers_z": 0.0,
     "n_peers": 35
    },
    {
@@ -218,8 +218,8 @@
   ],
   "summary": {
    "n_years": 5,
-   "mean_pct": 0.24,
-   "years_bottom_quartile": 3,
+   "mean_pct": 0.33,
+   "years_bottom_quartile": 2,
    "years_top_quartile": 0,
    "caveat": "field effect is weak (A3 ICC ~0.1) and does not carry across crop changes; read single-year percentiles as season outcomes"
   }
@@ -228,18 +228,16 @@
  "anomalies": [
   {
    "year": 2019,
-   "traj_dev_season_z": 7.8,
+   "traj_dev_season_z": 7.33,
    "emb_dev_z": 2.18,
    "events": []
   },
   {
    "year": 2021,
-   "traj_dev_season_z": 9.82,
+   "traj_dev_season_z": 7.39,
    "emb_dev_z": 2.49,
    "events": [
-    "low_peak",
-    "delayed_resown",
-    "no_harvest"
+    "low_peak"
    ]
   }
  ],
@@ -261,5 +259,5 @@
   "anomalies": "A5 (blinded curve review; in-season score)",
   "boundary": "A6 (PRUE vs declared)"
  },
- "narrative": "Declared 2019 winter soft wheat -> 2020 winter soft wheat -> 2021 winter barley -> 2022 arable land withdrawn from production (self-greening)/al taken from generation -> 2023 arable land withdrawn from production (self-greening)/al taken from generation. 3 crops in 5 declared years, cereal share 60%, longest same-crop run 2y; 3 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 2/2 seasons (2019 autumn-sown next crop, 2020 autumn-sown next crop). Season greenness vs same-crop peers within 5 km: mean percentile 0.24 over 5 years (3 bottom-quartile, 0 top-quartile); weak persistence (A3), treat as season outcomes. Screen flags (unverified, ~27% in-season precision outside vegetables): 2019 off-peer trajectory; 2021 low_peak, delayed_resown, no_harvest."
+ "narrative": "Declared 2019 winter soft wheat -> 2020 winter soft wheat -> 2021 winter barley -> 2022 arable land withdrawn from production (self-greening)/al taken from generation -> 2023 arable land withdrawn from production (self-greening)/al taken from generation. 3 crops in 5 declared years, cereal share 60%, longest same-crop run 2y; 3 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 3/3 seasons (2019 autumn-sown next crop, 2020 autumn-sown next crop, 2021 cover/catch). Season greenness vs same-crop peers within 5 km: mean percentile 0.33 over 5 years (2 bottom-quartile, 0 top-quartile); weak persistence (A3), treat as season outcomes. Screen flags (unverified, ~27% in-season precision outside vegetables): 2019 off-peer trajectory; 2021 low_peak."
 }

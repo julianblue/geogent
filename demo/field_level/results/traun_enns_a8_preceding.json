@@ -1,0 +1,113 @@
+{
+ "n": 2063,
+ "by_class": {
+  "cereal": {
+   "n": 295,
+   "z_greenness": [
+    -0.154,
+    -0.297,
+    -0.007
+   ],
+   "z_peak": [
+    -0.438,
+    -0.614,
+    -0.269
+   ]
+  },
+  "early non-cereal": {
+   "n": 293,
+   "z_greenness": [
+    0.626,
+    0.475,
+    0.768
+   ],
+   "z_peak": [
+    -0.011,
+    -0.17,
+    0.136
+   ]
+  },
+  "late row crop": {
+   "n": 1475,
+   "z_greenness": [
+    -0.034,
+    -0.087,
+    0.022
+   ],
+   "z_peak": [
+    -0.313,
+    -0.38,
+    -0.247
+   ]
+  }
+ },
+ "late_rowcrop_harvest_doy_vs_z": {
+  "n": 1475,
+  "spearman": -0.306,
+  "p": 2.8615810152792757e-33,
+  "harvest_doy_iqr": [
+   271.0,
+   301.0
+  ]
+ },
+ "by_year": [
+  {
+   "year": 2020,
+   "p_winter": 257.2,
+   "p_winter_pct": 0.14,
+   "late_minus_early": -0.594,
+   "n_late": 250,
+   "n_early": 33
+  },
+  {
+   "year": 2021,
+   "p_winter": 219.9,
+   "p_winter_pct": 0.1,
+   "late_minus_early": -0.761,
+   "n_late": 259,
+   "n_early": 33
+  },
+  {
+   "year": 2022,
+   "p_winter": 219.7,
+   "p_winter_pct": 0.1,
+   "late_minus_early": -0.814,
+   "n_late": 289,
+   "n_early": 17
+  },
+  {
+   "year": 2023,
+   "p_winter": 271.3,
+   "p_winter_pct": 0.17,
+   "late_minus_early": -0.575,
+   "n_late": 223,
+   "n_early": 53
+  },
+  {
+   "year": 2024,
+   "p_winter": 389.3,
+   "p_winter_pct": 0.76,
+   "late_minus_early": -1.037,
+   "n_late": 335,
+   "n_early": 21
+  },
+  {
+   "year": 2025,
+   "p_winter": 222.5,
+   "p_winter_pct": 0.1,
+   "late_minus_early": -0.644,
+   "n_late": 119,
+   "n_early": 136
+  }
+ ],
+ "late_penalty_vs_winter_precip": {
+  "n_years": 6,
+  "spearman": 0.143
+ },
+ "top_preceding_late": {
+  "GRAIN CORN": 453,
+  "SOYBEANS": 410,
+  "SUGAR BEET": 380,
+  "SEED CORN PROPAGATION": 85
+ }
+}

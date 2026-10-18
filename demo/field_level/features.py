@@ -22,6 +22,8 @@ from common import group  # noqa: E402
 name, D = sys.argv[1], sys.argv[2]
 U = json.load(open(f"{D}/{name}/units.json"))
 PH = json.load(open(f"{D}/{name}/pheno.json"))
+CY = json.load(open(f"{D}/{name}/cycles.json")) if os.path.exists(f"{D}/{name}/cycles.json") else {}
+CROP_AWARE = ("peak_ndvi", "peak_doy", "sos", "eos", "harvest_doy", "indvi_season")
 T = np.load(f"{D}/{name}/tessera_units.npz")
 years = U["years"]
 units = U["units"]
@@ -40,6 +42,17 @@ for yi, y in enumerate(years):
             r["emb_yoy_centred"] = float(1 - a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
         if ph:
             r.update({k: v for k, v in ph.items() if k not in ("ndvi_smooth", "cycle_peaks")})
+            # crop-aware main-cycle metrics (cycles_ts.py) replace the naive year-max ones; naive kept as *_naive
+            cy = CY.get(str(y), [None] * len(units))[i]
+            if cy is not None:
+                for k in CROP_AWARE:
+                    r[f"{k}_naive"] = r.get(k)
+                r["main_cycle_found"] = cy["main_found"] or cy.get("main_kind") == "weak"
+                r["n_cover_cycles"] = cy["n_cover_cycles"]
+                if "peak_ndvi" in cy:
+                    r.update({k: cy[k] for k in CROP_AWARE})
+                    r["season_len"] = cy["eos"] - cy["sos"]
+                    r["pre_cover"] = cy["pre_cover"]
         rows.append(r)
 F = pd.DataFrame(rows)
 F["ui"] = np.tile(np.arange(len(units)), len(years))

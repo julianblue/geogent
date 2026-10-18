@@ -1,0 +1,46 @@
+{
+ "by_year": [
+  {
+   "year": 2019,
+   "n_units": 178,
+   "mean_rho_tpi": -0.207,
+   "share_neg": 0.758,
+   "cwb_aprjun": -197.7,
+   "cwb_pct": 0.48
+  },
+  {
+   "year": 2020,
+   "n_units": 165,
+   "mean_rho_tpi": -0.159,
+   "share_neg": 0.745,
+   "cwb_aprjun": -262.6,
+   "cwb_pct": 0.03
+  },
+  {
+   "year": 2021,
+   "n_units": 170,
+   "mean_rho_tpi": -0.084,
+   "share_neg": 0.635,
+   "cwb_aprjun": -88.2,
+   "cwb_pct": 0.93
+  },
+  {
+   "year": 2022,
+   "n_units": 178,
+   "mean_rho_tpi": -0.207,
+   "share_neg": 0.764,
+   "cwb_aprjun": -258.8,
+   "cwb_pct": 0.1
+  },
+  {
+   "year": 2023,
+   "n_units": 185,
+   "mean_rho_tpi": -0.19,
+   "share_neg": 0.768,
+   "cwb_aprjun": -181.9,
+   "cwb_pct": 0.62
+  }
+ ],
+ "spearman_rho_vs_cwb": 0.359,
+ "n_years": 5
+}

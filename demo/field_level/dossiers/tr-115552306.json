@@ -149,10 +149,10 @@
   },
   {
    "year": 2021,
-   "sos_doy": 106.0,
-   "peak_doy": 161.0,
-   "harvest_doy": 201.0,
-   "season_len_d": 85.0,
+   "sos_doy": 95.0,
+   "peak_doy": 160.0,
+   "harvest_doy": 200.0,
+   "season_len_d": 95.0,
    "n_cycles": 1.0,
    "winter_cover": "bare",
    "winter_green_kind": null,
@@ -160,9 +160,9 @@
   },
   {
    "year": 2022,
-   "sos_doy": 161.0,
-   "peak_doy": 206.0,
-   "harvest_doy": 236.0,
+   "sos_doy": 160.0,
+   "peak_doy": 205.0,
+   "harvest_doy": 240.0,
    "season_len_d": 70.0,
    "n_cycles": 1.0,
    "winter_cover": "ambiguous",
@@ -171,10 +171,10 @@
   },
   {
    "year": 2023,
-   "sos_doy": 116.0,
-   "peak_doy": 146.0,
-   "harvest_doy": 191.0,
-   "season_len_d": 65.0,
+   "sos_doy": 110.0,
+   "peak_doy": 145.0,
+   "harvest_doy": 195.0,
+   "season_len_d": 75.0,
    "n_cycles": 1.0,
    "winter_cover": "green",
    "winter_green_kind": "autumn-sown next crop",
@@ -182,10 +182,10 @@
   },
   {
    "year": 2024,
-   "sos_doy": 86.0,
-   "peak_doy": 106.0,
-   "harvest_doy": 171.0,
-   "season_len_d": 70.0,
+   "sos_doy": 20.0,
+   "peak_doy": 105.0,
+   "harvest_doy": 175.0,
+   "season_len_d": 135.0,
    "n_cycles": 1.0,
    "winter_cover": "green",
    "winter_green_kind": "cover/catch",
@@ -193,12 +193,12 @@
   },
   {
    "year": 2025,
-   "sos_doy": 171.0,
-   "peak_doy": 226.0,
-   "harvest_doy": 251.0,
+   "sos_doy": 169.0,
+   "peak_doy": 229.0,
+   "harvest_doy": 249.0,
    "season_len_d": 75.0,
    "n_cycles": 1.0,
-   "winter_cover": "n/a",
+   "winter_cover": "bare",
    "winter_green_kind": null,
    "bare_soil_days": 150.0
   }
@@ -209,10 +209,10 @@
     "year": 2019,
     "crop": "WINTER BARLEY",
     "indvi_season": 45.4,
-    "pct_vs_peers": 0.11,
-    "z_peer": -1.21,
-    "peak_ndvi_pct": 0.11,
-    "peak_timing_vs_peers_z": 0.88,
+    "pct_vs_peers": 0.03,
+    "z_peer": -1.35,
+    "peak_ndvi_pct": 0.14,
+    "peak_timing_vs_peers_z": 2.49,
     "n_peers": 35
    },
    {
@@ -220,7 +220,7 @@
     "crop": "SUGAR BEET",
     "indvi_season": 64.4,
     "pct_vs_peers": 0.0,
-    "z_peer": -1.93,
+    "z_peer": -2.02,
     "peak_ndvi_pct": 0.09,
     "peak_timing_vs_peers_z": 4.72,
     "n_peers": 37
@@ -228,58 +228,58 @@
    {
     "year": 2021,
     "crop": "WINTER SOFT WHEAT",
-    "indvi_season": 50.7,
-    "pct_vs_peers": 0.23,
-    "z_peer": -0.9,
-    "peak_ndvi_pct": 0.28,
-    "peak_timing_vs_peers_z": 0.94,
+    "indvi_season": 54.3,
+    "pct_vs_peers": 0.22,
+    "z_peer": -0.86,
+    "peak_ndvi_pct": 0.35,
+    "peak_timing_vs_peers_z": 1.01,
     "n_peers": 110
    },
    {
     "year": 2022,
     "crop": "SOYBEANS",
-    "indvi_season": 42.8,
-    "pct_vs_peers": 0.08,
-    "z_peer": -1.0,
-    "peak_ndvi_pct": 0.55,
-    "peak_timing_vs_peers_z": 2.02,
+    "indvi_season": 43.0,
+    "pct_vs_peers": 0.09,
+    "z_peer": -0.97,
+    "peak_ndvi_pct": 0.8,
+    "peak_timing_vs_peers_z": 1.38,
     "n_peers": 44
    },
    {
     "year": 2023,
     "crop": "WINTER SOFT WHEAT",
-    "indvi_season": 38.3,
-    "pct_vs_peers": 0.08,
-    "z_peer": -1.31,
-    "peak_ndvi_pct": 0.05,
-    "peak_timing_vs_peers_z": -0.45,
+    "indvi_season": 40.9,
+    "pct_vs_peers": 0.05,
+    "z_peer": -1.59,
+    "peak_ndvi_pct": 0.1,
+    "peak_timing_vs_peers_z": -1.01,
     "n_peers": 102
    },
    {
     "year": 2024,
     "crop": "WINTER BARLEY",
-    "indvi_season": 45.3,
-    "pct_vs_peers": 0.07,
-    "z_peer": -2.91,
+    "indvi_season": 70.7,
+    "pct_vs_peers": 0.63,
+    "z_peer": 1.05,
     "peak_ndvi_pct": 0.33,
-    "peak_timing_vs_peers_z": -1.35,
+    "peak_timing_vs_peers_z": -0.49,
     "n_peers": 30
    },
    {
     "year": 2025,
     "crop": "SUGAR BEET",
-    "indvi_season": 39.5,
+    "indvi_season": 39.0,
     "pct_vs_peers": 0.0,
-    "z_peer": -5.95,
-    "peak_ndvi_pct": 0.06,
-    "peak_timing_vs_peers_z": 2.02,
+    "z_peer": -5.83,
+    "peak_ndvi_pct": 0.02,
+    "peak_timing_vs_peers_z": 1.01,
     "n_peers": 49
    }
   ],
   "summary": {
    "n_years": 7,
-   "mean_pct": 0.08,
-   "years_bottom_quartile": 7,
+   "mean_pct": 0.15,
+   "years_bottom_quartile": 6,
    "years_top_quartile": 0,
    "caveat": "field effect is weak (A3 ICC ~0.1) and does not carry across crop changes; read single-year percentiles as season outcomes"
   }
@@ -316,9 +316,11 @@
   },
   {
    "year": 2025,
-   "traj_dev_season_z": 4.77,
+   "traj_dev_season_z": 5.43,
    "emb_dev_z": 3.39,
-   "events": []
+   "events": [
+    "low_peak"
+   ]
   }
  ],
  "boundary": {
@@ -339,5 +341,5 @@
   "anomalies": "A5 (blinded curve review; in-season score)",
   "boundary": "A6 (PRUE vs declared)"
  },
- "narrative": "Declared 2019 winter barley -> 2020 sugar beet -> 2021 winter soft wheat -> 2022 soybeans -> 2023 winter soft wheat -> 2024 winter barley -> 2025 sugar beet. 4 crops in 7 declared years, cereal share 57%, longest same-crop run 1y; 0 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 3/4 seasons (2019 cover/catch, 2023 autumn-sown next crop, 2024 cover/catch). Season greenness vs same-crop peers within 5 km: mean percentile 0.08 over 7 years (7 bottom-quartile, 0 top-quartile); weak persistence (A3), treat as season outcomes. Within-field: a stable pattern (year-to-year rho 0.34, 7 seasons); 4% of the field is low-vigour in >=60% of seasons (chance 0.5%), concentrated NW. Screen flags (unverified, ~27% in-season precision outside vegetables): 2019 off-peer trajectory; 2020 delayed_resown; 2025 off-peer trajectory."
+ "narrative": "Declared 2019 winter barley -> 2020 sugar beet -> 2021 winter soft wheat -> 2022 soybeans -> 2023 winter soft wheat -> 2024 winter barley -> 2025 sugar beet. 4 crops in 7 declared years, cereal share 57%, longest same-crop run 1y; 0 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 3/5 seasons (2019 cover/catch, 2023 autumn-sown next crop, 2024 cover/catch). Season greenness vs same-crop peers within 5 km: mean percentile 0.15 over 7 years (6 bottom-quartile, 0 top-quartile); weak persistence (A3), treat as season outcomes. Within-field: a stable pattern (year-to-year rho 0.34, 7 seasons); 4% of the field is low-vigour in >=60% of seasons (chance 0.5%), concentrated NW. Screen flags (unverified, ~27% in-season precision outside vegetables): 2019 off-peer trajectory; 2020 delayed_resown; 2025 low_peak."
 }

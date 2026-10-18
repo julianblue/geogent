@@ -2,51 +2,51 @@
  "indvi_season_zpeer": {
   "n_units": 927,
   "n_unit_years": 5373,
-  "icc": 0.108,
+  "icc": 0.112,
   "icc_null_p95": 0.015,
-  "yoy_spearman_median": 0.07,
-  "loyo_spearman_median": 0.192,
-  "bottom_quartile_recurrence": 0.325,
+  "yoy_spearman_median": 0.065,
+  "loyo_spearman_median": 0.199,
+  "bottom_quartile_recurrence": 0.329,
   "chance": 0.25,
-  "nearest_neighbour_same_year_spearman": 0.155
+  "nearest_neighbour_same_year_spearman": 0.144
  },
  "peak_ndvi_zpeer": {
   "n_units": 927,
   "n_unit_years": 5373,
-  "icc": 0.164,
-  "icc_null_p95": 0.013,
-  "yoy_spearman_median": 0.114,
-  "loyo_spearman_median": 0.246,
-  "bottom_quartile_recurrence": 0.392,
+  "icc": 0.157,
+  "icc_null_p95": 0.014,
+  "yoy_spearman_median": 0.118,
+  "loyo_spearman_median": 0.238,
+  "bottom_quartile_recurrence": 0.394,
   "chance": 0.25,
   "nearest_neighbour_same_year_spearman": 0.146
  },
  "peak_doy_zpeer": {
   "n_units": 927,
   "n_unit_years": 5373,
-  "icc": 0.052,
-  "icc_null_p95": 0.013,
-  "yoy_spearman_median": 0.075,
-  "loyo_spearman_median": 0.117,
-  "bottom_quartile_recurrence": 0.381,
+  "icc": 0.076,
+  "icc_null_p95": 0.014,
+  "yoy_spearman_median": 0.096,
+  "loyo_spearman_median": 0.164,
+  "bottom_quartile_recurrence": 0.394,
   "chance": 0.25,
-  "nearest_neighbour_same_year_spearman": 0.174
+  "nearest_neighbour_same_year_spearman": 0.148
  },
  "harvest_doy_zpeer": {
-  "n_units": 915,
-  "n_unit_years": 5198,
-  "icc": 0.051,
+  "n_units": 924,
+  "n_unit_years": 5312,
+  "icc": 0.086,
   "icc_null_p95": 0.014,
-  "yoy_spearman_median": 0.117,
-  "loyo_spearman_median": 0.114,
-  "bottom_quartile_recurrence": 0.333,
+  "yoy_spearman_median": 0.088,
+  "loyo_spearman_median": 0.17,
+  "bottom_quartile_recurrence": 0.337,
   "chance": 0.25,
-  "nearest_neighbour_same_year_spearman": 0.2
+  "nearest_neighbour_same_year_spearman": 0.165
  },
  "indvi_persistence_across_crop_change": {
   "n_changed": 3548,
-  "spearman_changed": 0.026,
+  "spearman_changed": 0.024,
   "n_same": 1177,
-  "spearman_same": 0.262
+  "spearman_same": 0.261
  }
 }

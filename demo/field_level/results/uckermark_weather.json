@@ -1,0 +1,194 @@
+{
+ "source": "DWD station 01869 Gruenow (daily KL)",
+ "normal": "1992-2020 (29 seasons)",
+ "years": {
+  "2019": {
+   "p_winter": 151.6,
+   "p_autumn_prev": 43.4,
+   "p_aprjun": 158.8,
+   "cwb_aprjun": -197.7,
+   "p_julsep": 103.9,
+   "cwb_julsep": -231.0,
+   "gdd_marOct": 2231.1,
+   "heat_days": 18.0,
+   "dry_spell_aprjun": 22.0,
+   "frost_marapr": 0.0
+  },
+  "2020": {
+   "p_winter": 203.3,
+   "p_autumn_prev": 135.6,
+   "p_aprjun": 68.2,
+   "cwb_aprjun": -262.6,
+   "p_julsep": 121.5,
+   "cwb_julsep": -222.1,
+   "gdd_marOct": 2044.3,
+   "heat_days": 13.0,
+   "dry_spell_aprjun": 27.0,
+   "frost_marapr": 1.0
+  },
+  "2021": {
+   "p_winter": 183.8,
+   "p_autumn_prev": 112.3,
+   "p_aprjun": 230.9,
+   "cwb_aprjun": -88.2,
+   "p_julsep": 193.1,
+   "cwb_julsep": -116.0,
+   "gdd_marOct": 2027.7,
+   "heat_days": 10.0,
+   "dry_spell_aprjun": 22.0,
+   "frost_marapr": 2.0
+  },
+  "2022": {
+   "p_winter": 202.1,
+   "p_autumn_prev": 123.9,
+   "p_aprjun": 74.4,
+   "cwb_aprjun": -258.8,
+   "p_julsep": 115.7,
+   "cwb_julsep": -215.7,
+   "gdd_marOct": 2192.1,
+   "heat_days": 15.0,
+   "dry_spell_aprjun": 19.0,
+   "frost_marapr": 0.0
+  },
+  "2023": {
+   "p_winter": 188.0,
+   "p_autumn_prev": 83.5,
+   "p_aprjun": 148.2,
+   "cwb_aprjun": -181.9,
+   "p_julsep": 126.8,
+   "cwb_julsep": -226.8,
+   "gdd_marOct": 2215.0,
+   "heat_days": 6.0,
+   "dry_spell_aprjun": 34.0,
+   "frost_marapr": 0.0
+  },
+  "2024": {
+   "p_winter": 257.6,
+   "p_autumn_prev": 108.2,
+   "p_aprjun": 125.5,
+   "cwb_aprjun": -214.0,
+   "p_julsep": 151.1,
+   "cwb_julsep": -192.0,
+   "gdd_marOct": 2419.8,
+   "heat_days": 9.0,
+   "dry_spell_aprjun": 15.0,
+   "frost_marapr": 0.0
+  },
+  "2025": {
+   "p_winter": 179.8,
+   "p_autumn_prev": 106.1,
+   "p_aprjun": 85.0,
+   "cwb_aprjun": -254.7,
+   "p_julsep": 210.9,
+   "cwb_julsep": -91.4,
+   "gdd_marOct": 2119.0,
+   "heat_days": 8.0,
+   "dry_spell_aprjun": 17.0,
+   "frost_marapr": 0.0
+  }
+ },
+ "normal_median": {
+  "p_winter": 178.4,
+  "p_autumn_prev": 117.3,
+  "p_aprjun": 119.5,
+  "cwb_aprjun": -197.7,
+  "p_julsep": 162.3,
+  "cwb_julsep": -167.5,
+  "gdd_marOct": 1990.9,
+  "heat_days": 8.0,
+  "dry_spell_aprjun": 18.0,
+  "frost_marapr": 1.0
+ },
+ "percentile_vs_normal": {
+  "p_winter": {
+   "2019": 0.24,
+   "2020": 0.66,
+   "2021": 0.55,
+   "2022": 0.66,
+   "2023": 0.62,
+   "2024": 0.97,
+   "2025": 0.52
+  },
+  "p_autumn_prev": {
+   "2019": 0.03,
+   "2020": 0.79,
+   "2021": 0.48,
+   "2022": 0.59,
+   "2023": 0.28,
+   "2024": 0.45,
+   "2025": 0.45
+  },
+  "p_aprjun": {
+   "2019": 0.79,
+   "2020": 0.03,
+   "2021": 1.0,
+   "2022": 0.1,
+   "2023": 0.76,
+   "2024": 0.55,
+   "2025": 0.21
+  },
+  "cwb_aprjun": {
+   "2019": 0.48,
+   "2020": 0.03,
+   "2021": 0.93,
+   "2022": 0.1,
+   "2023": 0.62,
+   "2024": 0.31,
+   "2025": 0.1
+  },
+  "p_julsep": {
+   "2019": 0.17,
+   "2020": 0.28,
+   "2021": 0.76,
+   "2022": 0.24,
+   "2023": 0.38,
+   "2024": 0.48,
+   "2025": 0.86
+  },
+  "cwb_julsep": {
+   "2019": 0.1,
+   "2020": 0.21,
+   "2021": 0.72,
+   "2022": 0.24,
+   "2023": 0.14,
+   "2024": 0.28,
+   "2025": 0.79
+  },
+  "gdd_marOct": {
+   "2019": 0.9,
+   "2020": 0.62,
+   "2021": 0.62,
+   "2022": 0.9,
+   "2023": 0.9,
+   "2024": 1.0,
+   "2025": 0.86
+  },
+  "heat_days": {
+   "2019": 0.9,
+   "2020": 0.76,
+   "2021": 0.66,
+   "2022": 0.86,
+   "2023": 0.34,
+   "2024": 0.55,
+   "2025": 0.41
+  },
+  "dry_spell_aprjun": {
+   "2019": 0.62,
+   "2020": 0.83,
+   "2021": 0.62,
+   "2022": 0.52,
+   "2023": 0.97,
+   "2024": 0.31,
+   "2025": 0.38
+  },
+  "frost_marapr": {
+   "2019": 0.0,
+   "2020": 0.45,
+   "2021": 0.59,
+   "2022": 0.0,
+   "2023": 0.0,
+   "2024": 0.0,
+   "2025": 0.0
+  }
+ }
+}

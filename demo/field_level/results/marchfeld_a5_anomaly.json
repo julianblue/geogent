@@ -3,37 +3,37 @@
  "top2pct_threshold": 4.42,
  "spearman_traj_vs_emb": 0.468,
  "event_counts": {
-  "ev_low_peak": 242,
-  "ev_delayed_resown": 218,
-  "ev_no_harvest": 179
+  "ev_low_peak": 254,
+  "ev_delayed_resown": 104,
+  "ev_no_harvest": 90
  },
  "event_rate_arable": {
-  "ev_low_peak": 0.0393,
-  "ev_delayed_resown": 0.0354,
-  "ev_no_harvest": 0.0291
+  "ev_low_peak": 0.0413,
+  "ev_delayed_resown": 0.0169,
+  "ev_no_harvest": 0.0146
  },
  "validation_without_harvest": {
   "n_without": 30,
   "n_with": 841,
   "auc_traj_dev": 0.551,
-  "auc_no_harvest_rule": 0.537,
-  "auc_peak_ndvi_low": 0.685,
-  "no_harvest_rule_rate_without": 0.167,
-  "no_harvest_rule_rate_with": 0.093
+  "auc_no_harvest_rule": 0.488,
+  "auc_peak_ndvi_low": 0.67,
+  "no_harvest_rule_rate_without": 0.033,
+  "no_harvest_rule_rate_with": 0.058
  },
  "event_rule_auc_traj_dev": {
-  "ev_low_peak": 0.643,
-  "ev_delayed_resown": 0.78,
-  "ev_no_harvest": 0.644
+  "ev_low_peak": 0.684,
+  "ev_delayed_resown": 0.746,
+  "ev_no_harvest": 0.427
  },
  "event_rule_auc_traj_dev_season": {
-  "ev_low_peak": 0.755,
-  "ev_delayed_resown": 0.7,
-  "ev_no_harvest": 0.604
+  "ev_low_peak": 0.765,
+  "ev_delayed_resown": 0.786,
+  "ev_no_harvest": 0.455
  },
  "event_rule_auc_emb_dev": {
-  "ev_low_peak": 0.702,
-  "ev_delayed_resown": 0.627,
-  "ev_no_harvest": 0.602
+  "ev_low_peak": 0.708,
+  "ev_delayed_resown": 0.622,
+  "ev_no_harvest": 0.508
  }
 }

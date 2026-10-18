@@ -21,13 +21,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 from windows import WINDOWS  # noqa: E402
 
 name, D = sys.argv[1], sys.argv[2]
+HIST = [int(y) for y in sys.argv[3:]]  # e.g. 2017 2018 -> tessera_units_hist.npz, no pixel dumps
 W = WINDOWS[name]
 U = json.load(open(f"{D}/{name}/units.json"))
 geoms = [wkt.loads(u["wkt"]).buffer(-10) for u in U["units"]]
 r = IcechunkTesseraReader(year_threads=1)
 n = len(geoms)
 means, counts, disps, aoi = [], [], [], []
-for y in U["years"]:
+for y in HIST or U["years"]:
     t = time.time()
     w = r.read_window(W["bbox"], [y], 128)
     emb = w.emb[0]
@@ -47,6 +48,7 @@ for y in U["years"]:
     means.append(mu.astype("f4"))
     counts.append(cnt)
     disps.append(d.astype("f4"))
-    np.savez(f"{D}/{name}/tessera_px_{y}.npz", emb=emb.astype("f2"), transform=np.array(w.transform)[:6], crs=str(w.crs))
+    if not HIST:
+        np.savez(f"{D}/{name}/tessera_px_{y}.npz", emb=emb.astype("f2"), transform=np.array(w.transform)[:6], crs=str(w.crs))
     print(name, y, f"{H}x{Wd}", "valid", round(valid.mean(), 3), "units with px", int((cnt >= 5).sum()), "read", round(time.time() - t, 1), "s", flush=True)
-np.savez(f"{D}/{name}/tessera_units.npz", means=np.stack(means), counts=np.stack(counts), disp=np.stack(disps), aoi=np.stack(aoi), years=np.array(U["years"]))
+np.savez(f"{D}/{name}/tessera_units{'_hist' if HIST else ''}.npz", means=np.stack(means), counts=np.stack(counts), disp=np.stack(disps), aoi=np.stack(aoi), years=np.array(HIST or U["years"]))
