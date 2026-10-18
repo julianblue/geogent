@@ -452,8 +452,11 @@ def main() -> None:
             f"  {r.years[i]}->{r.years[i + 1]}: valid={float(np.isfinite(d).mean()):.2%} "
             f"mean={float(np.nanmean(d)):.3f} {fmt_stats(d)}"
         )
-    mean_d = np.nanmean(np.stack(dists), axis=0)
-    print(f"  pixels with mean YoY distance > 0.5: {float(np.nanmean(mean_d > 0.5)):.2%}")
+    if dists:
+        mean_d = np.nanmean(np.stack(dists), axis=0)
+        print(f"  pixels with mean YoY distance > 0.5: {float(np.nanmean(mean_d > 0.5)):.2%}")
+    else:
+        print("  (fewer than 2 years: year-over-year summary skipped)")
 
     i = r.years.index(args.pca_year)
     rgb, valid, ratio = pca_rgb(r.emb[i])

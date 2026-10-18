@@ -185,6 +185,11 @@ def interior_pixels(
     return pixel_indices(geom, grid), False
 
 
+def finite_pixels(grid: Grid) -> np.ndarray:
+    """(H*W,) bool: pixels whose 128-d vector is finite in every loaded year (NaN = no coverage)."""
+    return np.logical_and.reduce([np.isfinite(grid.flat(y)).all(axis=1) for y in grid.years])
+
+
 # --------------------------------------------------------------------------------------------
 # Step 1: field-level embedding artifact
 # --------------------------------------------------------------------------------------------
@@ -214,10 +219,12 @@ def load_declared(path: Path, crs: str) -> gpd.GeoDataFrame:
 
 def build_field_set(gdf: gpd.GeoDataFrame, grid: Grid, year: int) -> FieldSet:
     flats = [grid.flat(y) for y in grid.years]
+    finite = finite_pixels(grid)
     grid_box = grid.bounds_box
     keep_rows, pix, buf, cov, dropped = [], [], [], [], []
     for i, geom in enumerate(gdf.geometry.values):
         idx, buffered = interior_pixels(geom, grid)
+        idx = idx[finite[idx]]  # drop NaN (no-coverage) pixels before the minimum-count check
         if idx.size < MIN_PIXELS:
             dropped.append({"orig": i, "area_m2": float(geom.area), "n_px": int(idx.size)})
             continue
@@ -749,6 +756,7 @@ def ftw_splitting(fs25: FieldSet, grid: Grid, ftw_path: Path) -> dict[str, Any]:
     for j, g in enumerate(fs25.gdf.geometry.values):
         owner_edge[pixel_indices(g, grid)] = j
     flat = grid.flat(2025)
+    finite = finite_pixels(grid)
     rows = []
     skipped = 0
     for fid in multi:
@@ -756,6 +764,7 @@ def ftw_splitting(fs25: FieldSet, grid: Grid, ftw_path: Path) -> dict[str, Any]:
         idx, _ = interior_pixels(geom, grid)
         if idx.size < FTW_MIN_PIXELS:
             idx = pixel_indices(geom, grid)
+        idx = idx[finite[idx]]  # NaN gaps between parcels cannot be clustered
         members = np.where(assign == fid)[0]
         truth = np.where(np.isin(owner[idx], members), owner[idx], -1)
         lab = truth >= 0
@@ -1059,7 +1068,7 @@ def make_plots(
 
 def strip_private(obj: Any) -> Any:
     if isinstance(obj, dict):
-        return {str(k): strip_private(v) for k, v in obj.items() if not str(k).startswith("_")}
+        return {str(k): strip_private(v) for k, v in obj.items() if k not in ("_arrays", "_df")}
     if isinstance(obj, (np.floating, np.integer)):
         return obj.item()
     return obj
