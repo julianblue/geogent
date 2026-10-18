@@ -1,0 +1,335 @@
+{
+ "harvest_vs_calendar": [
+  {
+   "crop": "WINTER BARLEY",
+   "n": 140,
+   "median": 176.0,
+   "iqr": [
+    171.0,
+    181.0
+   ],
+   "ref": [
+    172,
+    195
+   ],
+   "within_10d": 0.85,
+   "detected_share": 0.94
+  },
+  {
+   "crop": "WINTER SOFT WHEAT",
+   "n": 1113,
+   "median": 191.0,
+   "iqr": [
+    186.0,
+    191.0
+   ],
+   "ref": [
+    180,
+    215
+   ],
+   "within_10d": 0.957,
+   "detected_share": 0.988
+  },
+  {
+   "crop": "DURUM",
+   "n": 890,
+   "median": 186.0,
+   "iqr": [
+    181.0,
+    191.0
+   ],
+   "ref": [
+    180,
+    215
+   ],
+   "within_10d": 0.955,
+   "detected_share": 0.987
+  },
+  {
+   "crop": "WINTER RYE",
+   "n": 70,
+   "median": 186.0,
+   "iqr": [
+    181.0,
+    196.0
+   ],
+   "ref": [
+    180,
+    215
+   ],
+   "within_10d": 0.871,
+   "detected_share": 0.972
+  },
+  {
+   "crop": "TRITICALE",
+   "n": 30,
+   "median": 186.0,
+   "iqr": [
+    181.0,
+    189.75
+   ],
+   "ref": [
+    180,
+    215
+   ],
+   "within_10d": 0.967,
+   "detected_share": 0.909
+  },
+  {
+   "crop": "SUMMER BARLEY",
+   "n": 69,
+   "median": 191.0,
+   "iqr": [
+    186.0,
+    201.0
+   ],
+   "ref": [
+    185,
+    220
+   ],
+   "within_10d": 0.913,
+   "detected_share": 1.0
+  },
+  {
+   "crop": "RAPE",
+   "n": 27,
+   "median": 186.0,
+   "iqr": [
+    181.0,
+    191.0
+   ],
+   "ref": [
+    180,
+    205
+   ],
+   "within_10d": 0.963,
+   "detected_share": 0.964
+  },
+  {
+   "crop": "POTATO",
+   "n": 466,
+   "median": 246.0,
+   "iqr": [
+    231.0,
+    266.0
+   ],
+   "ref": [
+    200,
+    275
+   ],
+   "within_10d": 0.837,
+   "detected_share": 1.0
+  },
+  {
+   "crop": "SUNFLOWER",
+   "n": 37,
+   "median": 256.0,
+   "iqr": [
+    241.0,
+    271.0
+   ],
+   "ref": [
+    235,
+    275
+   ],
+   "within_10d": 0.811,
+   "detected_share": 1.0
+  },
+  {
+   "crop": "SOY",
+   "n": 445,
+   "median": 271.0,
+   "iqr": [
+    261.0,
+    281.0
+   ],
+   "ref": [
+    250,
+    290
+   ],
+   "within_10d": 0.885,
+   "detected_share": 0.993
+  },
+  {
+   "crop": "GRAIN CORN",
+   "n": 273,
+   "median": 286.0,
+   "iqr": [
+    276.0,
+    301.0
+   ],
+   "ref": [
+    255,
+    310
+   ],
+   "within_10d": 0.919,
+   "detected_share": 1.0
+  },
+  {
+   "crop": "SUGAR BEET",
+   "n": 293,
+   "median": 311.0,
+   "iqr": [
+    291.0,
+    331.0
+   ],
+   "ref": [
+    255,
+    335
+   ],
+   "within_10d": 0.956,
+   "detected_share": 0.983
+  }
+ ],
+ "harvest_rank_corr_vs_ref_mid": 0.966,
+ "harvest_within_window_pooled": 0.923,
+ "cycles_vs_multicrop": {
+  "n": 1473,
+  "n_multi": 142,
+  "two_cycle_rate_multi": 0.563,
+  "two_cycle_rate_single": 0.047,
+  "precision": 0.559,
+  "recall": 0.563
+ },
+ "two_cycle_rate_by_group": {
+  "fallow": 0.214,
+  "field veg": 0.094,
+  "grass/forage": 0.332,
+  "greenhouse": 0.052,
+  "legume": 0.064,
+  "maize": 0.045,
+  "oilseed/pumpkin": 0.053,
+  "other": 0.066,
+  "permanent": 0.02,
+  "potato": 0.013,
+  "spring cereal": 0.089,
+  "sugar beet": 0.0,
+  "winter cereal": 0.07
+ },
+ "winter_cover": {
+  "n": 2266,
+  "dropped_ambiguous": 872,
+  "green_share": 0.419,
+  "green_share_by_year": {
+   "2019": 0.647,
+   "2020": 0.439,
+   "2021": 0.446,
+   "2022": 0.43,
+   "2023": 0.526,
+   "2024": 0.32,
+   "2025": 0.145
+  },
+  "persistence_into_jan_feb": {
+   "n": 1788,
+   "green_then_green": 0.63,
+   "bare_then_green": 0.041
+  },
+  "green_split_next_decl": {
+   "n": 848,
+   "autumn_sown": 160,
+   "cover_catch": 688
+  },
+  "bare_share_by_group": {
+   "field veg": [
+    0.651,
+    258
+   ],
+   "legume": [
+    0.8,
+    35
+   ],
+   "maize": [
+    0.75,
+    24
+   ],
+   "oilseed/pumpkin": [
+    0.556,
+    27
+   ],
+   "potato": [
+    0.662,
+    136
+   ],
+   "spring cereal": [
+    0.557,
+    97
+   ],
+   "sugar beet": [
+    1.0,
+    1
+   ],
+   "winter cereal": [
+    0.559,
+    1688
+   ]
+  },
+  "embedding_loyo": {
+   "n": 2266,
+   "auc": 0.963,
+   "bal_acc": 0.9,
+   "auc_by_year": {
+    "2019": 0.923,
+    "2020": 0.984,
+    "2021": 0.986,
+    "2022": 0.946,
+    "2023": 0.987,
+    "2024": 0.999,
+    "2025": 0.945
+   }
+  }
+ },
+ "bare_days_by_group": {
+  "field veg": {
+   "count": 1520.0,
+   "25%": 195.0,
+   "50%": 225.0,
+   "75%": 260.0
+  },
+  "legume": {
+   "count": 512.0,
+   "25%": 165.0,
+   "50%": 210.0,
+   "75%": 240.0
+  },
+  "maize": {
+   "count": 604.0,
+   "25%": 175.0,
+   "50%": 215.0,
+   "75%": 245.0
+  },
+  "oilseed/pumpkin": {
+   "count": 132.0,
+   "25%": 135.0,
+   "50%": 180.0,
+   "75%": 225.0
+  },
+  "potato": {
+   "count": 466.0,
+   "25%": 180.0,
+   "50%": 210.0,
+   "75%": 240.0
+  },
+  "spring cereal": {
+   "count": 180.0,
+   "25%": 158.0,
+   "50%": 195.0,
+   "75%": 235.0
+  },
+  "sugar beet": {
+   "count": 298.0,
+   "25%": 135.0,
+   "50%": 165.0,
+   "75%": 190.0
+  },
+  "winter cereal": {
+   "count": 2266.0,
+   "25%": 105.0,
+   "50%": 140.0,
+   "75%": 180.0
+  }
+ },
+ "n_obs_per_unit_year": {
+  "median": 44.0,
+  "p10": 37.0
+ }
+}

@@ -1,0 +1,79 @@
+{
+ "pred_vs_declared_2024": {
+  "n_declared": 1125,
+  "n_pred": 410,
+  "iou_median": 0.189,
+  "iou_ge_0_5": 0.182,
+  "iou_ge_0_7": 0.126,
+  "no_match": 0.324,
+  "split_share": 0.015,
+  "merge_count": 217,
+  "unregistered_pred_area_share": 0.002,
+  "declared_area_covered_by_pred": 0.846
+ },
+ "pred_vs_declared_2025": {
+  "n_declared": 1089,
+  "n_pred": 432,
+  "iou_median": 0.18,
+  "iou_ge_0_5": 0.184,
+  "iou_ge_0_7": 0.119,
+  "no_match": 0.332,
+  "split_share": 0.007,
+  "merge_count": 200,
+  "unregistered_pred_area_share": 0.001,
+  "declared_area_covered_by_pred": 0.822
+ },
+ "split_vs_heterogeneity_2025": {
+  "n_split": 7,
+  "n_other": 1006,
+  "median_disp_split": 2.401,
+  "median_disp_other": 2.626,
+  "mannwhitney_p": 0.9459011333689235,
+  "spearman_iou_vs_ha": 0.467
+ },
+ "eurocrops_vs_ftw_2021": {
+  "n_ftw": 1475,
+  "n_ec": 1475,
+  "iou_median": 1.0,
+  "iou_ge_0_9": 1.0,
+  "matched": 1475,
+  "hcat_code_agreement": 0.97,
+  "top_disagreements": [
+   [
+    [
+     "SUMMER BARLEY",
+     "summer_barley"
+    ],
+    22
+   ],
+   [
+    [
+     "SUMMER HARD WHEAT (DURUM)",
+     "summer_durum_hard_wheat"
+    ],
+    15
+   ],
+   [
+    [
+     "TURF",
+     "peat_turf"
+    ],
+    4
+   ],
+   [
+    [
+     "SUMMER OATS",
+     "summer_oats"
+    ],
+    2
+   ],
+   [
+    [
+     "EMMER OR EINKORN (SUMMER)",
+     "summer_emmer"
+    ],
+    1
+   ]
+  ]
+ }
+}
