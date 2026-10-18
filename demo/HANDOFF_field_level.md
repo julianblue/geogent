@@ -127,7 +127,7 @@ Where FTW and EuroCrops overlap (same country and year), add **label and geometr
    - field-vs-peer deviation in embedding space and in the NDVI trajectory, per year
    - candidate crop failure, resowing, abandonment, waterlogging
    - Validate against FTW "without harvest" classes, or against a held-out manual check of NDVI curves.
-6. **Boundary and label quality:** FTW predicted vs declared polygons, and FTW harmonized vs EuroCrops labels where both exist, (IoU, splits, merges, unregistered fields). This matters for every field-level metric.
+6. **Boundary and label quality:** FTW predicted vs declared polygons, and FTW harmonized vs EuroCrops labels where both exist (IoU, label agreement, splits, merges, unregistered fields). This matters for every field-level metric.
 7. **"MACI"** once defined: what it adds beyond NDVI/NDRE (correlation, unique variance, any agronomic signal).
 
 ## Deliverables
