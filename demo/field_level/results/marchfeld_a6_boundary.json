@@ -1,5 +1,5 @@
 {
- "pred_vs_declared_2024": {
+ "pred_2024_vs_declared_2024": {
   "n_declared": 1125,
   "n_pred": 410,
   "iou_median": 0.189,
@@ -11,7 +11,7 @@
   "unregistered_pred_area_share": 0.002,
   "declared_area_covered_by_pred": 0.846
  },
- "pred_vs_declared_2025": {
+ "pred_2025_vs_declared_2025": {
   "n_declared": 1089,
   "n_pred": 432,
   "iou_median": 0.18,
@@ -36,7 +36,9 @@
   "n_ec": 1475,
   "iou_median": 1.0,
   "iou_ge_0_9": 1.0,
-  "matched": 1475,
+  "matched_with_both_labels": 1475,
+  "ftw_unknown": 0,
+  "ec_unmapped": 0,
   "hcat_code_agreement": 0.97,
   "top_disagreements": [
    [

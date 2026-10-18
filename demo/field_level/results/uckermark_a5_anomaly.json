@@ -1,0 +1,30 @@
+{
+ "n_scored": 1722,
+ "top2pct_threshold": 4.39,
+ "spearman_traj_vs_emb": 0.489,
+ "event_counts": {
+  "ev_low_peak": 49,
+  "ev_delayed_resown": 32,
+  "ev_no_harvest": 25
+ },
+ "event_rate_arable": {
+  "ev_low_peak": 0.0529,
+  "ev_delayed_resown": 0.0346,
+  "ev_no_harvest": 0.027
+ },
+ "event_rule_auc_traj_dev": {
+  "ev_low_peak": 0.812,
+  "ev_delayed_resown": 0.718,
+  "ev_no_harvest": 0.822
+ },
+ "event_rule_auc_traj_dev_season": {
+  "ev_low_peak": 0.9,
+  "ev_delayed_resown": 0.686,
+  "ev_no_harvest": 0.848
+ },
+ "event_rule_auc_emb_dev": {
+  "ev_low_peak": 0.8,
+  "ev_delayed_resown": 0.698,
+  "ev_no_harvest": 0.813
+ }
+}

@@ -21,7 +21,8 @@
   "null_median_abs_rho": 0.173,
   "share_abs_rho_gt_0_3": 0.306,
   "null_share_abs_rho_gt_0_3": 0.246,
-  "share_negative": 0.7
+  "share_negative": 0.7,
+  "null_share_negative": 0.517
  },
  "terrain_tpi": {
   "median_rho": -0.17,
@@ -29,7 +30,8 @@
   "null_median_abs_rho": 0.162,
   "share_abs_rho_gt_0_3": 0.322,
   "null_share_abs_rho_gt_0_3": 0.242,
-  "share_negative": 0.749
+  "share_negative": 0.749,
+  "null_share_negative": 0.508
  },
  "terrain_twi": {
   "median_rho": 0.112,
@@ -37,7 +39,8 @@
   "null_median_abs_rho": 0.084,
   "share_abs_rho_gt_0_3": 0.082,
   "null_share_abs_rho_gt_0_3": 0.035,
-  "share_negative": 0.178
+  "share_negative": 0.178,
+  "null_share_negative": 0.49
  },
  "terrain_slope": {
   "median_rho": -0.11,
@@ -45,7 +48,8 @@
   "null_median_abs_rho": 0.109,
   "share_abs_rho_gt_0_3": 0.151,
   "null_share_abs_rho_gt_0_3": 0.106,
-  "share_negative": 0.757
+  "share_negative": 0.757,
+  "null_share_negative": 0.54
  },
  "terrain_top_relief_quartile": {
   "n": 231,

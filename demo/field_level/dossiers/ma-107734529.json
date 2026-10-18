@@ -1,0 +1,340 @@
+{
+ "field": {
+  "uid": "ma-107734529",
+  "window": "marchfeld",
+  "area_ha": 0.84,
+  "centroid_lonlat": [
+   16.64332,
+   48.24717
+  ],
+  "ref_year": 2025
+ },
+ "coverage": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "declared_years": 7,
+  "s2_clear_obs_per_year": {
+   "2019": 42.0,
+   "2020": 43.0,
+   "2021": 56.0,
+   "2022": 44.0,
+   "2023": 44.0,
+   "2024": 42.0,
+   "2025": 58.0
+  },
+  "tessera_px": 49
+ },
+ "history": [
+  {
+   "year": 2019,
+   "declared": "SUMMER BARLEY",
+   "group": "spring cereal",
+   "embedding_group": "spring cereal",
+   "p_declared_group": 0.674,
+   "yoy_centred_distance": null,
+   "phenology_change": null,
+   "declared_change": null,
+   "flags": []
+  },
+  {
+   "year": 2020,
+   "declared": "SUMMER BARLEY",
+   "group": "spring cereal",
+   "embedding_group": "field veg",
+   "p_declared_group": 0.006,
+   "yoy_centred_distance": 0.55,
+   "phenology_change": true,
+   "declared_change": false,
+   "flags": [
+    "declaration looks like field veg",
+    "declared vs phenology change disagree"
+   ]
+  },
+  {
+   "year": 2021,
+   "declared": "WINTER BARLEY",
+   "group": "winter cereal",
+   "embedding_group": "winter cereal",
+   "p_declared_group": 0.93,
+   "yoy_centred_distance": 1.1,
+   "phenology_change": true,
+   "declared_change": true,
+   "flags": []
+  },
+  {
+   "year": 2022,
+   "declared": "WINTER BARLEY",
+   "group": "winter cereal",
+   "embedding_group": "winter cereal",
+   "p_declared_group": 0.908,
+   "yoy_centred_distance": 0.194,
+   "phenology_change": false,
+   "declared_change": false,
+   "flags": []
+  },
+  {
+   "year": 2023,
+   "declared": "WINTER SOFT WHEAT",
+   "group": "winter cereal",
+   "embedding_group": "winter cereal",
+   "p_declared_group": 0.981,
+   "yoy_centred_distance": 0.166,
+   "phenology_change": false,
+   "declared_change": true,
+   "flags": [
+    "declared vs phenology change disagree"
+   ]
+  },
+  {
+   "year": 2024,
+   "declared": "WINTER BARLEY",
+   "group": "winter cereal",
+   "embedding_group": "winter cereal",
+   "p_declared_group": 0.439,
+   "yoy_centred_distance": 0.31,
+   "phenology_change": false,
+   "declared_change": true,
+   "flags": [
+    "declared vs phenology change disagree"
+   ]
+  },
+  {
+   "year": 2025,
+   "declared": "WINTER SOFT WHEAT",
+   "group": "winter cereal",
+   "embedding_group": "winter cereal",
+   "p_declared_group": 0.912,
+   "yoy_centred_distance": 0.284,
+   "phenology_change": false,
+   "declared_change": true,
+   "flags": [
+    "declared vs phenology change disagree"
+   ]
+  }
+ ],
+ "rotation_profile": {
+  "n_years": 7,
+  "cereal_share": 1.0,
+  "n_crops": 3,
+  "group_entropy_bits": 0.86,
+  "max_monoculture_run": 2,
+  "declared_changes": 4,
+  "embedding_changes": 2,
+  "disagreements": 4,
+  "percentile_in_window": {
+   "cereal_share": 0.99,
+   "group_entropy": 0.18
+  }
+ },
+ "management": [
+  {
+   "year": 2019,
+   "sos_doy": 131.0,
+   "peak_doy": 151.0,
+   "harvest_doy": 191.0,
+   "season_len_d": 50.0,
+   "n_cycles": 1.0,
+   "winter_cover": "bare",
+   "winter_green_kind": null,
+   "bare_soil_days": 260.0
+  },
+  {
+   "year": 2020,
+   "sos_doy": 146.0,
+   "peak_doy": 166.0,
+   "harvest_doy": 211.0,
+   "season_len_d": 55.0,
+   "n_cycles": 0.0,
+   "winter_cover": "n/a",
+   "winter_green_kind": null,
+   "bare_soil_days": 235.0
+  },
+  {
+   "year": 2021,
+   "sos_doy": 131.0,
+   "peak_doy": 141.0,
+   "harvest_doy": 181.0,
+   "season_len_d": 40.0,
+   "n_cycles": 1.0,
+   "winter_cover": "ambiguous",
+   "winter_green_kind": null,
+   "bare_soil_days": 140.0
+  },
+  {
+   "year": 2022,
+   "sos_doy": 91.0,
+   "peak_doy": 136.0,
+   "harvest_doy": 171.0,
+   "season_len_d": 70.0,
+   "n_cycles": 1.0,
+   "winter_cover": "bare",
+   "winter_green_kind": null,
+   "bare_soil_days": 225.0
+  },
+  {
+   "year": 2023,
+   "sos_doy": 91.0,
+   "peak_doy": 116.0,
+   "harvest_doy": 191.0,
+   "season_len_d": 90.0,
+   "n_cycles": 1.0,
+   "winter_cover": "ambiguous",
+   "winter_green_kind": null,
+   "bare_soil_days": 115.0
+  },
+  {
+   "year": 2024,
+   "sos_doy": 71.0,
+   "peak_doy": 116.0,
+   "harvest_doy": 161.0,
+   "season_len_d": 80.0,
+   "n_cycles": 1.0,
+   "winter_cover": "ambiguous",
+   "winter_green_kind": null,
+   "bare_soil_days": 165.0
+  },
+  {
+   "year": 2025,
+   "sos_doy": 96.0,
+   "peak_doy": 151.0,
+   "harvest_doy": 186.0,
+   "season_len_d": 85.0,
+   "n_cycles": 1.0,
+   "winter_cover": "bare",
+   "winter_green_kind": null,
+   "bare_soil_days": 215.0
+  }
+ ],
+ "performance": {
+  "by_year": [
+   {
+    "year": 2019,
+    "crop": "SUMMER BARLEY",
+    "indvi_season": 23.7,
+    "pct_vs_peers": 0.1,
+    "z_peer": -2.11,
+    "peak_ndvi_pct": 0.1,
+    "peak_timing_vs_peers_z": -0.67,
+    "n_peers": 10
+   },
+   {
+    "year": 2020,
+    "crop": "SUMMER BARLEY",
+    "indvi_season": 14.5,
+    "pct_vs_peers": 0.0,
+    "z_peer": -2.19,
+    "peak_ndvi_pct": 0.0,
+    "peak_timing_vs_peers_z": 0.67,
+    "n_peers": 6
+   },
+   {
+    "year": 2021,
+    "crop": "WINTER BARLEY",
+    "indvi_season": 23.5,
+    "pct_vs_peers": 0.0,
+    "z_peer": -2.21,
+    "peak_ndvi_pct": 0.4,
+    "peak_timing_vs_peers_z": -0.34,
+    "n_peers": 15
+   },
+   {
+    "year": 2022,
+    "crop": "WINTER BARLEY",
+    "indvi_season": 28.0,
+    "pct_vs_peers": 0.13,
+    "z_peer": -1.27,
+    "peak_ndvi_pct": 0.07,
+    "peak_timing_vs_peers_z": 0.67,
+    "n_peers": 15
+   },
+   {
+    "year": 2023,
+    "crop": "WINTER SOFT WHEAT",
+    "indvi_season": 47.7,
+    "pct_vs_peers": 0.55,
+    "z_peer": 0.08,
+    "peak_ndvi_pct": 0.21,
+    "peak_timing_vs_peers_z": -1.35,
+    "n_peers": 82
+   },
+   {
+    "year": 2024,
+    "crop": "WINTER BARLEY",
+    "indvi_season": 31.9,
+    "pct_vs_peers": 0.0,
+    "z_peer": -2.21,
+    "peak_ndvi_pct": 0.0,
+    "peak_timing_vs_peers_z": 0.0,
+    "n_peers": 6
+   },
+   {
+    "year": 2025,
+    "crop": "WINTER SOFT WHEAT",
+    "indvi_season": 45.6,
+    "pct_vs_peers": 0.3,
+    "z_peer": -0.51,
+    "peak_ndvi_pct": 0.08,
+    "peak_timing_vs_peers_z": 0.0,
+    "n_peers": 99
+   }
+  ],
+  "summary": {
+   "n_years": 7,
+   "mean_pct": 0.15,
+   "years_bottom_quartile": 5,
+   "years_top_quartile": 0,
+   "caveat": "field effect is weak (A3 ICC ~0.1) and does not carry across crop changes; read single-year percentiles as season outcomes"
+  }
+ },
+ "within_field": {
+  "n_px": 49,
+  "n_years": 7,
+  "stability_rho": 0.776,
+  "split_half_rho": 0.758,
+  "persistent_low_frac": 0.204,
+  "persistent_low_expected_by_chance": 0.0047,
+  "low_zone_direction": "SE",
+  "terrain": {
+   "rho_elevation": -0.55,
+   "rho_twi": 0.234,
+   "rho_elevation_rotated_null": 0.417,
+   "relief_m": 1.4
+  }
+ },
+ "anomalies": [
+  {
+   "year": 2020,
+   "traj_dev_season_z": 0.9,
+   "emb_dev_z": 0.14,
+   "events": [
+    "low_peak"
+   ]
+  }
+ ],
+ "boundary": {
+  "pred_year": 2025,
+  "pred_best_iou": 0.698,
+  "pred_split": false,
+  "pred_block_ratio": 0.74,
+  "note": "PRUE delineates field blocks; low IoU with ratio >1.5 = merged with neighbours (A6), not a data error"
+ },
+ "maci": {
+  "status": "PLACEHOLDER: 'MACI time series' undefined; awaiting Julian"
+ },
+ "evidence": {
+  "history": "A1 (rotation AUC, LOYO group acc)",
+  "management": "A2 (harvest vs calendar, cycles vs multi-crop, winter-cover persistence)",
+  "performance": "A3 (peer percentile; field-effect ICC, crop-change caveat)",
+  "within_field": "A4 (zone stability, edge control, binomial null, DEM rotated null)",
+  "anomalies": "A5 (blinded curve review; in-season score)",
+  "boundary": "A6 (PRUE vs declared)"
+ },
+ "narrative": "Declared 2019 summer barley -> 2020 summer barley -> 2021 winter barley -> 2022 winter barley -> 2023 winter soft wheat -> 2024 winter barley -> 2025 winter soft wheat. 3 crops in 7 declared years, cereal share 100%, longest same-crop run 2y; 4 declared-vs-phenology disagreement(s). After summer harvest the field was green over winter in 0/3 seasons. Season greenness vs same-crop peers within 5 km: mean percentile 0.15 over 7 years (5 bottom-quartile, 0 top-quartile); weak persistence (A3), treat as season outcomes. Within-field: a stable pattern (year-to-year rho 0.78, 7 seasons); 20% of the field is low-vigour in >=60% of seasons (chance 0.5%), concentrated SE. Screen flags (unverified, ~27% in-season precision outside vegetables): 2020 low_peak."
+}

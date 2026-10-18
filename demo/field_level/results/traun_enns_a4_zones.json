@@ -1,0 +1,63 @@
+{
+ "n_units": 994,
+ "median_years": 7.0,
+ "median_px": 238.0,
+ "stability_median": 0.432,
+ "stability_edge_removed_median": 0.418,
+ "stability_iqr": [
+  0.294,
+  0.579
+ ],
+ "share_units_stability_gt_0_3": 0.741,
+ "split_half_median": 0.669,
+ "edge_rho_median": 0.25,
+ "persistent_low_frac_median": 0.103,
+ "persistent_low_frac_mean": 0.104,
+ "persistent_low_expected_mean": 0.0183,
+ "share_units_persistent_low_ge_10pct": 0.526,
+ "terrain_dem": {
+  "median_rho": -0.079,
+  "median_abs_rho": 0.302,
+  "null_median_abs_rho": 0.257,
+  "share_abs_rho_gt_0_3": 0.507,
+  "null_share_abs_rho_gt_0_3": 0.437,
+  "share_negative": 0.565,
+  "null_share_negative": 0.504
+ },
+ "terrain_tpi": {
+  "median_rho": -0.143,
+  "median_abs_rho": 0.284,
+  "null_median_abs_rho": 0.25,
+  "share_abs_rho_gt_0_3": 0.467,
+  "null_share_abs_rho_gt_0_3": 0.416,
+  "share_negative": 0.644,
+  "null_share_negative": 0.446
+ },
+ "terrain_twi": {
+  "median_rho": 0.086,
+  "median_abs_rho": 0.15,
+  "null_median_abs_rho": 0.129,
+  "share_abs_rho_gt_0_3": 0.178,
+  "null_share_abs_rho_gt_0_3": 0.156,
+  "share_negative": 0.311,
+  "null_share_negative": 0.468
+ },
+ "terrain_slope": {
+  "median_rho": -0.107,
+  "median_abs_rho": 0.204,
+  "null_median_abs_rho": 0.184,
+  "share_abs_rho_gt_0_3": 0.337,
+  "null_share_abs_rho_gt_0_3": 0.298,
+  "share_negative": 0.645,
+  "null_share_negative": 0.518
+ },
+ "terrain_top_relief_quartile": {
+  "n": 249,
+  "relief_m_min": 11.6,
+  "median_rho_dem": -0.178,
+  "median_rho_twi": 0.144,
+  "median_abs_rho_dem": 0.337,
+  "null_median_abs_rho_dem": 0.302
+ },
+ "relief_m_median": 5.6
+}

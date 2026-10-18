@@ -1,0 +1,98 @@
+{
+ "rotation_pairs": {
+  "n": 1496,
+  "changed": 0.457,
+  "auc": 0.93,
+  "precision_at_0_5": 0.936,
+  "recall_at_0_5": 0.748,
+  "fpr_at_0_5": 0.043,
+  "baseline_always_changed_acc": 0.457,
+  "acc_at_0_5": 0.862
+ },
+ "missed_changes_same_group_share": 0.674,
+ "missed_change_top": [
+  [
+   [
+    "Winter soft wheat",
+    "Winter barley"
+   ],
+   73
+  ],
+  [
+   [
+    "Mowing pastures",
+    "grasslands"
+   ],
+   14
+  ],
+  [
+   [
+    "Summer oats",
+    "Winter soft wheat"
+   ],
+   6
+  ],
+  [
+   [
+    "Honey plants used fallow land (species rich in pollen and nectar) -annual",
+    "Arable land withdrawn from production (self-greening)/AL taken from generation"
+   ],
+   6
+  ],
+  [
+   [
+    "Winter soft wheat",
+    "Summer oats"
+   ],
+   5
+  ],
+  [
+   [
+    "Winter barley",
+    "Winter soft wheat"
+   ],
+   5
+  ]
+ ],
+ "false_alarm_top_crops": [
+  [
+   "Winter soft wheat",
+   16
+  ],
+  [
+   "Arable land withdrawn from production (self-greening)/AL taken from generation",
+   5
+  ],
+  [
+   "Mowing pastures",
+   5
+  ],
+  [
+   "alfalfa",
+   3
+  ],
+  [
+   "Honey plants used fallow land (species rich in pollen and nectar) - perennial",
+   2
+  ],
+  [
+   "EUGAL construction activities",
+   2
+  ]
+ ],
+ "loyo_group_acc": 0.899,
+ "majority_group_acc": 0.374,
+ "untracked_unit_years": 281,
+ "untracked_with_embedding_group": 216,
+ "profiles": {
+  "n_units": 410,
+  "n_arable": 171,
+  "cereal_share_median": 0.6,
+  "cereal_share_ge_0_6": 0.848,
+  "monoculture_run_ge_3": 0.053,
+  "group_entropy_median": 0.97,
+  "n_crops_median": 3.0,
+  "units_with_any_disagreement": 0.509,
+  "units_with_ge2_disagreements": 0.129
+ }
+}

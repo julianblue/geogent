@@ -1,0 +1,52 @@
+{
+ "indvi_season_zpeer": {
+  "n_units": 166,
+  "n_unit_years": 727,
+  "icc": 0.155,
+  "icc_null_p95": 0.044,
+  "yoy_spearman_median": 0.135,
+  "loyo_spearman_median": 0.243,
+  "bottom_quartile_recurrence": 0.341,
+  "chance": 0.25,
+  "nearest_neighbour_same_year_spearman": 0.206
+ },
+ "peak_ndvi_zpeer": {
+  "n_units": 166,
+  "n_unit_years": 727,
+  "icc": 0.296,
+  "icc_null_p95": 0.04,
+  "yoy_spearman_median": 0.339,
+  "loyo_spearman_median": 0.454,
+  "bottom_quartile_recurrence": 0.424,
+  "chance": 0.25,
+  "nearest_neighbour_same_year_spearman": 0.333
+ },
+ "peak_doy_zpeer": {
+  "n_units": 166,
+  "n_unit_years": 727,
+  "icc": 0.084,
+  "icc_null_p95": 0.043,
+  "yoy_spearman_median": 0.069,
+  "loyo_spearman_median": 0.225,
+  "bottom_quartile_recurrence": 0.484,
+  "chance": 0.25,
+  "nearest_neighbour_same_year_spearman": 0.314
+ },
+ "harvest_doy_zpeer": {
+  "n_units": 163,
+  "n_unit_years": 712,
+  "icc": -0.021,
+  "icc_null_p95": 0.045,
+  "yoy_spearman_median": 0.046,
+  "loyo_spearman_median": -0.02,
+  "bottom_quartile_recurrence": 0.409,
+  "chance": 0.25,
+  "nearest_neighbour_same_year_spearman": 0.225
+ },
+ "indvi_persistence_across_crop_change": {
+  "n_changed": 354,
+  "spearman_changed": 0.067,
+  "n_same": 843,
+  "spearman_same": 0.198
+ }
+}

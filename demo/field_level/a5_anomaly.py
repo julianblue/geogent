@@ -3,7 +3,7 @@
 Scores (robust z within declared HCAT class x year, >=8 members):
 - traj_dev: RMSE of the unit's smoothed NDVI curve to the class-year median curve
 - emb_dev: distance of the centred TESSERA mean to the class-year centroid (self excluded)
-Rule-based event candidates: crop failure (peak NDVI z_peer <= -3), delayed / resown
+Rule-based event candidates: low peak (peak NDVI z_peer <= -3; failure or severe underperformance candidate), delayed / resown
 (peak >= 25 d after peers and z >= 3), no harvest signal (declared arable, no >=0.3 drop).
 Validation: (1) declared '... WITHOUT HARVEST' classes vs their with-harvest counterpart;
 (2) blinded manual review of curves (panels + key written to <datadir>, key opened after labels)."""
@@ -49,7 +49,7 @@ for (y, h), g in F[F.tracked & F.peak_ndvi.notna()].groupby(["year", "hcat"]):
         F.loc[g.index, col] = (v - mu) / max(mad, 1e-6)
 F["anomaly"] = F[["traj_dev", "emb_dev"]].max(axis=1)
 ar = F.group.isin(ARABLE) & F.tracked
-F["ev_crop_failure"] = ar & (F.peak_ndvi_zpeer <= -3)
+F["ev_low_peak"] = ar & (F.peak_ndvi_zpeer <= -3)
 F["ev_delayed_resown"] = ar & (F.peak_doy_zpeer >= 3) & ((F.peak_doy - (F.peak_doy - 0)).notna())
 pk = F.groupby(["year", "hcat"]).peak_doy.transform("median")
 F["ev_delayed_resown"] = ar & (F.peak_doy_zpeer >= 3) & (F.peak_doy - pk >= 25)
@@ -57,8 +57,8 @@ F["ev_no_harvest"] = ar & F.peak_ndvi.notna() & F.harvest_doy.isna()
 F.to_csv(f"{D}/{name}/anomaly.csv", index=False)
 R = dict(n_scored=int(F.anomaly.notna().sum()), top2pct_threshold=round(float(F.anomaly.quantile(.98)), 2),
          spearman_traj_vs_emb=round(F[["traj_dev", "emb_dev"]].corr("spearman").iloc[0, 1], 3),
-         event_counts={k: int(F[k].sum()) for k in ("ev_crop_failure", "ev_delayed_resown", "ev_no_harvest")},
-         event_rate_arable={k: round(F.loc[ar, k].mean(), 4) for k in ("ev_crop_failure", "ev_delayed_resown", "ev_no_harvest")})
+         event_counts={k: int(F[k].sum()) for k in ("ev_low_peak", "ev_delayed_resown", "ev_no_harvest")},
+         event_rate_arable={k: round(F.loc[ar, k].mean(), 4) for k in ("ev_low_peak", "ev_delayed_resown", "ev_no_harvest")})
 # validation 1: declared without-harvest classes (scored against the pooled with-harvest class-year)
 wh = F[F.hcat.str.contains("WITHOUT HARVEST", na=False) & F.peak_ndvi.notna()]
 if len(wh) >= 10:
@@ -82,7 +82,7 @@ print(json.dumps(R, indent=1))
 
 # validation 2: blinded panels -- 30 top-2% anomalies + 30 random scored unit-years, shuffled
 for col in ("traj_dev", "traj_dev_season", "emb_dev"):
-    R[f"event_rule_auc_{col}"] = {k: round(roc_auc_score(F.loc[ar & F[col].notna(), k], F.loc[ar & F[col].notna(), col]), 3) for k in ("ev_crop_failure", "ev_delayed_resown", "ev_no_harvest")}
+    R[f"event_rule_auc_{col}"] = {k: round(roc_auc_score(F.loc[ar & F[col].notna(), k], F.loc[ar & F[col].notna(), col]), 3) for k in ("ev_low_peak", "ev_delayed_resown", "ev_no_harvest")}
 json.dump(R, open(f"results/{name}_a5_anomaly.json", "w"), indent=1)
 print(json.dumps({k: v for k, v in R.items() if k.startswith("event_rule")}, indent=1))
 SCORE = sys.argv[4] if len(sys.argv) > 4 else "anomaly"

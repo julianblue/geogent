@@ -1,0 +1,98 @@
+{
+ "rotation_pairs": {
+  "n": 6591,
+  "changed": 0.804,
+  "auc": 0.975,
+  "precision_at_0_5": 0.982,
+  "recall_at_0_5": 0.924,
+  "fpr_at_0_5": 0.069,
+  "baseline_always_changed_acc": 0.804,
+  "acc_at_0_5": 0.926
+ },
+ "missed_changes_same_group_share": 0.394,
+ "missed_change_top": [
+  [
+   [
+    "WINTER SOFT WHEAT",
+    "WINTER BARLEY"
+   ],
+   71
+  ],
+  [
+   [
+    "GRAIN CORN",
+    "SOYBEANS"
+   ],
+   35
+  ],
+  [
+   [
+    "WINTER SOFT WHEAT",
+    "WINTER RYE"
+   ],
+   16
+  ],
+  [
+   [
+    "GRAIN CORN",
+    "WINTER SOFT WHEAT"
+   ],
+   14
+  ],
+  [
+   [
+    "SUGAR BEET",
+    "SOYBEANS"
+   ],
+   14
+  ],
+  [
+   [
+    "WINTER SOFT WHEAT",
+    "GRAIN CORN"
+   ],
+   13
+  ]
+ ],
+ "false_alarm_top_crops": [
+  [
+   "GREEN FALLOW",
+   23
+  ],
+  [
+   "GRAIN CORN",
+   22
+  ],
+  [
+   "SILO CORN",
+   10
+  ],
+  [
+   "CLOVER-GRASS",
+   7
+  ],
+  [
+   "WINTER SOFT WHEAT",
+   5
+  ],
+  [
+   "CLOVER",
+   3
+  ]
+ ],
+ "loyo_group_acc": 0.946,
+ "majority_group_acc": 0.347,
+ "untracked_unit_years": 1010,
+ "untracked_with_embedding_group": 967,
+ "profiles": {
+  "n_units": 1220,
+  "n_arable": 949,
+  "cereal_share_median": 0.43,
+  "cereal_share_ge_0_6": 0.09,
+  "monoculture_run_ge_3": 0.038,
+  "group_entropy_median": 1.56,
+  "n_crops_median": 4.0,
+  "units_with_any_disagreement": 0.257,
+  "units_with_ge2_disagreements": 0.058
+ }
+}

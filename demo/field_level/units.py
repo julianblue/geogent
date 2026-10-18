@@ -16,7 +16,7 @@ name, D = sys.argv[1], sys.argv[2]
 years = FTW_YEARS[WINDOWS[name]["cc"]]
 P = json.load(open(f"{D}/{name}/parcels_utm.json"))
 ref = years[-1]
-U = [dict(uid=f"{name[:2]}-{f['id']}", wkt=f["wkt"], ha=f["ha"]) for f in P[str(ref)] if f["ha"] >= 0.5]
+U = [dict(uid=f"{name[:2]}-{f['id'].removesuffix('.0')}", wkt=f["wkt"], ha=f["ha"]) for f in P[str(ref)] if f["ha"] >= 0.5]
 ug = [wkt.loads(u["wkt"]) for u in U]
 for y in years:
     g = [wkt.loads(f["wkt"]).buffer(0) for f in P[str(y)]]

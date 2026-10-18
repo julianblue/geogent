@@ -29,10 +29,10 @@ b = W["bbox"]
 xs, ys = zip(*[t.transform(x, y) for x in b[0::2] for y in b[1::2]])
 interior = box(max(min(xs), min(xs)) + 300, min(ys) + 300, max(xs) - 300, max(ys) - 300)
 R = {}
-for yr in ("2024", "2025", "2023"):
-    if yr not in P:
-        continue
-    pg = [wkt.loads(p["wkt"]).buffer(0) for p in pred if p["when"].startswith(yr)]
+pred_years = sorted({p["when"][:4] for p in pred})
+pairs = [(y, y) for y in pred_years if y in P] or [(max(P), pred_years[0])]  # BB: declarations end 2023 -> cross-year
+for yr, pyr in pairs:
+    pg = [wkt.loads(p["wkt"]).buffer(0) for p in pred if p["when"].startswith(pyr)]
     if not pg:
         continue
     dg = [wkt.loads(p["wkt"]).buffer(0) for p in P[yr]]
@@ -61,7 +61,7 @@ for yr in ("2024", "2025", "2023"):
     best = np.array(best)
     declared_area = sum(dg[i].area for i in keep)
     covered = sum(dg[i].intersection(pg[j]).area for i in keep for j in tp.query(dg[i]))
-    R[f"pred_vs_declared_{yr}"] = dict(n_declared=len(keep), n_pred=len(pg), iou_median=round(float(np.median(best)), 3),
+    R[f"pred_{pyr}_vs_declared_{yr}"] = dict(n_declared=len(keep), n_pred=len(pg), iou_median=round(float(np.median(best)), 3),
                                        iou_ge_0_5=round(float((best >= 0.5).mean()), 3), iou_ge_0_7=round(float((best >= 0.7).mean()), 3),
                                        no_match=round(float((best < 0.1).mean()), 3), split_share=round(float(np.mean(split)), 3),
                                        merge_count=int(merges), unregistered_pred_area_share=round(unreg_area / max(tot_area, 1), 3),
@@ -69,7 +69,7 @@ for yr in ("2024", "2025", "2023"):
     # link to field metrics via units (ref-year ids)
     if yr == str(max(int(k) for k in P)):
         F = pd.read_csv(f"{D}/{name}/features.csv")
-        ids = {P[yr][i]["id"]: (s, bi) for i, s, bi in zip(keep, split, best)}
+        ids = {P[yr][i]["id"].removesuffix(".0"): (s, bi) for i, s, bi in zip(keep, split, best)}
         f = F[(F.year == int(yr)) & F.tess_px.ge(20)].copy()
         f["pid"] = f.uid.str.split("-", n=1).str[1]
         f = f[f.pid.isin(ids)]
@@ -97,13 +97,15 @@ for f in os.listdir(f"{D}/{name}"):
             if v > bi:
                 bj, bi = j, v
         iou.append(bi)
-        if bj is not None and bi >= 0.5:
-            agree.append(str(p["hcat_code"]) == ec[bj]["hcat_c"])
+        ec_code = ec[bj]["hcat_c"] if bj is not None else "nan"
+        if bj is not None and bi >= 0.5 and ec_code not in ("nan", "None") and "unknown" not in str(p["hcat"]).lower():
+            agree.append(str(p["hcat_code"]) == str(int(float(ec_code))))
             agree_name.append((p["hcat"], ec[bj]["hcat_n"]))
     iou = np.array(iou)
     dis = pd.Series([a for a, ok in zip(agree_name, agree) if not ok]).value_counts().head(5)
     R[f"eurocrops_vs_ftw_{yr}"] = dict(n_ftw=len(fg), n_ec=len(eg), iou_median=round(float(np.median(iou)), 3), iou_ge_0_9=round(float((iou >= 0.9).mean()), 3),
-                                       matched=len(agree), hcat_code_agreement=round(float(np.mean(agree)), 3) if agree else None,
+                                       matched_with_both_labels=len(agree), ftw_unknown=sum("unknown" in str(p["hcat"]).lower() for p in P[yr]),
+                                       ec_unmapped=sum(e["hcat_c"] in ("nan", "None") for e in ec), hcat_code_agreement=round(float(np.mean(agree)), 3) if agree else None,
                                        top_disagreements=[[list(k), int(v)] for k, v in dis.items()])
 json.dump(R, open(f"results/{name}_a6_boundary.json", "w"), indent=1)
 print(json.dumps(R, indent=1))

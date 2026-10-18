@@ -1,0 +1,55 @@
+{
+ "pred_2024_vs_declared_2023": {
+  "n_declared": 423,
+  "n_pred": 123,
+  "iou_median": 0.0,
+  "iou_ge_0_5": 0.18,
+  "iou_ge_0_7": 0.158,
+  "no_match": 0.707,
+  "split_share": 0.002,
+  "merge_count": 37,
+  "unregistered_pred_area_share": 0.0,
+  "declared_area_covered_by_pred": 0.669
+ },
+ "split_vs_heterogeneity_2023": {
+  "n_split": 1,
+  "n_other": 378,
+  "median_disp_split": 3.794,
+  "median_disp_other": 3.922,
+  "mannwhitney_p": 0.9393139841688631,
+  "spearman_iou_vs_ha": 0.519
+ },
+ "eurocrops_vs_ftw_2023": {
+  "n_ftw": 1072,
+  "n_ec": 1132,
+  "iou_median": 1.0,
+  "iou_ge_0_9": 0.863,
+  "matched_with_both_labels": 490,
+  "ftw_unknown": 524,
+  "ec_unmapped": 440,
+  "hcat_code_agreement": 0.99,
+  "top_disagreements": [
+   [
+    [
+     "mixed crops",
+     "other_arable_land_crops"
+    ],
+    2
+   ],
+   [
+    [
+     "Mixture cereals/legumes",
+     "legumes_dried_pulses_protein_crops"
+    ],
+    2
+   ],
+   [
+    [
+     "Christmas trees",
+     "tree_wood_forest"
+    ],
+    1
+   ]
+  ]
+ }
+}

@@ -30,6 +30,8 @@ def group(code, name=""):
         return "oilseed/pumpkin"
     if c.startswith("330111"):
         return "fallow"
+    if c.startswith("3399") and "UNKNOWN" in n:
+        return "other"
     if c.startswith("330109") or c.startswith("3302") or c.startswith("3399"):
         return "grass/forage"
     if c.startswith("3303"):

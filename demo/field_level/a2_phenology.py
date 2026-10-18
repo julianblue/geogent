@@ -67,7 +67,7 @@ pers = hc[hc.next_winter_early.notna()]
 R["winter_cover"]["persistence_into_jan_feb"] = dict(n=len(pers), green_then_green=round((pers.next_winter_early[pers.wc == 1] >= 0.4).mean(), 3),
                                                      bare_then_green=round((pers.next_winter_early[pers.wc == 0] >= 0.4).mean(), 3))
 g = hc[(hc.wc == 1) & hc.next_hcat.notna()].copy()
-g["autumn_sown"] = g.next_hcat.str.contains("WINTER|winter", na=False)
+g["autumn_sown"] = g.next_hcat.str.contains("winter", case=False, na=False)
 R["winter_cover"]["green_split_next_decl"] = dict(n=len(g), autumn_sown=int(g.autumn_sown.sum()), cover_catch=int((~g.autumn_sown).sum()))
 R["winter_cover"]["bare_share_by_group"] = hc.groupby("group").apply(lambda x: [round(1 - x.wc.mean(), 3), len(x)]).to_dict()
 

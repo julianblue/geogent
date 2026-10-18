@@ -1,0 +1,81 @@
+{
+ "pred_2024_vs_declared_2024": {
+  "n_declared": 1198,
+  "n_pred": 596,
+  "iou_median": 0.272,
+  "iou_ge_0_5": 0.308,
+  "iou_ge_0_7": 0.242,
+  "no_match": 0.274,
+  "split_share": 0.005,
+  "merge_count": 225,
+  "unregistered_pred_area_share": 0.002,
+  "declared_area_covered_by_pred": 0.854
+ },
+ "pred_2025_vs_declared_2025": {
+  "n_declared": 1197,
+  "n_pred": 576,
+  "iou_median": 0.24,
+  "iou_ge_0_5": 0.311,
+  "iou_ge_0_7": 0.234,
+  "no_match": 0.297,
+  "split_share": 0.006,
+  "merge_count": 236,
+  "unregistered_pred_area_share": 0.001,
+  "declared_area_covered_by_pred": 0.86
+ },
+ "split_vs_heterogeneity_2025": {
+  "n_split": 7,
+  "n_other": 1103,
+  "median_disp_split": 4.201,
+  "median_disp_other": 3.297,
+  "mannwhitney_p": 0.0007947695881497365,
+  "spearman_iou_vs_ha": 0.307
+ },
+ "eurocrops_vs_ftw_2021": {
+  "n_ftw": 2588,
+  "n_ec": 2588,
+  "iou_median": 1.0,
+  "iou_ge_0_9": 1.0,
+  "matched_with_both_labels": 2588,
+  "ftw_unknown": 0,
+  "ec_unmapped": 0,
+  "hcat_code_agreement": 0.991,
+  "top_disagreements": [
+   [
+    [
+     "SUMMER OATS",
+     "summer_oats"
+    ],
+    11
+   ],
+   [
+    [
+     "SUMMER BARLEY",
+     "summer_barley"
+    ],
+    6
+   ],
+   [
+    [
+     "FORAGE GRASS",
+     "pasture_meadow_grassland_grass"
+    ],
+    3
+   ],
+   [
+    [
+     "FLAX (NOT FOR FIBER RECOVERY)",
+     "flax_linseed"
+    ],
+    2
+   ],
+   [
+    [
+     "SUMMER HARD WHEAT (DURUM)",
+     "summer_durum_hard_wheat"
+    ],
+    1
+   ]
+  ]
+ }
+}
