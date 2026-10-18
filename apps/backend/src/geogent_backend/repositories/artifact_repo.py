@@ -78,3 +78,15 @@ class ArtifactRepository:
             update(Artifact).where(Artifact.id == artifact_id).values(status="failed", error=error)
         )
         await self._session.commit()
+
+    async def reset_failed(self, artifact_id: str) -> bool:
+        """Put a *failed* artifact back to ``pending`` (clearing its error) so it can
+        be re-dispatched. Atomic on ``status == 'failed'``: of two racing retries
+        only one wins (returns True) and dispatches the job."""
+        result = await self._session.execute(
+            update(Artifact)
+            .where(Artifact.id == artifact_id, Artifact.status == "failed")
+            .values(status="pending", error=None, summary=None, assets=None)
+        )
+        await self._session.commit()
+        return bool(result.rowcount)  # type: ignore[attr-defined]

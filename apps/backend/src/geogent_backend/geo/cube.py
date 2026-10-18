@@ -113,6 +113,44 @@ def write_single_band_cog(
         return bytes(mem.read())
 
 
+def write_rgb_cog(
+    rgb_uint8: np.ndarray,
+    crs: CRS,
+    transform: Affine,
+    nodata: int = 0,
+) -> bytes:
+    """Write a ``(3, y, x)`` uint8 false-colour raster as a GeoTIFF; return its bytes.
+
+    Same v1 caveat as :func:`write_single_band_cog` (tiled GeoTIFF, no overviews).
+    Unlike the float layers it is **always tiled 256**, even for small rasters:
+    the browser GeoTIFF reader behind the UI's ``COGLayer`` addresses tiles, and a
+    striped file would not load. ``nodata`` (0) marks pixels without an embedding —
+    valid data is stretched into 1..255 so no real value collides with it.
+    """
+    if rgb_uint8.ndim != 3 or rgb_uint8.shape[0] != 3:
+        raise CubeError(f"expected a (3, y, x) RGB array, got shape {rgb_uint8.shape}")
+    _, height, width = rgb_uint8.shape
+    profile: dict = {
+        "driver": "GTiff",
+        "dtype": "uint8",
+        "count": 3,
+        "height": height,
+        "width": width,
+        "crs": crs,
+        "transform": transform,
+        "compress": "deflate",
+        "nodata": nodata,
+        "photometric": "RGB",
+        "tiled": True,
+        "blockxsize": 256,
+        "blockysize": 256,
+    }
+    with MemoryFile() as mem:
+        with mem.open(**profile) as dst:
+            dst.write(rgb_uint8.astype("uint8"))
+        return bytes(mem.read())
+
+
 def build_reduction(
     geom_4326: dict,
     scene_items: list[dict],

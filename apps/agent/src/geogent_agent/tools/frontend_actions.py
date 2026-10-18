@@ -179,6 +179,38 @@ def show_field_memory(
 
 
 @tool
+def show_embedding_layer(
+    artifact_id: str,
+    mode: Literal["pca"] = "pca",
+    label: str | None = None,
+) -> dict:
+    """Render a built embedding layer as a PCA false-colour image on the map.
+
+    The browser fetches the artifact's 3-band raster and paints it as RGB.
+    Returns only an acknowledgement; it reads no data back to you. Call
+    ``embedding_layer`` first to build the artifact and answer from its
+    ``summary``; pass the returned ``artifact_id`` here only to display it.
+
+    PCA colours are not comparable across years (the component signs are
+    arbitrary and the stretch is set per layer), so do not present two years'
+    colours as the same land cover. Compare years with ``field_embedding_profile``.
+    Pair the layer with ``seasonal_index_time_series_for_field`` before you
+    interpret what a colour represents.
+
+    Args:
+        artifact_id: The id returned by ``embedding_layer``.
+        mode: The display mode. Only ``pca`` is supported.
+        label: Optional layer label shown in the Layer Manager.
+    """
+    return {
+        "queued_embedding_layer": True,
+        "artifact_id": artifact_id,
+        "mode": mode,
+        "label": label,
+    }
+
+
+@tool
 def list_features_in_viewport() -> dict:
     """Display-only: open an interactive feature-list panel in the user's UI.
 

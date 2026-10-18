@@ -36,6 +36,9 @@ __all__ = [
 
 class ArtifactKind(str, Enum):  # noqa: UP042 — str-mixin keeps JSON value as the bare string
     temporal_features = "temporal_features"
+    # TESSERA yearly embeddings (ADR 0003); recipes live in schemas/embedding.py.
+    field_embeddings = "field_embeddings"
+    embedding_layer = "embedding_layer"
 
 
 class TemporalFeaturesRecipe(BaseModel):

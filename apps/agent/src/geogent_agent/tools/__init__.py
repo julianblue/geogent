@@ -1,3 +1,7 @@
+from geogent_agent.tools.embedding_tools import (
+    embedding_layer,
+    field_embedding_profile,
+)
 from geogent_agent.tools.frontend_actions import (
     add_aggregation_layer,
     add_buffer_layer,
@@ -7,6 +11,7 @@ from geogent_agent.tools.frontend_actions import (
     fly_to,
     list_features_in_viewport,
     render_dashboard,
+    show_embedding_layer,
     show_field_memory,
     show_sentinel2_scene,
 )
@@ -50,6 +55,8 @@ TOOLS = [
     zonal_stats_for_field,
     seasonal_index_time_series_for_field,
     field_memory_for_field,
+    field_embedding_profile,
+    embedding_layer,
     geocode_place,
     reverse_geocode,
     route_between,
@@ -67,6 +74,7 @@ TOOLS = [
     confirm_feature_save,
     show_sentinel2_scene,
     show_field_memory,
+    show_embedding_layer,
     render_dashboard,
 ]
 
@@ -81,7 +89,9 @@ __all__ = [
     "confirm_feature_save",
     "crop_stats_within_bbox",
     "distance_between",
+    "embedding_layer",
     "features_within",
+    "field_embedding_profile",
     "field_memory_for_field",
     "fields_within_bbox",
     "fly_to",
@@ -95,6 +105,7 @@ __all__ = [
     "reverse_geocode",
     "route_between",
     "seasonal_index_time_series_for_field",
+    "show_embedding_layer",
     "show_field_memory",
     "show_sentinel2_scene",
     "stac_get_item",

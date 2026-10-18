@@ -14,7 +14,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 WORKDIR /app
 
 COPY pyproject.toml uv.lock* README.md ./
-RUN uv sync --frozen || uv sync
+# `embeddings` group: icechunk/xarray/zarr for the TESSERA reader (geo/tessera.py).
+RUN uv sync --frozen --group embeddings || uv sync --group embeddings
 
 COPY . .
 

@@ -145,6 +145,8 @@ function isAggregationSource(src: Record<string, unknown>): boolean {
   );
 }
 
+const EMBEDDING_URL_PREFIX = "/api/proxy/analytics/artifacts/";
+
 function parseLayers(raw: unknown): MapLayer[] {
   if (!Array.isArray(raw)) return [];
   const out: MapLayer[] = [];
@@ -187,6 +189,25 @@ function parseLayers(raw: unknown): MapLayer[] {
           artifactId: src.artifactId,
           band: src.band,
           colormap: src.colormap,
+          url: src.url,
+        };
+      } else if (
+        src.kind === "embedding" &&
+        typeof src.artifactId === "string" &&
+        src.artifactId.length > 0 &&
+        src.mode === "pca" &&
+        typeof src.year === "number" &&
+        Number.isInteger(src.year) &&
+        // The COG is fetched straight from this URL on restore, so only accept
+        // the same-origin authed proxy path — never an arbitrary stored URL.
+        typeof src.url === "string" &&
+        src.url.startsWith(EMBEDDING_URL_PREFIX)
+      ) {
+        layer.source = {
+          kind: "embedding",
+          artifactId: src.artifactId,
+          mode: "pca",
+          year: src.year,
           url: src.url,
         };
       }

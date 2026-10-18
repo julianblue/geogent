@@ -40,6 +40,16 @@ ingest = [
   "geopandas>=1.0",
   "pyogrio>=0.10",
 ]
+# TESSERA yearly embeddings (ADR 0003): the global Icechunk/Zarr v3 store is read
+# anonymously via these. Imported lazily by geo/tessera.py, so the API still boots
+# without them (embedding routes answer 503). Installed in the Docker image; run
+# locally with: uv run --group embeddings ...
+embeddings = [
+  "icechunk>=2.3",
+  "xarray>=2025.1",
+  "zarr>=3.1",
+  "numcodecs[pcodec]>=0.17",
+]
 
 [build-system]
 requires = ["hatchling"]

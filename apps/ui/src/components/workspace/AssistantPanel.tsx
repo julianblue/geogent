@@ -11,12 +11,14 @@ import { RouteLayerTool } from "@/components/assistant/tools/RouteLayerTool";
 import { IsochroneLayerTool } from "@/components/assistant/tools/IsochroneLayerTool";
 import { AggregationLayerTool } from "@/components/assistant/tools/AggregationLayerTool";
 import { FieldMemoryLayerTool } from "@/components/assistant/tools/FieldMemoryLayerTool";
+import { EmbeddingLayerTool } from "@/components/assistant/tools/EmbeddingLayerTool";
 import { FeaturesInViewportTool } from "@/components/assistant/tools/FeaturesInViewportTool";
 import { ConfirmFeatureSaveTool } from "@/components/assistant/tools/ConfirmFeatureSaveTool";
 import { RenderDashboardTool } from "@/components/assistant/tools/RenderDashboardTool";
 import { ZonalStatsTool } from "@/components/assistant/tools/agriculture/ZonalStatsTool";
 import { IndexTimeSeriesTool } from "@/components/assistant/tools/agriculture/IndexTimeSeriesTool";
 import { Sentinel2SceneWidgetTool } from "@/components/assistant/tools/agriculture/Sentinel2SceneWidgetTool";
+import { FieldEmbeddingProfileTool } from "@/components/assistant/tools/agriculture/FieldEmbeddingProfileTool";
 import { ThreadListSidebar } from "@/components/workspace/ThreadListSidebar";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 
@@ -63,12 +65,14 @@ export function AssistantPanel() {
       <IsochroneLayerTool />
       <AggregationLayerTool />
       <FieldMemoryLayerTool />
+      <EmbeddingLayerTool />
       <FeaturesInViewportTool />
       <ConfirmFeatureSaveTool />
       <RenderDashboardTool />
       <ZonalStatsTool />
       <IndexTimeSeriesTool />
       <Sentinel2SceneWidgetTool />
+      <FieldEmbeddingProfileTool />
 
       {expanded ? (
         <div className="flex min-h-0 flex-1 flex-col">

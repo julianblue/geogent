@@ -6,11 +6,12 @@ the index kernels without touching COGs.
 """
 
 import numpy as np
+import pytest
 from affine import Affine
 from rasterio.crs import CRS
 from rasterio.io import MemoryFile
 
-from geogent_backend.geo.cube import write_single_band_cog
+from geogent_backend.geo.cube import CubeError, write_rgb_cog, write_single_band_cog
 from geogent_backend.geo.reducers import ReducerName, get_spec
 
 _YEARS = np.array([2023.0, 2024.0, 2025.0])
@@ -71,3 +72,31 @@ def test_write_single_band_cog_roundtrips() -> None:
         assert ds.crs.to_epsg() == 32611
         assert np.isclose(ds.read(1).mean(), 0.6, atol=1e-4)
         assert ds.descriptions[0] == "productivity_mean_index"
+
+
+def test_write_rgb_cog_roundtrips_and_is_always_tiled() -> None:
+    # a tiny 8x6 raster: still written with 256 px tiles (the UI's COGLayer needs tiles)
+    rgb = np.zeros((3, 6, 8), dtype="uint8")
+    rgb[0], rgb[1], rgb[2] = 10, 128, 255
+    rgb[:, 0, 0] = 0  # nodata pixel
+    crs = CRS.from_epsg(32633)
+    transform = Affine(10.0, 0.0, 600000.0, 0.0, -10.0, 5340000.0)
+
+    data = write_rgb_cog(rgb, crs, transform)
+
+    with MemoryFile(data) as mem, mem.open() as ds:
+        assert ds.count == 3 and ds.dtypes == ("uint8",) * 3
+        assert ds.crs.to_epsg() == 32633 and ds.transform == transform
+        assert ds.nodata == 0
+        assert ds.block_shapes == [(256, 256)] * 3
+        assert np.array_equal(ds.read(), rgb)
+        assert ds.read_masks(1)[0, 0] == 0 and ds.read_masks(1)[1, 1] == 255
+
+
+def test_write_rgb_cog_rejects_other_shapes() -> None:
+    with pytest.raises(CubeError):
+        write_rgb_cog(
+            np.zeros((4, 4, 4), dtype="uint8"),
+            CRS.from_epsg(32633),
+            Affine(10.0, 0.0, 0.0, 0.0, -10.0, 0.0),
+        )
