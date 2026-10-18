@@ -123,3 +123,47 @@ Ground truth comes from Sentinel-2 L2A NDVI rather than declarations (`s2_ndvi.p
   - Declared "processing vegetables, multi-cultured" parcels are 81% two-cycle, against 0–9% for every other crop. That independently validates the NDVI labelling.
   - The embedding finds double-cropped parcels much better than the crop label does (AUC 0.91 vs 0.72). Balanced accuracy at p = 0.5 is 0.71 because of the 8% prevalence, so the threshold should be tuned.
 - **Caveat:** TESSERA is itself trained on S1/S2 time series, so this shows the 128-d vector *retains* intra-season cycle structure. The NDVI labels are not independent evidence of anything new. The practical gain is cost: one read per pixel-year instead of ~45 scenes.
+
+## 7. Over-winter cover after harvest: cover/catch crop vs next season's autumn-sown crop (2024)
+
+Script: `winter_cover.py`.
+
+**Population.** Harvested arable parcels only: the main NDVI peak is ≥0.5 by early September, followed by a trough below 0.35. Perennials, fallow and greenhouses are excluded.
+
+**Classes,** from mean NDVI between mid-November and the end of December:
+- **winter green:** ≥0.45
+- **bare:** <0.30
+- parcels in between are dropped
+
+**Splitting winter green.** The 2025 declaration on the same ground (≥80% overlap) decides which kind each winter-green parcel is:
+- **autumn-sown next crop:** the 2025 crop is a winter crop
+- **cover/catch crop:** the 2025 crop is a spring/summer crop
+
+**Counts.** 680 parcels: 493 bare and 187 winter green. The 187 split into 129 cover/catch, 34 autumn-sown next crop, and 9 that go to perennial/fallow.
+
+**Independent sanity check from timing:** the autumn green-up date (NDVI ≥0.4) for cover/catch crops has median 16 Oct (IQR 6–31 Oct); for autumn-sown next crops it has median 20 Nov (IQR 15–25 Nov). This fits catch crops sown right after the cereal harvest versus winter cereals sown in October.
+
+**Practice prevalence** among harvested parcels:
+
+| 2024 crop | bare | cover/catch | next winter crop |
+|---|---|---|---|
+| durum | 0.62 | 0.35 | 0.00 |
+| soft wheat | 0.64 | 0.30 | 0.02 |
+| field veg | 0.81 | 0.08 | 0.10 |
+| grain maize | 0.74 | 0.07 | 0.07 |
+| soy | 0.94 | 0.03 | 0.02 |
+
+A third of cereal fields carry a cover crop. Late-harvested row crops almost never do.
+
+**Embedding probes** (2024 embedding only, 2-km spatial-block CV):
+
+| Task | n | Prevalence | AUC, crop label | AUC, embedding | Balanced accuracy |
+|---|---|---|---|---|---|
+| winter green vs bare after harvest | 680 | 0.28 | 0.615 | **0.996** | 0.964 |
+| cover/catch vs autumn-sown next crop | 163 | 0.79 | 0.834 | **0.972** | 0.889 |
+
+The embedding beats the hand-made NDVI green-up date (AUC 0.883) at separating cover crops from autumn sowings. It keeps more than greening timing, possibly canopy density or radar-visible structure; unverified.
+
+**Caveats:**
+- "Cover/catch" here means green over winter followed by a spring crop. Volunteer cereals or weedy stubble would land in the same class.
+- The labels depend on 2025 declarations, so they reflect what was declared, not what was observed.
