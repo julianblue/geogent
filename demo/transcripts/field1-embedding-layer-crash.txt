@@ -1,0 +1,21 @@
+thread 340820e1-ff89-4866-85de-d9535eb3e526 {"owner": "1", "graph_id": "geogent", "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db", "title": "Show me an embedding false-colour view of field 1 for 2024."}
+
+[USER] Show me an embedding false-colour view of field 1 for 2024.
+
+[AI] I'll create a false-colour embedding view of field 1 for the year 2024.
+[CALL] embedding_layer {"year": 2024, "field_id": 1}
+[RESULT embedding_layer] status=success {"artifact_id": "a45c8331d483499491a165f126871cb1", "kind": "embedding_layer", "status": "succeeded", "summary": {"dim": 128, "grid": {"epsg": 32633, "width": 88, "height": 113, "resolution_m": 10.0}, "mode": "pca", "yea
+
+[AI] Now I'll display the embedding layer on the map:
+[CALL] show_embedding_layer {"artifact_id": "a45c8331d483499491a165f126871cb1", "label": "Field 1 - 2024 Embedding (PCA)"}
+[RESULT show_embedding_layer] status=success {"queued_embedding_layer": true, "artifact_id": "a45c8331d483499491a165f126871cb1", "mode": "pca", "label": "Field 1 - 2024 Embedding (PCA)"}
+
+[AI] Perfect! I've displayed a PCA false-colour embedding view of field 1 for 2024 on your map. 
+
+**Key details:**
+- **Year:** 2024 (calendar year: Jan 1–Dec 31)
+- **Resolution:** 10m per pixel
+- **Coverage:** 100% valid pixels (no gaps)
+- **PCA components:** The three principal components explain 26%, 23%, and 10% of the variance respectively (59% total)
+
+The colors represent the field's seasonal spectral signature compressed into three RGB channels via PCA. Different colors indicate different land-cover or crop patterns throughout the year. Remember that PCA colors are **not comparable across years** (the component signs and stretches are arbitrary per layer), so this view is best for exploring spatial patterns within 2024 rather than comparing to other years.

@@ -1,0 +1,22 @@
+diff --git a/apps/ui/src/components/assistant/tools/EmbeddingLayerTool.tsx b/apps/ui/src/components/assistant/tools/EmbeddingLayerTool.tsx
+index 85ee51a..5790b2c 100644
+--- a/apps/ui/src/components/assistant/tools/EmbeddingLayerTool.tsx
++++ b/apps/ui/src/components/assistant/tools/EmbeddingLayerTool.tsx
+@@ -5,6 +5,7 @@ import { useAssistantTool, type ToolCallMessagePartProps } from "@assistant-ui/r
+ 
+ import { useMapState } from "@/components/map/MapStateProvider";
+ import { ToolErrorChip } from "@/components/assistant/tools/ToolErrorChip";
++import { parseToolResult } from "@/components/assistant/widgets/agriculture/shared";
+ 
+ const embeddingSchema = z.object({
+   artifact_id: z.string().describe("Artifact id returned by embedding_layer."),
+@@ -89,7 +90,8 @@ export function EmbeddingLayerTool() {
+       }
+       return (
+         <div className="text-xs text-muted-foreground">
+-          Embedding {result.mode.toUpperCase()} layer drawn on the map.
++          Embedding {(parseToolResult<EmbeddingResult>(result)?.mode ?? "pca").toUpperCase()} layer
++          drawn on the map.
+         </div>
+       );
+     },

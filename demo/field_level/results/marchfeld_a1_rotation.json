@@ -1,0 +1,98 @@
+{
+ "rotation_pairs": {
+  "n": 5701,
+  "changed": 0.787,
+  "auc": 0.958,
+  "precision_at_0_5": 0.966,
+  "recall_at_0_5": 0.897,
+  "fpr_at_0_5": 0.117,
+  "baseline_always_changed_acc": 0.787,
+  "acc_at_0_5": 0.894
+ },
+ "missed_changes_same_group_share": 0.328,
+ "missed_change_top": [
+  [
+   [
+    "WINTER SOFT WHEAT",
+    "WINTER BARLEY"
+   ],
+   21
+  ],
+  [
+   [
+    "SOYBEANS",
+    "GRAIN CORN"
+   ],
+   18
+  ],
+  [
+   [
+    "FIELD VEGETABLES WITHOUT HARVEST",
+    "FIELD VEGETABLES SINGLE CULTURE"
+   ],
+   17
+  ],
+  [
+   [
+    "WINTER SOFT WHEAT",
+    "WINTER RYE"
+   ],
+   15
+  ],
+  [
+   [
+    "WINTER BARLEY",
+    "WINTER SOFT WHEAT"
+   ],
+   15
+  ],
+  [
+   [
+    "FIELD VEGETABLES PROCESSING SINGLE CULTURE",
+    "FOOD INDUSTRY POTATOES"
+   ],
+   14
+  ]
+ ],
+ "false_alarm_top_crops": [
+  [
+   "GREEN FALLOW",
+   35
+  ],
+  [
+   "FIELD VEGETABLES PROCESSING SINGLE CULTURE",
+   31
+  ],
+  [
+   "FIELD VEGETABLES SINGLE CULTURE",
+   23
+  ],
+  [
+   "ALFALFA",
+   11
+  ],
+  [
+   "WINTER SOFT WHEAT",
+   7
+  ],
+  [
+   "SOYBEANS",
+   7
+  ]
+ ],
+ "loyo_group_acc": 0.915,
+ "majority_group_acc": 0.316,
+ "untracked_unit_years": 1098,
+ "untracked_with_embedding_group": 1030,
+ "profiles": {
+  "n_units": 1124,
+  "n_arable": 874,
+  "cereal_share_median": 0.43,
+  "cereal_share_ge_0_6": 0.114,
+  "monoculture_run_ge_3": 0.056,
+  "group_entropy_median": 1.66,
+  "n_crops_median": 5.0,
+  "units_with_any_disagreement": 0.347,
+  "units_with_ge2_disagreements": 0.109
+ }
+}

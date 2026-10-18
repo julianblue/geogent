@@ -1,0 +1,30 @@
+thread c121dde4-bd0b-4c0b-b2dd-f96429b033a7 {"owner": "1", "graph_id": "geogent", "assistant_id": "7ff9179d-9ee6-5082-8532-3a579e7345db", "title": "Show me an embedding false-colour view of field 1 for 2024.", "snapshot": {"v": 1, "viewport": {"longitude": 16.597231999999963, "latitude": 48.248951000000005, "zoom": 15}, "layers": [{"id": "emb
+
+[USER] Show me an embedding false-colour view of field 1 for 2024.
+
+[AI] I'll create a false-colour embedding view of field 1 for the year 2024.
+[CALL] embedding_layer {"year": 2024, "field_id": 1}
+[RESULT embedding_layer] status=success {"artifact_id": "a45c8331d483499491a165f126871cb1", "kind": "embedding_layer", "status": "succeeded", "summary": {"dim": 128, "grid": {"epsg": 32633, "width": 88, "height": 113, "resolution_m": 10.0}, "mode": "pca", "yea
+
+[AI] Now I'll display the embedding layer on the map:
+[CALL] show_embedding_layer {"artifact_id": "a45c8331d483499491a165f126871cb1", "label": "Field 1 - 2024 Embedding (PCA)"}
+[RESULT show_embedding_layer] status=success {"queued_embedding_layer": true, "artifact_id": "a45c8331d483499491a165f126871cb1", "mode": "pca", "label": "Field 1 - 2024 Embedding (PCA)"}
+
+[AI] Perfect! I've rendered a PCA false-colour embedding view of field 1 for 2024 on your map. 
+
+**Key details:**
+- **Year:** 2024 (calendar year: Jan 1–Dec 31)
+- **Resolution:** 10m per pixel
+- **Coverage:** 100% valid pixels (no gaps)
+- **PCA components:** The three principal components explain 26%, 23%, and 10% of the variance respectively (59% total)
+
+The colors represent the field's seasonal spectral signature compressed into three RGB channels via PCA. Different colors indicate different land-cover or crop patterns throughout the year. Remember that PCA colors are **not comparable across years** (the component signs and stretches are arbitrary per layer), so this view is best for exploring spatial patterns within 2024 rather than comparing to other years.
+
+[USER] Zoom the map to field 1 so I can see the layer.
+
+[AI] I'll zoom the map to field 1's location based on the embedding layer's bounding box.
+[CALL] fly_to {"longitude": 16.597232, "latitude": 48.248951, "zoom": 15}
+[RESULT fly_to] status=success {"flown_to": [16.597232, 48.248951], "zoom": 15.0}
+
+[AI] Done! I've zoomed the map to field 1's location (centered at approximately 16.597°E, 48.249°N with zoom level 15). You should now see the PCA false-colour embedding layer clearly displayed over the field.
+[RESULT fly_to] status=success {"flown_to":[16.597232,48.248951],"zoom":15}
