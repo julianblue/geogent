@@ -197,6 +197,43 @@ describe("parseSnapshot", () => {
       { id: "fm-bad", label: "No colormap", visible: true },
     ]);
   });
+
+  it("restores embedding layer sources and rejects invalid ones", () => {
+    const emb = {
+      kind: "embedding",
+      artifactId: "beef5678",
+      mode: "pca",
+      year: 2024,
+      url: "/api/proxy/analytics/artifacts/beef5678/assets/pca_rgb.tif",
+    };
+    const parsed = parseSnapshot({
+      v: 1,
+      layers: [
+        { id: "embedding-beef5678-pca", label: "Embedding PCA (2024)", source: emb },
+        // Each of these breaks one rule → source dropped, layer kept.
+        {
+          id: "e-url",
+          label: "Foreign url",
+          source: { ...emb, url: "https://evil.example/x.tif" },
+        },
+        { id: "e-root", label: "Wrong prefix", source: { ...emb, url: "/api/proxy/other/x.tif" } },
+        { id: "e-mode", label: "Bad mode", source: { ...emb, mode: "umap" } },
+        { id: "e-year", label: "Fractional year", source: { ...emb, year: 2024.5 } },
+        { id: "e-year-str", label: "String year", source: { ...emb, year: "2024" } },
+        { id: "e-id", label: "Empty id", source: { ...emb, artifactId: "" } },
+      ],
+      workspace: { openWidgetIds: [], pinnedWidgetIds: [], activeWidgetId: null },
+    });
+    expect(parsed?.layers).toEqual([
+      { id: "embedding-beef5678-pca", label: "Embedding PCA (2024)", visible: true, source: emb },
+      { id: "e-url", label: "Foreign url", visible: true },
+      { id: "e-root", label: "Wrong prefix", visible: true },
+      { id: "e-mode", label: "Bad mode", visible: true },
+      { id: "e-year", label: "Fractional year", visible: true },
+      { id: "e-year-str", label: "String year", visible: true },
+      { id: "e-id", label: "Empty id", visible: true },
+    ]);
+  });
 });
 
 describe("snapshotsEqual", () => {

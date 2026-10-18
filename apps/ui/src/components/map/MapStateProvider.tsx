@@ -74,6 +74,17 @@ export type LayerSource =
       band: string;
       colormap: string;
       url: string;
+    }
+  | {
+      // TESSERA embedding PCA-RGB COG layer (ADR 0003). Only the artifact id,
+      // mode, calendar year and asset URL ride along — the COG is refetched by
+      // EmbeddingOverlay on thread reopen. `url` is always an authed
+      // `/api/proxy/analytics/artifacts/…` path (enforced in parseLayers).
+      kind: "embedding";
+      artifactId: string;
+      mode: "pca";
+      year: number;
+      url: string;
     };
 
 export type MapLayer = {
