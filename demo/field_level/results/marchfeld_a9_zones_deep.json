@@ -1,0 +1,141 @@
+{
+ "window": "marchfeld",
+ "split_year": 2022,
+ "n_units_with_patches": 779,
+ "n_patches": 1924,
+ "holdout": {
+  "n_unit_seasons": 2101,
+  "auc_median": 0.791,
+  "auc_null_median": 0.498,
+  "share_auc_gt_0_6": 0.849,
+  "share_null_gt_0_6": 0.257,
+  "low_zone_mean_z_in_test": -0.768,
+  "by_group": {
+   "field veg": [
+    0.694,
+    542
+   ],
+   "legume": [
+    0.786,
+    188
+   ],
+   "maize": [
+    0.803,
+    212
+   ],
+   "oilseed/pumpkin": [
+    0.818,
+    31
+   ],
+   "potato": [
+    0.745,
+    182
+   ],
+   "spring cereal": [
+    0.838,
+    55
+   ],
+   "sugar beet": [
+    0.777,
+    104
+   ],
+   "winter cereal": [
+    0.842,
+    787
+   ]
+  }
+ },
+ "patches": {
+  "median_ha": 0.21,
+  "median_field_share": 0.057,
+  "deficit_ndvi_median": -0.04,
+  "deficit_ndvi_p10": -0.07,
+  "recurrence_median": 0.558,
+  "type_share": {
+   "edge / headland": 0.295,
+   "drought-prone": 0.24,
+   "unexplained": 0.203,
+   "establishment": 0.111,
+   "legacy parcel": 0.078,
+   "wet / hollow": 0.074
+  },
+  "type_ha": {
+   "drought-prone": 134.1,
+   "edge / headland": 145.4,
+   "establishment": 61.8,
+   "legacy parcel": 52.3,
+   "unexplained": 126.8,
+   "wet / hollow": 42.9
+  }
+ },
+ "soil_within_field": {
+  "acker": {
+   "n_fields": 712,
+   "mean_score_diff_hi_minus_lo": 0.168,
+   "share_positive": 0.684,
+   "sign_test_p": 4.3583693341911454e-23,
+   "wilcoxon_p": 2.897130402391538e-29,
+   "median_rho": 0.128
+  },
+  "depth": {
+   "n_fields": 35,
+   "mean_score_diff_hi_minus_lo": 0.209,
+   "share_positive": 0.657,
+   "sign_test_p": 0.08953107893466952,
+   "wilcoxon_p": 0.01582449523266405,
+   "median_rho": 0.1
+  },
+  "nfk": {
+   "n_fields": 573,
+   "mean_score_diff_hi_minus_lo": 0.127,
+   "share_positive": 0.66,
+   "sign_test_p": 1.7417804901618554e-14,
+   "wilcoxon_p": 8.661262867061494e-17,
+   "median_rho": 0.116
+  }
+ },
+ "patch_soil_by_type": {
+  "drought-prone": {
+   "n": 366,
+   "nfk_off_mean": -0.1,
+   "share_nfk_lower": 0.593,
+   "depth_off_mean": -0.01,
+   "acker_off_mean": -0.22
+  },
+  "edge / headland": {
+   "n": 452,
+   "nfk_off_mean": -0.0,
+   "share_nfk_lower": 0.569,
+   "depth_off_mean": -0.02,
+   "acker_off_mean": -0.04
+  },
+  "establishment": {
+   "n": 160,
+   "nfk_off_mean": -0.1,
+   "share_nfk_lower": 0.637,
+   "depth_off_mean": 0.01,
+   "acker_off_mean": -0.13
+  },
+  "legacy parcel": {
+   "n": 112,
+   "nfk_off_mean": -0.1,
+   "share_nfk_lower": 0.625,
+   "depth_off_mean": -0.03,
+   "acker_off_mean": -0.2
+  },
+  "unexplained": {
+   "n": 296,
+   "nfk_off_mean": -0.1,
+   "share_nfk_lower": 0.625,
+   "depth_off_mean": -0.0,
+   "acker_off_mean": -0.14
+  },
+  "wet / hollow": {
+   "n": 118,
+   "nfk_off_mean": -0.1,
+   "share_nfk_lower": 0.602,
+   "depth_off_mean": -0.01,
+   "acker_off_mean": -0.13
+  }
+ }
+}

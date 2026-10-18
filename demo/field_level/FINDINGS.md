@@ -32,7 +32,7 @@ Date 2026-10-18 · branch `claude/field-level-insights` · builds on `demo/analy
   - Uckermark: DWD station 01869 Grünow, 2.8 km from the window centre.
   - Evapotranspiration is computed with Hargreaves; normals are 1992–2020 (`weather.py`).
   - Open-Meteo is unusable from this egress: it first returned a daily-quota 429, later timed out.
-- SoilGrids is reachable but was not integrated (250 m is too coarse for within-field work).
+- SoilGrids is reachable but was not integrated (250 m is too coarse for within-field work). Within-field soil truth comes from eBod (AT) and the Bodenschätzung pits (BB); see A9.
 
 **Pipeline.** `run_all.sh` runs `labels → units → tessera_extract → s2_cube → dem → pheno → features → a1…a6 → dossier`. Since revision 2, `cycles_ts.py` runs between `pheno` and `features`. `weather.py`, `history_labels.py`, `a1b_history.py`, `a4b_zone_weather.py` and `a8_preceding.py` are standalone. Derived tables go to `results/*.json`. No imagery is committed (TESSERA licence).
 
@@ -172,6 +172,68 @@ Date 2026-10-18 · branch `claude/field-level-insights` · builds on `demo/analy
   - That fits low water-holding soil at that spot.
   - Single field, 7 seasons: a hint, not a test.
 
+### A9 Low-performing zones: delineation, hold-out, soil truth and typology
+
+Scripts: `pixel_phases.py`, `soil_ebod.py`, `soil_bb.py`, `a9_zones_deep.py`.
+
+**Zone score.** Within-field z of season-mean NDVI, averaged over arable seasons and smoothed over 3×3 pixels.
+
+**Weak patch.** Connected pixels (≥0.1 ha) in the field's weakest fifth.
+
+**Soil truth (new, external, independent of the satellite data):**
+- **Austria:** the national soil map eBod (BFW; 1:25,000 from a 1:10,000 field survey; public vector tiles, free to embed with attribution).
+  - Classes used: arable value 1–5, rooting depth 1–5, plant-available water 1–5 (<60 to >300 mm). Code 0 means "strongly varying" and is excluded.
+  - Georeferencing check: never-green pixels (roofs, yards) vs mapped area peaks sharply at zero shift in Marchfeld.
+- **Brandenburg:** the official soil-survey pits (Bodenschätzung, LBGR WFS-BOGRABLOECHER, free of charge).
+  - 532 pits in the window, 450 of them arable.
+  - Each pit carries the soil-quality score (Wertzahl, 13–69) and texture.
+- Only derived statistics are committed.
+
+| | Marchfeld | Traun-Enns | Uckermark |
+|---|---|---|---|
+| **Hold-out:** zones from 2019–22 (BB 2019–21) find each later season's weakest fifth, median AUC (rotated-map null) | **0.79** (0.50), n=2,101 field-seasons | **0.82** (0.50), n=2,368 | **0.87** (0.49), n=288 |
+| Field-seasons with AUC > 0.6 (null) | 85% (26%) | 87% (31%) | 96% (21%) |
+| Hold-out AUC range by crop | 0.69 (field veg) to 0.84 (winter cereal) | 0.81–0.83 | 0.85–0.89 |
+| **Soil map:** fields where the better arable-value part is greener | 68% of 712 (p 4e-23), +0.17 SD | 60% of 243 (p 0.002), +0.18 SD | — |
+| … higher plant-available water part greener | 66% of 573 (p 2e-14), +0.13 SD | 61% of 193 (p 0.002), +0.22 SD | — |
+| … deeper rooting part greener | 66% of 35 (p 0.09) | **74% of 117** (p 1e-7), **+0.47 SD** | — |
+| **Soil pits:** within-field ρ (pit score vs soil-quality score) | — | — | **0.38** (208 pits, 12 fields, p 1e-8) |
+| … mean soil-quality score of pits inside weak zones vs elsewhere | — | — | **40.6 vs 53.5** (47 vs 165 pits) |
+| Weak patches: median size, share of field, NDVI deficit (p10) | 0.21 ha, 5.7%, −0.040 (−0.07) | 0.23 ha, 8.3%, −0.026 (−0.05) | 0.31 ha, 1.2%, −0.043 (−0.09) |
+| Share of seasons a patch is in the weakest fifth (median) | 56% | 58% | 64% |
+
+**Typology.** Rules, first match:
+1. **edge / headland:** ≥60% of the patch within 30 m of the field edge, and well above the field's own edge share
+2. **legacy parcel:** a former separate 2015–18 parcel holds ≥80% of the patch
+3. **drought-prone:** deficit grows in dry springs (ρ ≥ 0.5 vs Apr–Jun water balance), or the deficit is late-season dominated
+4. **wet / hollow:** deficit grows in wet springs (ρ ≤ −0.5), or low terrain with an early deficit
+5. **establishment:** early-season deficit
+6. **unexplained**
+
+| Patch share | Marchfeld (n=1,924) | Traun-Enns | Uckermark |
+|---|---|---|---|
+| edge / headland | 30% | **51%** | 27% |
+| drought-prone | 24% | 16% | 29% |
+| wet / hollow | 7% | 6% | 12% |
+| establishment | 11% | 6% | 11% |
+| legacy parcel | 8% | 7% | 7% |
+| unexplained | 20% | 15% | 15% |
+
+**Typology vs soil map (internal check).**
+- Edge / headland patches sit on the same soil as the rest of their field: arable value −0.03 / −0.04 classes, and nFK lower in 53–57% of cases, about chance. That is what a management effect should look like.
+- Drought-prone patches sit on poorer soil: arable value −0.22 / −0.27 classes, nFK lower in 59–63%, and in Traun-Enns 0.21 classes shallower.
+- Legacy-parcel patches are also on poorer soil (−0.18 / −0.20).
+- Wet / hollow patches are soil-neutral in Traun-Enns. The eBod water class is not ordinal there, and stagnic soils are scattered, so the soil map cannot test this type.
+- **Unverified:** the typology is rule-based and has no field-checked labels. The soil comparison supports the edge vs soil split. It does not validate the finer classes.
+
+**Worked example** (`tr-115077081`, field report):
+- The weakest fifth splits into two patches with opposite causes:
+  - **A (0.94 ha):** weak in dry springs (ρ +0.79), early-season deficit, partly along the headland, on soil mapped as deep and high-value. Suspect compaction.
+  - **B (0.56 ha):** weak in wet springs (ρ −0.82), the lowest part of the field, on the eBod unit mapped *wechselfeucht* (stagnic, medium value). Suspect waterlogging.
+- An earlier single explanation ("low water-holding soil") was wrong.
+
+**Agent use.** A `low_zones(field_id)` tool should return patches with type, deficit, recurrence and the evidence behind each type (season timing, weather ρ, terrain, soil). It should give the hold-out AUC as its reliability, and frame its output as "where to dig first", not as a diagnosis.
+
 ## A5 Anomaly and event screening
 
 **Scores,** per unit-year, as a robust z within class-year:
@@ -268,7 +330,8 @@ These are the season effects that peer z removes. They are kept for explaining s
 | Harvest date, winter cover class | High | A2 calendar match 94–95% (crop-aware main cycle); persistence check |
 | Preceding-crop / sowing-window effect on winter cereals | High (direction and size), 3 regions | A8; confounded with nitrogen and disease break |
 | 11-year history, gap-fill on unseen years | High | A1b 2018 hold-out: group 0.86–0.91, rotation AUC 0.93–0.97 |
-| Within-field persistent zones | Medium-high | A4: edge-controlled, binomial null, split-half 0.58–0.73 |
+| Within-field persistent zones | **High** | A4/A9: hold-out AUC 0.79–0.87 vs 0.50 null; agrees with the soil map (60–74% of fields) and soil pits (ρ 0.38) |
+| Zone typology (edge vs soil-driven vs weather-sensitive) | Medium | A9: edge patches soil-neutral, drought-prone patches on poorer soil; finer classes unverified |
 | Terrain explanation of zones | Medium, direction only | A4 rotated-DEM null |
 | Peer percentile (single year) | Medium as "this season"; **low** as a field trait | A3 |
 | Event screen (failure, resowing) | Low, a review queue | A5, 27% precision |

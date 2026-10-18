@@ -10,9 +10,11 @@ if [[ "${3:-}" == fetch ]]; then
   ${TPY:?set TPY} tessera_extract.py "$W" "$D"
   for y in $($PY -c "from windows import *; print(*FTW_YEARS[WINDOWS['$W']['cc']])"); do $PY s2_cube.py "$W" "$y" "$D"; done
   $PY dem.py "$W" "$D"; $PY weather.py "$W" "$D"
+  [[ "$W" != uckermark ]] && $PY soil_ebod.py "$W" "$D"  # BB: soil_bb.py on a WFS-BOGRABLOECHER GetFeature dump
 fi
 $PY units.py "$W" "$D"
 $PY pheno.py "$W" "$D"
 $PY cycles_ts.py "$W" "$D"
 $PY features.py "$W" "$D"
-for a in a1_rotation a2_phenology a3_peers a4_zones a5_anomaly a6_boundary a4b_zone_weather a8_preceding; do $PY $a.py "$W" "$D" > "$D/$W/$a.log"; done
+$PY pixel_phases.py "$W" "$D"
+for a in a1_rotation a2_phenology a3_peers a4_zones a5_anomaly a6_boundary a4b_zone_weather a8_preceding a9_zones_deep; do $PY $a.py "$W" "$D" > "$D/$W/$a.log"; done

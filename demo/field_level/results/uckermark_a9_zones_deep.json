@@ -1,0 +1,65 @@
+{
+ "window": "uckermark",
+ "split_year": 2021,
+ "n_units_with_patches": 160,
+ "n_patches": 1078,
+ "holdout": {
+  "n_unit_seasons": 288,
+  "auc_median": 0.87,
+  "auc_null_median": 0.494,
+  "share_auc_gt_0_6": 0.955,
+  "share_null_gt_0_6": 0.205,
+  "low_zone_mean_z_in_test": -1.007,
+  "by_group": {
+   "maize": [
+    0.859,
+    31
+   ],
+   "oilseed/pumpkin": [
+    0.846,
+    60
+   ],
+   "winter cereal": [
+    0.889,
+    184
+   ]
+  }
+ },
+ "patches": {
+  "median_ha": 0.31,
+  "median_field_share": 0.012,
+  "deficit_ndvi_median": -0.043,
+  "deficit_ndvi_p10": -0.088,
+  "recurrence_median": 0.636,
+  "type_share": {
+   "drought-prone": 0.286,
+   "edge / headland": 0.265,
+   "unexplained": 0.149,
+   "wet / hollow": 0.122,
+   "establishment": 0.11,
+   "legacy parcel": 0.068
+  },
+  "type_ha": {
+   "drought-prone": 208.8,
+   "edge / headland": 94.1,
+   "establishment": 62.1,
+   "legacy parcel": 68.0,
+   "unexplained": 130.5,
+   "wet / hollow": 81.5
+  }
+ },
+ "pits": {
+  "n_pits_in_fields": 212,
+  "n_fields_multi": 12,
+  "n_pits_multi": 208,
+  "within_field_spearman": 0.38,
+  "within_field_p": 1.497570825583719e-08,
+  "wertzahl_low_vs_other": [
+   40.6,
+   53.5,
+   47,
+   165
+  ],
+  "pooled_spearman": 0.333
+ }
+}
