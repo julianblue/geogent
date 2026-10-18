@@ -185,3 +185,73 @@ Script: `xyear.py`. Labels are rebuilt from scratch for each year from that year
   - Double crop: 13.1% in 2023 vs 8.2% in 2024.
   - Winter green: 45% vs 28%.
   - The shift could reflect real year differences (autumn moisture, sowing windows) or be an artefact of cloud-limited Nov–Dec observations in the NDVI labels. Not resolved here. For deployment, calibrate the threshold per year, e.g. on a small NDVI-labelled sample, or report a ranked probability rather than a yes/no.
+
+## 9. Geographic transfer: Marchfeld → Upper Austria (Traun-Enns plateau)
+
+Script: `transfer.py`, plus `transfer_checks.py` for the raw-vs-centred comparison and the confusion checks.
+
+**Target region:** lon 14.38–14.50, lat 48.12–48.19, in the same UTM 33N zone. It is rainfed and wetter, with smaller fields (~1.7 ha vs 3.5 ha). The crop mix is wheat, maize, soy, sugar beet and barley, plus meadows; few vegetables.
+- 2,544–2,846 declared parcels per year, about 4,550 ha.
+- Same pipeline as Marchfeld: declarations 2019–2025, embeddings, and 2024 S2 NDVI.
+
+**Method:** every model is trained on Marchfeld only and applied unchanged. The only adaptation is the unsupervised per-year centring on the target's own window mean. The comparison column ("own") is trained inside Upper Austria.
+
+**(a) Crop type**
+
+13 shared classes, 8,356 target parcel-years.
+
+| Model | Accuracy | Macro-F1 |
+|---|---|---|
+| Marchfeld → UA | **0.853** | 0.597 |
+| UA own leave-one-year-out | 0.938 | 0.785 |
+| majority baseline | 0.261 | — |
+| 7 crop groups, transfer | 0.899 | 0.742 |
+
+- The main crops transfer well: soft wheat 0.97, soy 0.95, fallow 0.93, sugar beet 0.90.
+- Weaker classes:
+  - Grain maize 0.71: 289 of its errors go to *seed maize*, so they stay within maize.
+  - Winter barley 0.77: errors go to wheat and rye.
+  - Triticale 0.16: absorbed into rye and wheat.
+  - Catch-all forage 0.02.
+- Raw vs centred for transfer: accuracy 0.859 vs 0.853, macro-F1 0.554 vs 0.597. Centring by a region mean depends on the region's crop mix, so it is roughly neutral for transfer.
+- **Summary:** a model trained in one region gets ~85% fine and ~90% group accuracy in another, about 9 points below training locally. A small local label set is still worth it.
+
+**(b) Rotation threshold**
+
+Calibrated in Marchfeld (0.5), applied unchanged.
+
+| Pair set | n | Changed | AUC (centred) |
+|---|---|---|---|
+| Arable pairs | 8,035 | 72% | **0.973** (raw 0.965) |
+| Excluding any grass, fallow or forage pair | 5,848 | 92% | 0.959 |
+
+| Threshold | Precision | Recall | False-positive rate |
+|---|---|---|---|
+| 0.5, all pairs | 0.977 | 0.906 | 0.054 |
+| 0.5, no grass | 0.989 | 0.928 | 0.122 |
+
+- Best threshold in the target is 0.43, against 0.49 in Marchfeld.
+- Centred distance quantiles (p10/p50/p90): unchanged 0.07 / 0.14 / 0.38, changed 0.51 / 0.93 / 1.27. This is nearly identical to Marchfeld.
+- **The 0.5 rule is region-portable.**
+
+**(c) Practice detectors**
+
+Trained on Marchfeld 2023 + 2024 NDVI labels, tested on UA 2024.
+
+| Detector | Target prevalence | Marchfeld prevalence | AUC, transfer | AUC, UA own |
+|---|---|---|---|---|
+| Winter green after harvest | **0.74** | 0.36 | **0.997** | 0.997 |
+| Double crop (2 complete cycles, arable) | 0.117 | 0.087 | 0.813 | 0.894 |
+
+- Winter green, transfer: balanced accuracy 0.964, precision 0.998, recall 0.933.
+- Double crop, transfer: precision 0.285, recall 0.641.
+- **Winter cover is the most robust signal in this study:** no loss across years or regions.
+- Winter cover is twice as common in Upper Austria (74% vs 36% of harvested arable parcels). That plausibly reflects rainfed systems, nitrate/groundwater-protection areas and ÖPUL greening uptake, but this is unverified.
+- Double cropping transfers with a ~0.08 AUC loss and needs a local threshold.
+
+**Overall robustness ranking:**
+1. winter cover
+2. rotation (0.5 rule)
+3. crop group
+4. fine crop
+5. double crop
