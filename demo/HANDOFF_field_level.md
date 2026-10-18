@@ -38,6 +38,24 @@ Build **field-level insights** by fusing every data layer we can reach for a set
   - See `demo/analysis/parcels_years.py`.
 - `global-data/predictions/vectors/...`: model-predicted field boundaries (no crop). Use it to compare against declared boundaries (boundary disagreement, unregistered fields, splits and merges).
 
+**1b. EuroCrops** (Schneider et al. 2023, Zenodo 10118572 / doi 10.5281/zenodo.6868143, **CC-BY-4.0**).
+
+*What it is:* a harmonized EU crop-parcel dataset using the same HCAT taxonomy as FTW. It covers many more member states, but mostly **one declaration year per country/region** (e.g. DE-Brandenburg 2023, AT 2021, DK 2019, FR, NL, SI, …). Check the Zenodo record for the current file list and years.
+
+*Already in the repo:*
+- `apps/backend/scripts/ingest_eurocrops.py`: columns `EC_hcat_n`, `EC_trans_n`, a per-country year column, `--bbox` clip, writes to the `fields` table or exports GeoJSON.
+- Committed sample: `apps/backend/data/eurocrops_de_bb_2023_sample.geojson`.
+
+*Uses:*
+- **Extends coverage beyond FTW's multi-year countries.** It adds new regions for cross-region transfer of the embedding detectors and the phenology metrics; the Brandenburg sample is a ready third region.
+- **Cross-checks FTW harmonized labels** where both cover the same country and year: label agreement and geometry IoU.
+- **Seeds geogent's `fields` table** so the backend routes can run against real parcels: zonal stats, seasonal index, field memory/cubes, `field_embedding_profile`.
+
+*Caveats:*
+- Single-year snapshots, so no rotation history from EuroCrops alone. Pair it with TESSERA multi-year embeddings to infer history.
+- Whole-region files are large: download once, clip with `--bbox`, keep raw files out of git.
+- Confirm the Zenodo host is reachable through the proxy.
+
 **2. TESSERA v1.1 annual 128-d embeddings, 10 m, 2017–2025.**
 - Source: anonymous Icechunk `s3://tessera-embeddings/v1.1/dclimate.icechunk`, us-west-2.
 - Read with the reader above, using the backend venv (`uv sync --all-groups` installs icechunk/xarray/zarr).
@@ -83,7 +101,12 @@ On a 403, report the blocked host; do not work around it.
 
 ## Analyses to run (prioritise; each needs a validation or control)
 
-Pick 2–3 study windows of ~50 km²: Marchfeld (lon 16.54–16.66, lat 48.22–48.29), Traun-Enns plateau (lon 14.38–14.50, lat 48.12–48.19), plus one non-Austrian FTW country for contrast. Per field and year, build a feature table, then:
+Pick 2–3 study windows of ~50 km²:
+- Marchfeld (lon 16.54–16.66, lat 48.22–48.29)
+- Traun-Enns plateau (lon 14.38–14.50, lat 48.12–48.19)
+- one non-Austrian region for contrast: the EuroCrops DE-Brandenburg 2023 clip around the committed sample, or an FTW country with multi-year labels
+
+Where FTW and EuroCrops overlap (same country and year), add **label and geometry agreement** to analysis 6. Per field and year, build a feature table, then:
 
 1. **Crop history and rotation profile (7 years):**
    - declared sequence, embedding-based rotation flags, rotation diversity
@@ -104,7 +127,7 @@ Pick 2–3 study windows of ~50 km²: Marchfeld (lon 16.54–16.66, lat 48.22–
    - field-vs-peer deviation in embedding space and in the NDVI trajectory, per year
    - candidate crop failure, resowing, abandonment, waterlogging
    - Validate against FTW "without harvest" classes, or against a held-out manual check of NDVI curves.
-6. **Boundary quality:** FTW predicted vs declared polygons (IoU, splits, merges, unregistered fields). This matters for every field-level metric.
+6. **Boundary and label quality:** FTW predicted vs declared polygons, and FTW harmonized vs EuroCrops labels where both exist, (IoU, splits, merges, unregistered fields). This matters for every field-level metric.
 7. **"MACI"** once defined: what it adds beyond NDVI/NDRE (correlation, unique variance, any agronomic signal).
 
 ## Deliverables
