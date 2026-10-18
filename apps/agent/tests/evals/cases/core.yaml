@@ -336,6 +336,34 @@
     max_steps: 12
   xfail: "new multi-step case; not yet validated against the default eval model"
 
+# --- TESSERA embeddings (ADR 0003) -------------------------------------------
+
+- id: field_embedding_year_over_year
+  input: "How has field 12 changed year to year since 2020? Did the crop rotate?"
+  configurable: {}
+  expect:
+    tools_required: [field_embedding_profile]
+    args:
+      field_embedding_profile:
+        field_id: {equals: 12}
+        start_year: {equals: 2020}
+    max_steps: 8
+    final_contains_any: ["rotation", "year"]
+  xfail: "new TESSERA case; not yet validated against the default eval model"
+
+- id: embedding_false_colour_field_2024
+  input: "Show me an embedding false-colour view of field 12 for 2024."
+  configurable: {}
+  expect:
+    tools_required: [embedding_layer, show_embedding_layer]
+    args:
+      embedding_layer:
+        field_id: {equals: 12}
+        year: {equals: 2024}
+    max_steps: 8
+    final_contains_any: ["embedding", "pca", "2024"]
+  xfail: "new TESSERA case; not yet validated against the default eval model"
+
 # --- routing: travel-time matrix ---------------------------------------------
 
 - id: travel_time_matrix_three_cities

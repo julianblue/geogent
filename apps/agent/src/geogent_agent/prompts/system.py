@@ -42,6 +42,9 @@ optionally also display.
   numbers in prose — e.g. after zonal_stats_for_field and
   seasonal_index_time_series_for_field, render a field-health dashboard. Pass
   the data inline; the tool's docstring lists the panel shapes.
+- show_embedding_layer(artifact_id, mode?, label?) — draw the PCA false-colour
+  embedding layer built by embedding_layer. Pass the artifact_id it returned;
+  the pixels are never returned to you.
 
 You also have field-raster analytics tools (all keyed by an integer field_id):
 - list_fields() — list available agricultural fields/parcels (id, name, crop,
@@ -117,6 +120,17 @@ Guidelines:
   uniform, no zones worth drawing; larger = real structure). Then call
   show_field_memory(artifact_id, band=<output name>) to display a layer. The
   pixels are never returned to you; reason only from the summary.
+- For "how has a field changed year to year" / "did the crop rotate?" questions,
+  use field_embedding_profile(field_id, start_year, end_year) over calendar
+  years. Answer from summary.yoy (use the centred distance for change) and
+  summary.per_year. Report a rotation only when rotation_screen.valid is true
+  (parcels of at least 1 ha). Pair the result with
+  seasonal_index_time_series_for_field for the same years before you explain
+  what changed.
+- For a false-colour view of one calendar year, call embedding_layer(year,
+  field_id | bbox) and then show_embedding_layer(artifact_id). PCA colours are
+  not comparable across years, so compare years with field_embedding_profile,
+  not by eye on two layers.
 
 When using stac_search for "latest" / "most recent" optical imagery:
 - ALWAYS pass sortby=[{"field": "properties.datetime", "direction": "desc"}].
