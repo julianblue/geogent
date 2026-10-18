@@ -114,6 +114,19 @@ async def test_service_errors_map_to_http_codes(
         ("embedding-layers", {"year": 2016, "field_id": 1}),
         ("embedding-layers", {"year": 2024, "bbox": [16.1, 48.0, 16.0, 48.1]}),  # west > east
         ("embedding-layers", {"year": 2024, "geometry_wkt": "not wkt"}),
+        # geometry_wkt bounds get the same lon/lat check as bbox
+        (
+            "embedding-layers",
+            {
+                "year": 2024,
+                "geometry_wkt": "POLYGON((600000 5300000,600100 5300000,600100 5300100,600000 5300000))",
+            },
+        ),  # UTM metres, not degrees
+        (
+            "embedding-layers",
+            {"year": 2024, "geometry_wkt": "POLYGON((16 91,16.1 91,16.1 92,16 91))"},
+        ),
+        ("embedding-layers", {"year": 2024, "geometry_wkt": "POINT(16.3 48.1)"}),  # no extent
         ("embedding-layers", {**_LAYER, "mode": "umap"}),
         ("embedding-layers", {**_LAYER, "pad_m": 5000}),
     ],
@@ -175,6 +188,9 @@ def test_get_tessera_reader_is_503_when_icechunk_missing(monkeypatch: pytest.Mon
 
 
 def test_get_tessera_reader_builds_a_cached_reader(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Stub the install check: this test is about the cache, and must not need the
+    # optional `embeddings` dependency group.
+    monkeypatch.setattr(tessera, "ensure_available", lambda: None)
     monkeypatch.setattr(embeddings_routes, "_reader", None)
     first = embeddings_routes.get_tessera_reader()
     assert isinstance(first, tessera.IcechunkTesseraReader)  # lazy: no network on construct

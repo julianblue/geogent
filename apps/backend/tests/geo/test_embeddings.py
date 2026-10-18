@@ -144,6 +144,13 @@ def test_pca_rgb_handles_degenerate_inputs() -> None:
     empty_rgb, empty_valid, _ = emb.pca_rgb(np.full((DIM, 3, 3), np.nan, dtype=np.float32))
     assert not empty_valid.any() and (empty_rgb == 0).all()
 
+    # a single valid pixel is valid data: mid-grey, never the 0 nodata value
+    lone = np.full((DIM, 4, 4), np.nan, dtype=np.float32)
+    lone[:, 2, 1] = 1.0
+    lone_rgb, lone_valid, lone_ratio = emb.pca_rgb(lone)
+    assert lone_valid.sum() == 1 and (lone_rgb[:, 2, 1] == 128).all()
+    assert (lone_rgb[:, ~lone_valid] == 0).all() and lone_ratio.sum() == 0
+
     two_band = np.random.default_rng(0).normal(size=(2, 10, 10)).astype(np.float32)
     rgb2, valid2, ratio2 = emb.pca_rgb(two_band)
     assert valid2.all() and ratio2[2] == 0 and (rgb2[2] == 128).all()

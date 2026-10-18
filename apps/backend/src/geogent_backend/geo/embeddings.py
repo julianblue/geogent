@@ -145,6 +145,7 @@ def pca_rgb(emb: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     flat_valid = valid.reshape(-1)
     n = int(flat_valid.sum())
     if n < 2:
+        out[:, flat_valid] = 128  # a lone valid pixel has no contrast, but must not read as nodata
         return out.reshape(3, h, w), valid, ratio
 
     x = np.ascontiguousarray(emb.reshape(n_band, -1)[:, flat_valid].T, dtype=np.float32)

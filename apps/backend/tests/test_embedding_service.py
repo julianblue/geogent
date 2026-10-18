@@ -7,11 +7,14 @@ repository, session factory and artifact store for in-memory fakes.
 
 import io
 import json
+import math
+import threading
 import time
 from contextlib import asynccontextmanager
 
 import numpy as np
 import pytest
+from affine import Affine
 from fastapi import BackgroundTasks
 from rasterio.io import MemoryFile
 
@@ -23,7 +26,7 @@ from geogent_backend.schemas.embedding import EmbeddingLayerRecipe, FieldEmbeddi
 from geogent_backend.services import embedding_service as svc
 from geogent_backend.services.artifact_service import AOITooLargeError
 from geogent_backend.services.raster_service import FieldNotFoundError
-from tests.tessera_fakes import DIM, FakeReader, field_geometry_4326, planted_window, unit
+from tests.tessera_fakes import DIM, X0, Y0, FakeReader, field_geometry_4326, planted_window, unit
 
 YEARS = [2020, 2021, 2022]
 # 2020 and 2021 grow crop A, 2022 crop B; every year carries its own big global offset.
@@ -229,6 +232,7 @@ class FakeRepo:
         self.row = existing
         self.reset_calls: list[str] = []
         self.created: list[tuple] = []
+        self.hashed: list[tuple[str, dict]] = []  # (recipe_hash, stored recipe)
         self.results: list[tuple] = []
         self.errors: list[str] = []
         self.statuses: list[str] = []
@@ -244,6 +248,7 @@ class FakeRepo:
             id=artifact_id, kind=kind, recipe_hash=h, status="pending", recipe=recipe, owner=owner
         )
         self.created.append((artifact_id, kind))
+        self.hashed.append((h, recipe))
         return self.row
 
     async def reset_failed(self, artifact_id):  # noqa: ANN001, ANN202
@@ -353,6 +358,64 @@ async def test_create_rejects_oversized_and_cross_zone_windows(field_geom: None)
     assert not repo.created
 
 
+async def test_pixel_cap_counts_the_projected_utm_window(field_geom: None) -> None:
+    # Thin sliver near the 18 E edge of zone 33N: meridians converge there, so the
+    # enclosing UTM rectangle is ~4x the lon/lat rectangle's pixel count.
+    bbox = (17.90, 47.0, 17.902, 47.1)
+    naive = math.ceil(0.002 * 111_320 * math.cos(math.radians(47.05)) / 10) * math.ceil(
+        0.1 * 110_540 / 10
+    )
+    rows, cols = tessera.estimate_window_shape(bbox)
+    assert naive < 30_000 < rows * cols  # passes a lon/lat-rectangle check, fails the real one
+
+    repo = FakeRepo()
+    s = _service(repo, tessera_layer_max_pixels=30_000)
+    with pytest.raises(AOITooLargeError, match="pixel-years"):
+        await s.create_embedding_layer(
+            EmbeddingLayerRecipe(year=2021, bbox=bbox), BackgroundTasks()
+        )
+    assert not repo.created
+    # the same sliver on the zone's central meridian is within budget
+    ok = (15.0, 47.0, 15.002, 47.1)
+    assert math.prod(tessera.estimate_window_shape(ok)) < 30_000
+    await s.create_embedding_layer(EmbeddingLayerRecipe(year=2021, bbox=ok), BackgroundTasks())
+    assert len(repo.created) == 1
+
+
+def test_window_estimate_bounds_what_the_reader_reads() -> None:
+    crs = tessera.zone_crs("33N")
+    assert crs.to_epsg() == 32633 and tessera.zone_crs("56S").to_epsg() == 32756
+    bbox = tessera.expand_bbox_m(_bounds_of(field_geometry_4326()), 0)
+    aff = Affine(10.0, 0.0, X0 - 1003.0, 0.0, -10.0, Y0 + 1007.0)  # off-grid origin
+    rows, cols, _ = tessera.bbox_to_window(bbox, crs, aff, 500, 500)
+    est_rows, est_cols = tessera.estimate_window_shape(bbox)
+    assert rows.stop - rows.start <= est_rows and cols.stop - cols.start <= est_cols
+
+
+def _bounds_of(geom: dict) -> tuple[float, float, float, float]:
+    xs = [p[0] for p in geom["coordinates"][0]]
+    ys = [p[1] for p in geom["coordinates"][0]]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+async def test_store_identity_is_server_side_and_part_of_the_cache_key(field_geom: None) -> None:
+    async def make(settings: dict, **recipe: object) -> tuple[str, dict]:
+        repo = FakeRepo()
+        await _service(repo, **settings).create_field_embeddings(
+            _recipe(**recipe), BackgroundTasks()
+        )
+        return repo.hashed[0]
+
+    base = await make({})
+    # the caller cannot choose the cache key through store_version ...
+    assert await make({}, store_version="attacker-chosen") == base
+    # ... while repointing the configured store does change it
+    assert (await make({"tessera_prefix": "v2/other.icechunk"}))[0] != base[0]
+    assert (await make({"tessera_bucket": "elsewhere"}))[0] != base[0]
+    assert (await make({"tessera_branch": "next"}))[0] != base[0]
+    assert base[1]["store_version"] == "s3://tessera-embeddings/v1.1/dclimate.icechunk@main"
+
+
 # --------------------------------------------------------------------------- jobs
 
 
@@ -369,8 +432,10 @@ def job_env(monkeypatch: pytest.MonkeyPatch, field_geom: None):  # noqa: ANN201
 
     monkeypatch.setattr(db_session, "SessionLocal", fake_session)
     monkeypatch.setattr(svc, "ArtifactRepository", lambda session: repo)
-    monkeypatch.setattr(svc, "_limiter", None)
-    return repo
+    monkeypatch.setattr(svc, "_read_pool", None)
+    yield repo
+    if svc._read_pool is not None:
+        svc._read_pool.shutdown(wait=False, cancel_futures=True)
 
 
 async def test_field_embeddings_job_stores_payload_with_no_assets(job_env: FakeRepo) -> None:
@@ -453,6 +518,38 @@ async def test_slow_read_times_out_into_a_failed_row(job_env: FakeRepo) -> None:
     s._reader = Slow(planted_window(YEARS, _CROPS, _OFFSETS))
     await s._build_field_embeddings("abc", _recipe())
     assert "timed out" in job_env.errors[0]
+
+
+async def test_timed_out_reads_keep_their_slot_until_the_thread_ends(job_env: FakeRepo) -> None:
+    """A deadline frees the caller, not the worker: with one slot, the next read must
+    wait for the abandoned one instead of running alongside it."""
+    lock = threading.Lock()
+    state = {"active": 0, "peak": 0, "ran": 0}
+
+    def read(seconds: float) -> None:
+        with lock:
+            state["active"] += 1
+            state["ran"] += 1
+            state["peak"] = max(state["peak"], state["active"])
+        time.sleep(seconds)
+        with lock:
+            state["active"] -= 1
+
+    s = _service(job_env, tessera_max_concurrent_reads=1, tessera_timeout_seconds=0.05)
+    with pytest.raises(TimeoutError):
+        await s._offload(read, 0.4)  # abandoned at 0.05 s, thread still sleeping
+    assert state["active"] == 1
+
+    # queued behind the stuck read; its own deadline expires while it waits, so it
+    # is cancelled in the queue and never starts
+    with pytest.raises(TimeoutError):
+        await s._offload(read, 0.0)
+    assert state["ran"] == 1
+
+    # a patient caller runs only once the stuck thread is done
+    s._settings = Settings(tessera_max_concurrent_reads=1, tessera_timeout_seconds=5.0)
+    await s._offload(read, 0.0)
+    assert state["peak"] == 1 and state["ran"] == 2 and state["active"] == 0
 
 
 def test_new_kinds_exist() -> None:

@@ -107,6 +107,32 @@ def expand_bbox_m(bbox_wgs84: BBox, metres: float) -> BBox:
     )
 
 
+def zone_crs(group: str) -> CRS:
+    """WGS84 / UTM CRS of a zone group name (``'33N'`` -> EPSG:32633, ``'56S'`` -> 32756)."""
+    return CRS.from_epsg((32600 if group.endswith("N") else 32700) + int(group[:2]))
+
+
+def _projected_bounds(bbox_wgs84: BBox, crs: CRS) -> tuple[float, float, float, float]:
+    """``(xmin, ymin, xmax, ymax)`` of a lon/lat bbox in ``crs``. The edges are
+    densified: a lon/lat rectangle is not a UTM rectangle (meridians converge), so
+    its enclosing UTM rectangle is larger than the lon/lat extent suggests."""
+    west, south, east, north = bbox_wgs84
+    return transform_bounds("EPSG:4326", crs, west, south, east, north, 21)
+
+
+def estimate_window_shape(bbox_wgs84: BBox, resolution_m: float = RESOLUTION_M) -> tuple[int, int]:
+    """Upper bound on the ``(rows, cols)`` that :func:`bbox_to_window` reads for ``bbox_wgs84``.
+
+    Same projection as the reader, so it sees the enclosing UTM rectangle the reader
+    actually fetches; the group's grid origin is not known without opening the store, so
+    each side gets the one extra pixel the snap-out can add. Cheap (no store access)."""
+    xmin, ymin, xmax, ymax = _projected_bounds(bbox_wgs84, zone_crs(bbox_zone_group(bbox_wgs84)))
+    cap = 1e12  # a non-finite projection (polar edge cases) reads as "enormous"
+    cols = math.ceil(min((xmax - xmin) / resolution_m, cap) if math.isfinite(xmax - xmin) else cap)
+    rows = math.ceil(min((ymax - ymin) / resolution_m, cap) if math.isfinite(ymax - ymin) else cap)
+    return rows + 1, cols + 1
+
+
 def bbox_to_window(
     bbox_wgs84: BBox, crs: CRS, group_affine: Affine, n_rows: int, n_cols: int
 ) -> tuple[slice, slice, Affine]:
@@ -114,9 +140,7 @@ def bbox_to_window(
 
     The window is snapped OUT to the 10 m grid and clipped to the group extent.
     ``group_affine`` has a pixel-corner origin and is north-up (``e < 0``)."""
-    west, south, east, north = bbox_wgs84
-    # densify the edges: a lon/lat rectangle is not a UTM rectangle
-    xmin, ymin, xmax, ymax = transform_bounds("EPSG:4326", crs, west, south, east, north, 21)
+    xmin, ymin, xmax, ymax = _projected_bounds(bbox_wgs84, crs)
     aff = group_affine
     col0 = max(0, math.floor((xmin - aff.c) / aff.a))
     col1 = min(n_cols, math.ceil((xmax - aff.c) / aff.a))

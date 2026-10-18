@@ -7,8 +7,9 @@ artifact store — with three differences:
 
 - a cached row that **failed** is reset and re-dispatched (a transient store
   error must not poison the recipe hash forever);
-- store reads are bounded by an anyio ``CapacityLimiter`` (``fail_after`` cannot
-  cancel a thread, so the limiter is what actually caps in-flight reads); and
+- store reads run on a dedicated bounded thread pool (``fail_after`` cannot cancel a
+  thread, so the pool's worker count — held until the read really ends — is what
+  caps in-flight reads, however many callers have timed out); and
 - the two builders (:func:`build_field_embeddings`, :func:`build_embedding_layer`)
   are plain sync functions over a :class:`TesseraReader`, so they are tested with
   a fake reader and no DB, network or event loop.
@@ -16,9 +17,11 @@ artifact store — with three differences:
 
 from __future__ import annotations
 
+import asyncio
 import io
 import logging
 import math
+from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
 import anyio
@@ -28,7 +31,7 @@ from geoalchemy2.shape import to_shape
 from rasterio.crs import CRS
 from rasterio.warp import transform_bounds, transform_geom
 from shapely import wkt
-from shapely.geometry import box, mapping, shape
+from shapely.geometry import mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from geogent_backend.config import Settings, get_settings
@@ -56,7 +59,6 @@ from geogent_backend.services.artifact_service import (
     _ASSET_MEDIA_TYPE,
     AOITooLargeError,
     _asset_url,
-    _estimate_pixels,
     recipe_hash,
 )
 from geogent_backend.services.raster_service import FieldNotFoundError
@@ -70,15 +72,19 @@ LAYER_KEY = "pca_rgb.tif"
 ROTATION_MIN_AREA_HA = 1.0
 _STRETCH = "p2–p98 per component; valid 1..255; 0=nodata"
 
-_limiter: anyio.CapacityLimiter | None = None
+_read_pool: ThreadPoolExecutor | None = None
 
 
-def _read_limiter(tokens: int) -> anyio.CapacityLimiter:
-    """Process-wide cap on concurrent store reads (created lazily, inside the loop)."""
-    global _limiter
-    if _limiter is None:
-        _limiter = anyio.CapacityLimiter(max(1, tokens))
-    return _limiter
+def _read_executor(workers: int) -> ThreadPoolExecutor:
+    """Process-wide pool whose size is the cap on concurrent store reads.
+
+    A worker is occupied until its read returns, so a caller that gave up (deadline)
+    does not free a slot while its thread is still running; further reads queue
+    behind it instead of piling more threads onto a stuck store."""
+    global _read_pool
+    if _read_pool is None:
+        _read_pool = ThreadPoolExecutor(max_workers=max(1, workers), thread_name_prefix="tessera")
+    return _read_pool
 
 
 def _finite(x: float) -> float | None:
@@ -286,11 +292,25 @@ class EmbeddingService:
 
     # -- create ------------------------------------------------------------
 
+    def _store_identity(self) -> str:
+        """What the reader will actually open, from settings (never from the caller)."""
+        s = self._settings
+        return f"s3://{s.tessera_bucket}/{s.tessera_prefix}@{s.tessera_branch}"
+
+    def _pin_store(self, recipe):  # noqa: ANN001, ANN202
+        """Overwrite the caller's ``store_version`` with the configured store, so the
+        recipe hash (the cache key) changes when the store does — and a client cannot
+        pick a key that serves an artifact built from a different store."""
+        return recipe.model_copy(update={"store_version": self._store_identity()})
+
     def _guard_pixels(self, bbox: BBox, n_years: int) -> None:
         """422 before dispatch: the window must be a single zone and fit the budget
-        (each pixel-year is 128 float32 = 512 B in memory)."""
-        tessera.bbox_zone_group(bbox)
-        pixels = _estimate_pixels(mapping(box(*bbox)), tessera.RESOLUTION_M) * n_years
+        (each pixel-year is 128 float32 = 512 B in memory). The budget is counted on
+        the projected UTM window the reader fetches, not the lon/lat rectangle: a thin
+        rectangle far from its zone's central meridian is tilted, and its enclosing
+        UTM rectangle is much bigger."""
+        rows, cols = tessera.estimate_window_shape(bbox)  # also checks the single zone
+        pixels = rows * cols * n_years
         if pixels > self._settings.tessera_layer_max_pixels:
             raise AOITooLargeError(
                 f"Window is ~{pixels:,} pixel-years at {tessera.RESOLUTION_M:g} m "
@@ -323,6 +343,7 @@ class EmbeddingService:
         )
 
     async def _create_or_reuse(self, recipe, kind, background_tasks, job):  # noqa: ANN001, ANN202
+        recipe = self._pin_store(recipe)
         h = recipe_hash(recipe)
         existing = await self._repo.get_by_recipe(self._owner, h)
         if existing is not None:
@@ -347,15 +368,13 @@ class EmbeddingService:
     # -- background jobs ---------------------------------------------------
 
     async def _offload(self, fn, *args):  # noqa: ANN001, ANN202
-        """Run a blocking build on a worker thread, bounded in two ways: the
-        limiter caps concurrent reads, and ``fail_after`` stops *waiting* after the
-        deadline (it cannot kill the thread — the limiter token is held until the
-        read really ends, which is what keeps stuck reads from piling up)."""
-        limiter = _read_limiter(self._settings.tessera_max_concurrent_reads)
+        """Run a blocking build on the bounded read pool. ``fail_after`` only stops
+        *waiting* after the deadline: it cannot kill the thread, and the pool slot
+        stays taken until the read really ends. A job still queued at the deadline is
+        cancelled and never starts."""
+        pool = _read_executor(self._settings.tessera_max_concurrent_reads)
         with anyio.fail_after(self._settings.tessera_timeout_seconds):
-            return await anyio.to_thread.run_sync(
-                fn, *args, limiter=limiter, abandon_on_cancel=True
-            )
+            return await asyncio.get_running_loop().run_in_executor(pool, fn, *args)
 
     async def _fail(self, repo: ArtifactRepository, artifact_id: str, exc: BaseException) -> None:
         if isinstance(exc, FieldNotFoundError | tessera.TesseraNoDataError):

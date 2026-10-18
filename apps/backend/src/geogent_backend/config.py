@@ -75,7 +75,8 @@ class Settings(BaseSettings):
 
     # --- TESSERA yearly embeddings (ADR 0003) --------------------------------
     # Read anonymously from the public Icechunk store on AWS Open Data. The
-    # store version is part of every recipe, so bumping the prefix busts caches.
+    # bucket/prefix/branch are folded into every recipe hash server-side, so
+    # pointing at another store busts caches.
     tessera_enabled: bool = Field(
         default=True,
         description="Kill switch: when false the embedding routes answer 503.",

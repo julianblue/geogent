@@ -10,6 +10,8 @@ Two recipe kinds join ``temporal_features`` in the artifacts registry:
 
 Both carry ``store_version`` so pointing the reader at a new store release busts
 the content-addressed cache, exactly as ``recipe_version`` does for a math change.
+It is informational on the wire: the service overwrites it with the configured
+store (bucket/prefix/branch) before hashing, so a caller cannot choose the cache key.
 """
 
 from __future__ import annotations
@@ -36,6 +38,12 @@ def _check_year(year: int, label: str) -> None:
         raise ValueError(
             f"{label} {year} is outside the TESSERA range {s.tessera_min_year}-{s.tessera_max_year}"
         )
+
+
+def _check_wgs84_bounds(west: float, south: float, east: float, north: float, label: str) -> None:
+    """Finite, ordered lon/lat degrees (NaN fails every comparison, so it is rejected)."""
+    if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
+        raise ValueError(f"{label} must be (west, south, east, north) in lon/lat degrees")
 
 
 class FieldEmbeddingsRecipe(BaseModel):
@@ -93,9 +101,7 @@ class EmbeddingLayerRecipe(BaseModel):
         if sum(provided) != 1:
             raise ValueError("provide exactly one of field_id, geometry_wkt, bbox")
         if self.bbox is not None:
-            west, south, east, north = self.bbox
-            if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
-                raise ValueError("bbox must be (west, south, east, north) in lon/lat degrees")
+            _check_wgs84_bounds(*self.bbox, "bbox")
         if self.geometry_wkt is not None:
             try:
                 geom = wkt.loads(self.geometry_wkt)
@@ -103,6 +109,10 @@ class EmbeddingLayerRecipe(BaseModel):
                 raise ValueError(f"geometry_wkt is not valid WKT: {exc}") from exc
             if geom.is_empty:
                 raise ValueError("geometry_wkt is empty")
+            # The window is read from the geometry's bounds, so they must be lon/lat too
+            # (e.g. UTM metres pasted in would otherwise pick a nonsense zone).
+            west, south, east, north = geom.bounds
+            _check_wgs84_bounds(west, south, east, north, "geometry_wkt bounds")
         return self
 
 
