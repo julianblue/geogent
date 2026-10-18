@@ -77,9 +77,12 @@ async def field_embedding_profile(field_id: int, start_year: int, end_year: int)
 
     - ``per_year`` → pixel count, masked fraction, mean norm, heterogeneity, and
       ``usable`` (false when the field has fewer than 5 pixels in that year).
-    - ``yoy`` → cosine distance between consecutive years, both ``centred``
-      (field-mean removed, so the field's own change stands out) and ``raw``.
-      A large centred distance suggests a real change in the land cover, such as
+    - ``yoy`` → cosine distance between consecutive usable years (unusable years
+      are omitted), both ``centred`` (the surrounding area's per-year mean
+      removed, cancelling the global year-to-year offset so the field's own
+      change stands out) and ``raw``. Distances range 0–2 and are relative:
+      compare years within the field rather than against a fixed cut-off. A
+      large centred distance suggests a real change in the land cover, such as
       a crop rotation.
     - ``rotation_screen`` → ``valid`` and ``min_area_ha``.
 
