@@ -26,9 +26,13 @@ backend**, with four findings that change the plan:
   license anywhere in the store, mirror, registry, or API. Keep derived
   products private per user until Cambridge/dClimate answer.
 
-The cross-source question (do per-field embeddings classify crop/regime, detect
-rotation, survive FTW block splitting?) is the **join experiment**, recorded at
-the end of "PoC results".
+- **Field-level embeddings carry strong crop/season signal** (join
+  experiment, ~350 parcels, one AOI): a standardised logistic regression on
+  field means reaches **~0.85 season-regime and ~0.81 crop (HCAT) accuracy**
+  vs ~0.29 / 0.23 majority; year-centred embedding distance flags crop
+  rotation at **AUC 0.90**; per-pixel clustering splits merged FTW blocks into
+  declared parcels at **median ARI 0.82** (spatial baseline 0.13). Rare classes
+  (grassland, spring crops) and within-regime crop swaps are the weak spots.
 
 ## Context
 
@@ -66,16 +70,16 @@ FTW against declared, and derives a draft HCAT -> season-regime mapping
 
 ### TESSERA store (confirmed schema)
 
-| Property | Value |
-|---|---|
-| Stack that worked | icechunk 2.3.0, zarr 3.4.1, xarray 2026.9.0, numcodecs 0.17.0 + pcodec 1.0.4, rasterio 1.5.2, pyproj 3.8.0, Python 3.12 |
-| Group `33N` dims | time=9 (2017-2025), northing=933888, easting=67584, band=128, month=12 |
-| Chunking | 256 x 256 x 128 x 1 yr, in 2048² shards, zstd; **~8.1 MB per chunk-year** (embeddings + scales) |
-| Grid | 10 m north-up, `spatial:transform` `[10,0,163840,0,-10,9338880]`, corner origin, coords are pixel centres, northing descending, origin chunk-aligned |
-| Root attrs | `geoemb:*` — model `geotessera.org/model/1.1`, `optical_min_obs=15`, per-pixel-scale int8 |
-| Group attrs | `years_complete`, `runs` (per-year provenance) |
-| Repo | branch `main` + `zone-XXN-YEAR` tags; latest snapshot 2026-09-14 |
-| Year convention | `time_convention="calendar_year"`, `time_bnds` Jan 1 -> Jan 1, S2 input 01-01..12-31 |
+| Property          | Value                                                                                                                                                |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack that worked | icechunk 2.3.0, zarr 3.4.1, xarray 2026.9.0, numcodecs 0.17.0 + pcodec 1.0.4, rasterio 1.5.2, pyproj 3.8.0, Python 3.12                              |
+| Group `33N` dims  | time=9 (2017-2025), northing=933888, easting=67584, band=128, month=12                                                                               |
+| Chunking          | 256 x 256 x 128 x 1 yr, in 2048² shards, zstd; **~8.1 MB per chunk-year** (embeddings + scales)                                                      |
+| Grid              | 10 m north-up, `spatial:transform` `[10,0,163840,0,-10,9338880]`, corner origin, coords are pixel centres, northing descending, origin chunk-aligned |
+| Root attrs        | `geoemb:*` — model `geotessera.org/model/1.1`, `optical_min_obs=15`, per-pixel-scale int8                                                            |
+| Group attrs       | `years_complete`, `runs` (per-year provenance)                                                                                                       |
+| Repo              | branch `main` + `zone-XXN-YEAR` tags; latest snapshot 2026-09-14                                                                                     |
+| Year convention   | `time_convention="calendar_year"`, `time_bnds` Jan 1 -> Jan 1, S2 input 01-01..12-31                                                                 |
 
 Unfilled preallocated years read as fill values — **check `years_complete`**
 before trusting a year. 2017 is thinner (Sentinel-2B ramp-up).
@@ -85,15 +89,15 @@ before trusting a year. 2017 is thinner (Sentinel-2B ramp-up).
 Measured from this container via the agent proxy — **not** us-west-2, so
 absolute numbers are pessimistic for a co-located backend.
 
-| Step | Time / size |
-|---|---|
-| Repo open | ~0.8 s |
-| Group open | ~1.6-1.9 s |
-| Embeddings + scales, 1 year, cold | 1.2-1.7 s (~34 MB, 4 chunks) |
-| Per chunk, cold | ~0.3-0.4 s (a single 8 MB chunk ~0.8 s) |
-| Same year, repeat | ~0.9 s (**no cache; re-downloads**) |
-| 5 years threaded, cold | 2.4 s (~170 MB) |
-| 5 years threaded, repeat | 1.2 s |
+| Step                                   | Time / size                                               |
+| -------------------------------------- | --------------------------------------------------------- |
+| Repo open                              | ~0.8 s                                                    |
+| Group open                             | ~1.6-1.9 s                                                |
+| Embeddings + scales, 1 year, cold      | 1.2-1.7 s (~34 MB, 4 chunks)                              |
+| Per chunk, cold                        | ~0.3-0.4 s (a single 8 MB chunk ~0.8 s)                   |
+| Same year, repeat                      | ~0.9 s (**no cache; re-downloads**)                       |
+| 5 years threaded, cold                 | 2.4 s (~170 MB)                                           |
+| 5 years threaded, repeat               | 1.2 s                                                     |
 | QC arrays (obs counts, month coverage) | only ~0.7 MB/yr but 1.4-2 s latency (many small requests) |
 
 QC arrays are cheap in bytes but expensive in round-trips: **read them on
@@ -101,16 +105,16 @@ demand, not by default.**
 
 ### TESSERA data quality (Marchfeld AOI, cropland)
 
-| Check | Result |
-|---|---|
-| NaN / +inf scales | 0% |
-| Scale range | 0.008-0.095 |
-| Dequantised value range | -12..+9 |
-| `s2_obs_count` / year | 45-85 (2025 median 75 vs 59-66 other years) |
-| S1 asc/desc obs | 56-115 every year — the store docs claim zero S1 for a 33N tile in 2022-24, so **S1 coverage varies by location** |
-| Months covered | all 12 |
-| YoY per-pixel cosine distance | median ~0.26; mean 0.24-0.26 every pair; min ~0.003; p99 0.42-0.45 |
-| PCA(3), 2024 | variance ratios 0.23 / 0.15 / 0.09 |
+| Check                         | Result                                                                                                            |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| NaN / +inf scales             | 0%                                                                                                                |
+| Scale range                   | 0.008-0.095                                                                                                       |
+| Dequantised value range       | -12..+9                                                                                                           |
+| `s2_obs_count` / year         | 45-85 (2025 median 75 vs 59-66 other years)                                                                       |
+| S1 asc/desc obs               | 56-115 every year — the store docs claim zero S1 for a 33N tile in 2022-24, so **S1 coverage varies by location** |
+| Months covered                | all 12                                                                                                            |
+| YoY per-pixel cosine distance | median ~0.26; mean 0.24-0.26 every pair; min ~0.003; p99 0.42-0.45                                                |
+| PCA(3), 2024                  | variance ratios 0.23 / 0.15 / 0.09                                                                                |
 
 Use `scales` NaN as the coverage mask. The large, uniform YoY distance is
 consistent with crop rotation on cropland (the join experiment tests this).
@@ -125,10 +129,10 @@ Tyrol/Salzburg, so this is not a corner case for the target region.
 
 ### Field sources — endpoints
 
-| Source | Location | Notes |
-|---|---|---|
-| Declared (harmonized) | `https://data.source.coop/ftw/harmonized-field-data/at/year=<Y>/at-<Y>.parquet`, Y = 2015-2025 (`at/latest/at.parquet` = 2025) | 2.94M fields, 851 MB (latest). CC-BY-4.0 (Agrarmarkt Austria; EuroCrops V2 for 2015-2017). License is in `collection.json` + file metadata, mostly **absent from per-year item JSON**. CRS EPSG:31287 for 2021-2025, **2015 is EPSG:3035 -> read CRS per file** |
-| FTW predicted | `https://data.source.coop/ftw/global-data/predictions/vectors/alpha/results-by-admin-conf/admin:country_code=AT/Austria.parquet` | One 298 MB file, 900,048 polygons, 2024 + 2025 together (year via `determination:datetime`). CC-BY-4.0. CRS absent -> OGC:CRS84. The `tge-labs/...` prefix 404s. `features/` holds STAC metadata, COGs, and a Zarr of S2 planting/harvest composites |
+| Source                | Location                                                                                                                         | Notes                                                                                                                                                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Declared (harmonized) | `https://data.source.coop/ftw/harmonized-field-data/at/year=<Y>/at-<Y>.parquet`, Y = 2015-2025 (`at/latest/at.parquet` = 2025)   | 2.94M fields, 851 MB (latest). CC-BY-4.0 (Agrarmarkt Austria; EuroCrops V2 for 2015-2017). License is in `collection.json` + file metadata, mostly **absent from per-year item JSON**. CRS EPSG:31287 for 2021-2025, **2015 is EPSG:3035 -> read CRS per file** |
+| FTW predicted         | `https://data.source.coop/ftw/global-data/predictions/vectors/alpha/results-by-admin-conf/admin:country_code=AT/Austria.parquet` | One 298 MB file, 900,048 polygons, 2024 + 2025 together (year via `determination:datetime`). CC-BY-4.0. CRS absent -> OGC:CRS84. The `tge-labs/...` prefix 404s. `features/` holds STAC metadata, COGs, and a Zarr of S2 planting/harvest composites            |
 
 Declared columns: `id`, `crop:code`, `crop:name` (DE), `hcat:code`
 (10-digit), `hcat:name`, `hcat:name_en`, `metrics:area`,
@@ -138,11 +142,11 @@ partition is the edition.
 
 ### Field sources — query cost
 
-| Query | Time | GETs | Bytes | Rows in AOI |
-|---|---|---|---|---|
-| Declared 2025 | 4.5 s | 11 | 3.4 MB | 371 fields |
-| Declared 2024 | 4.6 s | 12 | 5.6 MB | 354 fields |
-| FTW (both years) | 5.8 s | 26 | 29 MB | 108 (2024) / 106 (2025) |
+| Query            | Time  | GETs | Bytes  | Rows in AOI             |
+| ---------------- | ----- | ---- | ------ | ----------------------- |
+| Declared 2025    | 4.5 s | 11   | 3.4 MB | 371 fields              |
+| Declared 2024    | 4.6 s | 12   | 5.6 MB | 354 fields              |
+| FTW (both years) | 5.8 s | 26   | 29 MB  | 108 (2024) / 106 (2025) |
 
 Footer/metadata alone is ~2 s + 0.3-0.6 MB per file. FTW has a bbox covering
 column but only 14 x 65k-row groups (6 of 14 touched); **without the
@@ -152,17 +156,17 @@ geometry.
 
 ### Field sources — what is in the AOI (declared 2025, 371 fields, 1,148 ha)
 
-| Crop | Fields |
-|---|---|
-| Fallow | 87 |
-| Field vegetables | 61 |
-| Winter soft wheat | 53 |
-| Durum | 34 |
-| Potatoes | 25 |
-| Soy | 19 |
-| Maize | 18 |
-| Sugar beet | 13 |
-| Alfalfa | 9 |
+| Crop              | Fields |
+| ----------------- | ------ |
+| Fallow            | 87     |
+| Field vegetables  | 61     |
+| Winter soft wheat | 53     |
+| Durum             | 34     |
+| Potatoes          | 25     |
+| Soy               | 19     |
+| Maize             | 18     |
+| Sugar beet        | 13     |
+| Alfalfa           | 9      |
 
 Draft regimes (HCAT longest-prefix): winter_cereal 105, spring_crop 7,
 summer_crop 79, grassland_permanent 13, fallow 87, other 80. Declared field
@@ -172,27 +176,78 @@ season-ambiguous. FTW confidence is 95-99 everywhere — non-discriminative here
 
 ### FTW vs. declared (same AOI)
 
-| Metric | 2024 | 2025 |
-|---|---|---|
-| Declared parcels matched 1:1 (IoU > 0.5) | 15% | 12% |
-| ... area-weighted | 23% | 19% |
-| Declared parcels mostly inside one FTW polygon | ~72% (~95% by area) | same |
-| Declared area covered by the FTW union | ~88% | ~88% |
-| FTW polygons matched by some declared field (IoU > 0.5) | 40-49% | 40-49% |
-| Median declared parcels per FTW polygon | 2 | 2 |
-| FTW label purity (majority declared label) | 57-59% HCAT, 66-70% regime | |
+| Metric                                                  | 2024                       | 2025   |
+| ------------------------------------------------------- | -------------------------- | ------ |
+| Declared parcels matched 1:1 (IoU > 0.5)                | 15%                        | 12%    |
+| ... area-weighted                                       | 23%                        | 19%    |
+| Declared parcels mostly inside one FTW polygon          | ~72% (~95% by area)        | same   |
+| Declared area covered by the FTW union                  | ~88%                       | ~88%   |
+| FTW polygons matched by some declared field (IoU > 0.5) | 40-49%                     | 40-49% |
+| Median declared parcels per FTW polygon                 | 2                          | 2      |
+| FTW label purity (majority declared label)              | 57-59% HCAT, 66-70% regime |        |
 
 FTW median polygon is 6 ha and 40% exceed 10 ha, vs. a declared median of
-2.4 ha. FTW **under-segments**: it finds the right *extent* (88% coverage, 95%
+2.4 ha. FTW **under-segments**: it finds the right _extent_ (88% coverage, 95%
 of declared area sits inside one polygon) but merges neighbouring parcels with
 different crops, so a polygon is a 57-70% pure label unit at best.
 
-### Join experiment — TODO (orchestrator)
+### Join experiment (`poc_field_embeddings.py`)
 
-> Placeholder. Fill from `poc_field_embeddings.py`: per-field mean embeddings
-> -> crop/regime classification accuracy and separability, rotation detection
-> from YoY distance vs. declared history, and FTW block splitting (per-pixel /
-> sub-polygon clustering inside FTW polygons vs. declared parcels).
+Declared parcels rasterised onto the TESSERA grid (10 m inward buffer, fallback
+unbuffered; < 5 interior px dropped), per-field per-year mean/std embedding.
+Kept 350/371 (2025) and 345/354 (2024); dropped parcels median ~0.17 ha.
+**Field-artifact compute: ~1.6 ms/field** (695 fields × 5 years in 1.15 s,
+in-memory) — the store read dominates, not the reduction.
+
+**Separability** (fields as units, 5-fold × 5 repeats, ± ~0.01):
+
+| Task (year)                     | Majority | kNN (k=5, cos) | LogReg acc | LogReg macro-F1 |
+| ------------------------------- | -------- | -------------- | ---------- | --------------- |
+| Season regime, 6 classes (2025) | 0.29     | 0.82           | **0.855**  | 0.67            |
+| Season regime, 6 classes (2024) | 0.28     | 0.82           | 0.84       | 0.75            |
+| HCAT, 8 classes + rest (2025)   | 0.23     | 0.73           | **0.81**   | 0.83            |
+| HCAT, 8 classes + rest (2024)   | 0.23     | 0.75           | 0.80       | 0.81            |
+
+- Per-class F1 (regime): winter_cereal 0.96, summer_crop 0.90, fallow 0.82,
+  other 0.81; grassland_permanent 0.37–0.49 and spring_crop 0.20–0.60 are
+  **not** separable at n = 7–12. HCAT: maize 0.95, potatoes 0.90, sugar beet
+  0.89, soft wheat 0.84 vs durum 0.86.
+- Spatially blocked CV (1 km blocks) costs 2–5 points (HCAT 0.81 → 0.76) —
+  mild farm/spatial leakage; soft-vs-durum may partly be management signal.
+- Fields < 0.5 ha: regime accuracy 0.73–0.77 vs 0.87–0.88 for larger fields.
+  Pixel-level logreg with field-grouped folds + field vote ≈ field-level.
+
+**Temporal transfer** (train 2024 → test 2025, logreg): regime 0.79, HCAT 0.75
+raw; **subtracting each year's AOI-mean embedding recovers most of the gap**
+(0.83 / 0.78). Not parcel memorisation: on parcels whose crop changed
+(n = 176) HCAT accuracy is 0.75–0.82.
+
+**Rotation detection** (275 parcels matched 2024↔2025 at IoU > 0.8): cosine
+distance as a "crop changed" score has AUC **0.84** raw, **0.90 year-centred**,
+0.95 for parcels ≥ 1 ha; regime change AUC 0.86 / 0.91. Median distance:
+same crop 0.14, same regime/different crop 0.19, regime changed 0.27.
+Within-regime swaps are barely detectable (AUC 0.61–0.71, n = 15). Raw distance
+carries a large global year offset (~0.24 median for every year pair) → always
+centre per year.
+
+**FTW block splitting** (50 FTW polygons with ≥ 2 declared parcels): k-means on
+pixel embeddings, k by silhouette. Median ARI vs declared parcels **0.82 vs 0.13**
+for spatial k-means with the same k; embeddings win in 90% of polygons
+(Wilcoxon p ≈ 3e-11). ARI 1.0 for 2-parcel blocks, 0.83 for 3–4, 0.66 for ≥ 5;
+74% of polygons ARI ≥ 0.5. Silhouette-k equals the true count only 38% of the
+time (±1: 62%) and under-counts ≥ 5 parcels. Blocks whose parcels share one
+crop still split (ARI 0.95, n = 6) → embeddings see management/phenology, not
+just crop.
+
+**Unsupervised archetypes** (k = 6 on 2025 field means): regime purity 0.70
+(standardised) vs 0.29 majority, NMI 0.47; fallow and winter cereal separate,
+summer crops and "other" blend.
+
+**Caveats:** one ~3×3 km AOI, ~350 fields, rare classes n = 7–12, declared-label
+noise, fallow is a catch-all, 2024/2025 are largely the same parcels, no
+hyper-parameter tuning (C = 0.1). Treat the numbers as "signal is clearly
+there", not as expected production accuracy; P3 must re-validate on several
+regions with spatially blocked CV.
 
 ## Design implications (for ADR 0003)
 
@@ -208,14 +263,14 @@ different crops, so a polygon is a 57-70% pure label unit at best.
    its own nominal zone without a merge-quality problem.
 4. **Declared (harmonized) data is ground truth.** Where it exists it is both
    the field boundary and the training label (D5).
-5. **FTW polygons are field *extents*, not label units.** Use them where no
+5. **FTW polygons are field _extents_, not label units.** Use them where no
    declarations exist, but infer crop/regime **per pixel or per sub-polygon
    cluster** inside the polygon, and never assign one label to a whole FTW
    polygon. Their confidence score does not help.
 6. **Year = calendar year** => winter crops straddle two embeddings. Winter
    cereals sown in autumn Y-1 are captured partly in the Y-1 embedding (sowing
    and emergence) and partly in Y (growth, harvest); the Y embedding is the
-   "harvest year" signal but also carries the autumn sowing of the *next* crop.
+   "harvest year" signal but also carries the autumn sowing of the _next_ crop.
    Declared labels are keyed by harvest year, so expect label/embedding
    misalignment for winter crops. In the **southern hemisphere** the calendar
    year cuts the main growing season in half, so season-regime claims there
@@ -252,7 +307,7 @@ different crops, so a polygon is a 57-70% pure label unit at best.
   (maize variants, vegetables) are ambiguous and need review before it is used
   as a training target.
 - **Other countries**: only `at` was probed; other harmonized collections have
-  different licenses (CC0, CC-BY-SA, DL-DE-*, CC-BY-NC for `br_conab`).
+  different licenses (CC0, CC-BY-SA, DL-DE-\*, CC-BY-NC for `br_conab`).
 
 ## What I could and couldn't run in this container
 
@@ -266,10 +321,10 @@ different crops, so a polygon is a 57-70% pure label unit at best.
 
 ## Dependencies the spike used (none added to the backend)
 
-| Script | Packages |
-|---|---|
-| `poc_tessera_read.py` | icechunk 2.3.0, zarr 3.4.1, xarray 2026.9.0, numcodecs 0.17.0 (+ pcodec 1.0.4), numpy, pyproj 3.8.0, rasterio 1.5.2, shapely |
-| `poc_field_sources.py` | duckdb 1.5.6, pyarrow 26.0.0, geopandas 1.2.0, shapely 2.2.0, pyproj 3.8.0, pandas 3.0.6 |
+| Script                 | Packages                                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `poc_tessera_read.py`  | icechunk 2.3.0, zarr 3.4.1, xarray 2026.9.0, numcodecs 0.17.0 (+ pcodec 1.0.4), numpy, pyproj 3.8.0, rasterio 1.5.2, shapely |
+| `poc_field_sources.py` | duckdb 1.5.6, pyarrow 26.0.0, geopandas 1.2.0, shapely 2.2.0, pyproj 3.8.0, pandas 3.0.6                                     |
 
 ## Out of scope
 
@@ -304,5 +359,7 @@ uv pip install --python /tmp/venv-fields/bin/python \
 Writes normalised GeoParquet for both sources. Data is anonymous HTTPS on
 `data.source.coop`; TLS verification is explicitly on.
 
-The join experiment (`poc_field_embeddings.py`, if present) consumes the
-outputs of both scripts; see its docstring for its venv and arguments.
+The join experiment (`poc_field_embeddings.py`) consumes the outputs of both
+scripts (`aoi_embeddings.npz` + the declared/FTW GeoParquet) and additionally
+needs `scikit-learn`; see its docstring for venv and arguments (~3 min on 4
+cores).

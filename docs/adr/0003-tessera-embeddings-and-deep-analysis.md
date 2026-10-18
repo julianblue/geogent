@@ -19,9 +19,9 @@ multi-year, regional questions. Two linked bets, one rule:
 
 Chosen path, in phases (see "Phasing"):
 
-1. **P0 — spikes (this branch):** read latency, field sources, and the license
-   question are answered; field-embedding quality is pending (see "Spike
-   results").
+1. **P0 — spikes (this branch):** read latency, field sources, and
+   field-embedding quality are answered (≈0.85 season-regime / 0.81 crop
+   accuracy on one AOI); the license question is open (see "Spike results").
 2. **P1 — provider + field-embedding artifact + PCA layer** on the EuroCrops
    fields we already have.
 3. **P2 — similarity / clustering + a scatter widget.**
@@ -208,13 +208,13 @@ Per `apps/agent/CLAUDE.md`: backend endpoint first, then a thin tool via
 
 Data tools (return facts/handles, answer from these):
 
-| Tool                      | Returns                                                         |
-| ------------------------- | --------------------------------------------------------------- |
-| `field_embedding_profile` | per-year distance, neighbour-label crop, heterogeneity, handle  |
+| Tool                      | Returns                                                              |
+| ------------------------- | -------------------------------------------------------------------- |
+| `field_embedding_profile` | per-year distance, neighbour-label crop, heterogeneity, handle       |
 | `embedding_layer`         | artifact handle + render URL, `kind` = `pca`/`similarity`/`clusters` |
-| `find_similar_fields`     | ranked field ids + distances (`#60`)                            |
-| `cluster_fields`          | cluster summary + **medoid field ids** to feed the S2 series tool |
-| `classify_fields`         | per-field label + confidence, from labelled fields              |
+| `find_similar_fields`     | ranked field ids + distances (`#60`)                                 |
+| `cluster_fields`          | cluster summary + **medoid field ids** to feed the S2 series tool    |
+| `classify_fields`         | per-field label + confidence, from labelled fields                   |
 
 Multi-year or regional calls are **jobs** (submit → poll → result, same shape as
 `seasonal_index_time_series_for_field`).
@@ -282,14 +282,14 @@ I/O by handle only.
 
 ## Alternatives considered
 
-| Option                                        | Verdict                                                                                                                                             |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Switch the whole agent to `deepagents`        | **Rejected** — breaks top-level `interrupt()`/frontend-action invariants and eval replay (D8). Used as a worker only.                              |
-| 128-band COG + client-side compute            | **Rejected** — ~40× the payload of a 3-band layer, and violates "agent/UI manipulate handles, not pixels"; also repeats work per viewer.  |
-| TiTiler now                                   | **Deferred** — same reasoning as ADR 0002 D4; revisit when layers exceed field scale.                                                              |
-| `geotessera` library as the data layer        | **Consider, not default.** Convenient, but pulls heavy deps (`geopandas`, `obstore`, `aiohttp`) and its NPY tile path is deprecated; direct `icechunk` + `xarray` (D2) is preferred. Re-evaluate if the Icechunk path proves fragile. |
-| pgvector from day one                         | **Deferred** (D3) — adds an extension + index lifecycle before we know the search scale.                                                           |
-| Inline all recipes in `SYSTEM_PROMPT`         | **Rejected** (D7) — token and tool-selection cost on every turn.                                                                                   |
+| Option                                 | Verdict                                                                                                                                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Switch the whole agent to `deepagents` | **Rejected** — breaks top-level `interrupt()`/frontend-action invariants and eval replay (D8). Used as a worker only.                                                                                                                 |
+| 128-band COG + client-side compute     | **Rejected** — ~40× the payload of a 3-band layer, and violates "agent/UI manipulate handles, not pixels"; also repeats work per viewer.                                                                                              |
+| TiTiler now                            | **Deferred** — same reasoning as ADR 0002 D4; revisit when layers exceed field scale.                                                                                                                                                 |
+| `geotessera` library as the data layer | **Consider, not default.** Convenient, but pulls heavy deps (`geopandas`, `obstore`, `aiohttp`) and its NPY tile path is deprecated; direct `icechunk` + `xarray` (D2) is preferred. Re-evaluate if the Icechunk path proves fragile. |
+| pgvector from day one                  | **Deferred** (D3) — adds an extension + index lifecycle before we know the search scale.                                                                                                                                              |
+| Inline all recipes in `SYSTEM_PROMPT`  | **Rejected** (D7) — token and tool-selection cost on every turn.                                                                                                                                                                      |
 
 ## What it means for each app
 
@@ -323,21 +323,21 @@ fail-closed rules in `apps/ui/CLAUDE.md`. Add a per-endpoint
 
 ## Phasing
 
-| Phase | Scope                                                                                         | Exit criterion                                            |
-| ----- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| P0    | Spikes on this branch: read latency, field-embedding sanity, license check, scale sizing      | "Spike results" filled; D2/D3 numbers confirmed or revised |
-| P1    | `geo/tessera.py`, field-embedding artifact, PCA(3) RGB layer on EuroCrops fields              | PCA layer renders for a Brandenburg viewport              |
-| P2    | `find_similar_fields`, `cluster_fields`, similarity/cluster layers, scatter widget            | Medoid → S2 NDVI curve flow works end to end              |
-| P3    | FTW ingest (D5), `classify_fields`, season-regime map                                          | Cross-year/-border label transfer meets spike accuracy bar |
-| P4    | `load_playbook` + first playbooks (dossier, label transfer, archetypes)                       | `SYSTEM_PROMPT` size flat while tool count grows          |
-| P5    | LangChain 1.x upgrade, `deepagents` worker, `start_deep_analysis`/`show_analysis_report`      | One regional report produced from data tools only         |
+| Phase | Scope                                                                                    | Exit criterion                                             |
+| ----- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| P0    | Spikes on this branch: read latency, field-embedding sanity, license check, scale sizing | "Spike results" filled; D2/D3 numbers confirmed or revised |
+| P1    | `geo/tessera.py`, field-embedding artifact, PCA(3) RGB layer on EuroCrops fields         | PCA layer renders for a Brandenburg viewport               |
+| P2    | `find_similar_fields`, `cluster_fields`, similarity/cluster layers, scatter widget       | Medoid → S2 NDVI curve flow works end to end               |
+| P3    | FTW ingest (D5), `classify_fields`, season-regime map                                    | Cross-year/-border label transfer meets spike accuracy bar |
+| P4    | `load_playbook` + first playbooks (dossier, label transfer, archetypes)                  | `SYSTEM_PROMPT` size flat while tool count grows           |
+| P5    | LangChain 1.x upgrade, `deepagents` worker, `start_deep_analysis`/`show_analysis_report` | One regional report produced from data tools only          |
 
 ## Risks & open questions
 
 - **Read latency.** Measured from a non-us-west-2 sandbox: ~1.2–1.7 s and
   ~34 MB per year for a 10 km² AOI (~8 MB per chunk-year), no cache on repeat.
   Mitigate: run in us-west-2, parallelise years, chunk cache, async jobs for
-  >1 field, artifact cache (D3). Throughput/memory at county scale: open.
+  > 1 field, artifact cache (D3). Throughput/memory at county scale: open.
 - **UTM zone seams.** Zone overlap is ≤ 1 tile, so reading from the nominal
   zone is safe, but a bbox crossing a boundary must be split per zone (D2).
   Austria's 12°E boundary cuts Tyrol/Salzburg; the fraction of affected fields
@@ -390,25 +390,50 @@ Full write-up, tables, and run commands:
 Latencies were measured from a sandbox via proxy, **not** us-west-2. Headline:
 the read path works; declared data is cheap and rich; FTW polygons are coarse.
 
+| Question                                                                              | Result                                                                                                            |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Cold read latency, single field, us-west-2 → backend                                  | Not measured from us-west-2; sandbox: ~0.3–0.4 s/chunk, 1.2–1.7 s/year, +~2.4 s repo/group open                   |
+| Warm read latency / bytes per field                                                   | No cache: repeat ~0.9 s (re-download); ~8 MB per chunk-year (~34 MB for 10 km²); QC arrays +0.7 MB/yr but 1.4–2 s |
+| Throughput (fields/min, county scale); peak memory @ 1,000 fields                     | Open (5 years threaded: 2.4 s cold)                                                                               |
+| Effective "year" window                                                               | **Calendar year** (Jan 1 → Jan 1), confirmed                                                                      |
+| Fraction of fields straddling UTM zone seams                                          | Open; overlap ≤ 1 tile, nominal zone safe; 12°E cuts Tyrol/Salzburg                                               |
+| Label-transfer accuracy (held-out year; cross-border FTW); season-regime separability | Regime 0.855 / HCAT 0.81 within-year; 2024→2025 transfer 0.83 / 0.78 year-centred; cross-border open              |
+| Brute-force cosine latency @ 10k / 100k / 1M; pgvector needed?                        | Open                                                                                                              |
+| PCA(3) layer render check on a Brandenburg viewport                                   | `pca_2024.tif` produced for Marchfeld; UI render check open                                                       |
+| License: CC-BY-SA vs CC0                                                              | **Unresolved**; none in store/registry/API; bucket not requester-pays; ask Cambridge/dClimate                     |
+| `geotessera` vs direct `icechunk`+`xarray`                                            | Direct path works cleanly (D2); `geotessera` not benchmarked                                                      |
 
-| Question                                                         | Result |
-| ---------------------------------------------------------------- | ------ |
-| Cold read latency, single field, us-west-2 → backend             | Not measured from us-west-2; sandbox: ~0.3–0.4 s/chunk, 1.2–1.7 s/year, +~2.4 s repo/group open |
-| Warm read latency / bytes per field                              | No cache: repeat ~0.9 s (re-download); ~8 MB per chunk-year (~34 MB for 10 km²); QC arrays +0.7 MB/yr but 1.4–2 s |
-| Throughput (fields/min, county scale); peak memory @ 1,000 fields | Open (5 years threaded: 2.4 s cold) |
-| Effective "year" window                                          | **Calendar year** (Jan 1 → Jan 1), confirmed |
-| Fraction of fields straddling UTM zone seams                     | Open; overlap ≤ 1 tile, nominal zone safe; 12°E cuts Tyrol/Salzburg |
-| Label-transfer accuracy (held-out year; cross-border FTW); season-regime separability | Pending join experiment |
-| Brute-force cosine latency @ 10k / 100k / 1M; pgvector needed?   | Open |
-| PCA(3) layer render check on a Brandenburg viewport              | `pca_2024.tif` produced for Marchfeld; UI render check open |
-| License: CC-BY-SA vs CC0                                         | **Unresolved**; none in store/registry/API; bucket not requester-pays; ask Cambridge/dClimate |
-| `geotessera` vs direct `icechunk`+`xarray`                       | Direct path works cleanly (D2); `geotessera` not benchmarked |
+### Join experiment (`poc_field_embeddings.py`)
 
-### Join experiment — TODO (orchestrator)
+One AOI, ~350 declared parcels — signal check, not production accuracy.
 
-> Placeholder: per-field embeddings → crop/regime classification, rotation
-> detection, FTW block splitting (`poc_field_embeddings.py`). Fill from
-> `DECISION.md`; resolve the "Pending" row above; revisit D3/D5 and P3.
+- **Classification:** standardised logreg on field means: season regime 0.855,
+  HCAT 0.81 (majority 0.29 / 0.23); 1 km spatially blocked CV costs 2–5 points.
+  Grassland and spring crops (n = 7–12) are not separable; fields < 0.5 ha are
+  ~10 points worse.
+- **Rotation:** year-centred cosine distance detects "crop changed" at AUC 0.90
+  (0.95 for ≥ 1 ha) but not within-regime swaps (AUC ≤ 0.71).
+- **FTW block splitting:** pixel-embedding k-means recovers declared parcels at
+  median ARI 0.82 vs 0.13 for a spatial baseline; silhouette under-counts
+  blocks with ≥ 5 parcels.
+
+Consequences for the decisions:
+
+- **D3:** the field artifact stores mean + std + pixel count per (field, year)
+  and an **AOI/year-mean for centring**. Every distance or cross-year model
+  uses centred embeddings, because raw distance carries a ~0.24 global year
+  offset. The 1.6 ms/field reduction is negligible next to the store read.
+- **D5 / P3:** `classify_fields` is a per-region standardised logistic
+  regression trained on declared parcels. It returns class probabilities and
+  flags classes with < 15 training fields as unreliable.
+- **D6:** `field_embedding_profile` reports a centred YoY distance as a
+  "probably rotated" screen; that framing is only valid for parcels ≥ 1 ha.
+- **New boundary-QA tool:** add a boundary-QA tool to D6. It runs per-pixel
+  k-means inside a polygon and returns a "split suggested" flag plus candidate
+  sub-polygons. Silhouette is used as the signal; the chosen k is not trusted
+  for large blocks.
+- **P3 exit criterion:** re-validate on ≥ 3 regions with spatially blocked CV
+  before the agent is allowed to state crop predictions as facts.
 
 ## References
 
