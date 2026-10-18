@@ -73,6 +73,37 @@ class Settings(BaseSettings):
         "at cube_resolution_m — the in-process path is field/farm-scale only.",
     )
 
+    # --- TESSERA yearly embeddings (ADR 0003) --------------------------------
+    # Read anonymously from the public Icechunk store on AWS Open Data. The
+    # store version is part of every recipe, so bumping the prefix busts caches.
+    tessera_enabled: bool = Field(
+        default=True,
+        description="Kill switch: when false the embedding routes answer 503.",
+    )
+    tessera_bucket: str = Field(default="tessera-embeddings")
+    tessera_prefix: str = Field(default="v1.1/dclimate.icechunk")
+    tessera_region: str = Field(default="us-west-2")
+    tessera_branch: str = Field(default="main")
+    tessera_min_year: int = Field(default=2017, description="First year in the store.")
+    tessera_max_year: int = Field(default=2025, description="Latest year in the store.")
+    tessera_max_years: int = Field(
+        default=9, description="Cap on the number of years in one field_embeddings request."
+    )
+    tessera_timeout_seconds: float = Field(
+        default=120.0, description="Deadline for one blocking store read (per background job)."
+    )
+    tessera_layer_max_pixels: int = Field(
+        default=1_000_000,
+        description="Reject (422) embedding windows above this many 10 m pixels "
+        "(x years for field_embeddings) — each pixel-year is 512 B of float32.",
+    )
+    tessera_max_concurrent_reads: int = Field(
+        default=2, description="Store reads allowed in flight at once (worker-thread limiter)."
+    )
+    tessera_year_threads: int = Field(
+        default=4, description="Threads used to fetch the years of one window in parallel."
+    )
+
     # --- Routing / geocoding providers (#55) ---------------------------------
     # All pluggable + self-hostable via env. Defaults point at the public OSM
     # demo services; respect their usage policies and swap to a self-hosted

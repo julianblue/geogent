@@ -18,6 +18,7 @@ from uuid import uuid4
 import anyio
 from fastapi import BackgroundTasks
 from geoalchemy2.shape import to_shape
+from pydantic import BaseModel
 from shapely import wkt
 from shapely.geometry import box, mapping, shape
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,7 +69,7 @@ def _estimate_pixels(geom_4326: dict, resolution_m: float) -> int:
     return math.ceil(width_m / resolution_m) * math.ceil(height_m / resolution_m)
 
 
-def recipe_hash(recipe: TemporalFeaturesRecipe) -> str:
+def recipe_hash(recipe: BaseModel) -> str:
     """Stable content hash of a recipe. Canonical (sorted keys), version-aware
     (``recipe_version`` busts the cache on a math change)."""
     payload = recipe.model_dump(mode="json")
