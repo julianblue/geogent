@@ -19,8 +19,9 @@ multi-year, regional questions. Two linked bets, one rule:
 
 Chosen path, in phases (see "Phasing"):
 
-1. **P0 — spikes (this branch):** prove read latency, field-embedding quality,
-   and the license question (see "Spike results").
+1. **P0 — spikes (this branch):** read latency, field sources, and the license
+   question are answered; field-embedding quality is pending (see "Spike
+   results").
 2. **P1 — provider + field-embedding artifact + PCA layer** on the EuroCrops
    fields we already have.
 3. **P2 — similarity / clustering + a scatter widget.**
@@ -42,21 +43,26 @@ the interactive agent to `deepagents`.
   `s3://tessera-embeddings/v1.1/dclimate.icechunk` (us-west-2, anonymous
   access). Grouped by **UTM zone**; values are `int8` with a per-pixel
   `float32` scale (dequantise = `int8 × scale`). Chunks `256² × 128 × 1 yr`
-  (~8.4 MB). ~**66 TiB** total — never mirrored, always windowed reads.
+  (~8.1 MB measured). ~**66 TiB** total — never mirrored, always windowed reads.
+- **"Year" = calendar year** (confirmed: Jan 1 → Jan 1), so winter crops
+  straddle two embeddings (see Risks).
 - **Annual only.** There is **no intra-annual embedding**. "Season detection"
   therefore means **season-_regime_ classification** (winter cereal / spring
   crop / summer crop / double crop / grassland) from the annual vector — not
   phenological timing. Timing and the _why_ come from pairing with the existing
   S2 index series (`seasonal_index_time_series_for_field`, `field_memory_for_field`).
 - **License conflict (open question):** the data registry says **CC-BY-SA**, the
-  repo says **CC0**. Unresolved; blocks any redistribution of derived products
-  until settled (see Risks, Spike results).
+  repo says **CC0**. The spike found no license in the store metadata (and the
+  bucket is not requester-pays); only upstream can answer. Blocks any
+  redistribution of derived products until settled (see Risks, Spike results).
 
 ### Field data (the "what to attach embeddings to")
 
 - **FTW (Fields of the World):** harmonized national declarations as **fiboa
-  GeoParquet** on Source Cooperative (**per-collection licenses**), plus FTW
-  global **predicted boundaries** for 2024/2025 (CC-BY-4.0; "alpha" paths).
+  GeoParquet** on Source Cooperative (**per-collection licenses**; Austria is
+  CC-BY-4.0), plus FTW global **predicted boundaries** for 2024/2025
+  (CC-BY-4.0; "alpha" paths). Spike: declared = ground truth; predicted
+  polygons are coarse blocks (median 6 ha, ~2 declared parcels each).
 - **Already in the repo:** EuroCrops parcels in `models/field.py`
   (`crop`, `season`) loaded by `scripts/ingest_eurocrops.py` — i.e. **labelled
   training data** with no new ingest.
@@ -86,7 +92,8 @@ the interactive agent to `deepagents`.
 3. **Phenology archetypes** — cluster fields on embeddings, return **medoid**
    fields, feed their NDVI curves to the S2 series tool.
 4. **Label transfer** — train on labelled EuroCrops/declarations, classify
-   across years and borders onto FTW polygons.
+   across years and borders onto FTW extents (per pixel / sub-polygon cluster,
+   not one label per FTW polygon — D5).
 5. **Declaration / boundary QA** — fields whose embedding disagrees with their
    declared crop or whose interior is bimodal.
 6. **Similar-field search** (`#60`).
@@ -113,7 +120,13 @@ the `geo/` provider convention (typed error class, explicit timeouts from
 
 - open the Icechunk store read-only/anonymous via `icechunk` + `xarray` (lazy);
 - **UTM-zone selection** from the polygon; **polygon reprojection** into the
-  zone CRS; window the read to the polygon bbox (chunk-aligned);
+  zone CRS; window the read to the polygon bbox (chunk-aligned). A
+  **zone-crossing bbox is `NotImplementedError` in the spike; production must
+  split per nominal zone** (neighbouring zones overlap ≤ 1 tile, so the nominal
+  zone is safe);
+- run **in us-west-2**, **parallelise years**, add a **chunk cache** (icechunk
+  has none: repeats re-download), and check `years_complete` (unfilled years
+  read as fill);
 - **dequantise** (`int8 × scale`), **NaN/inf masking** (nodata, scale ≤ 0), and
   per-pixel **QC flags** (masked fraction, edge-of-zone);
 - `TesseraError` mapped to **502** (upstream) / **503** (unconfigured) in the
@@ -137,8 +150,10 @@ polygon-masked reduction and **cached** as a new `Artifact` kind (reuses
 artifact in object storage; only a compact `summary` (n_fields, year, dim,
 masked fraction) reaches the agent.
 
+- A "field" is a **declared parcel** where declarations exist; an FTW polygon
+  is only an **extent** (D5), so inference inside it is per pixel / sub-polygon.
 - _Deferred:_ **pgvector** — add only if **real-time similarity search across
-  large sets** is needed (spike will size this). Brute-force cosine over
+  large sets** is needed (still unsized; open). Brute-force cosine over
   tens of thousands of 128-d vectors in numpy is fine until then.
 - Embedding **dimension is configurable**, not hard-coded to 128 (TESSERA v2
   is expected to ship Matryoshka dims; see Risks).
@@ -164,8 +179,18 @@ ADR 0002 D4): small field-scale rasters are read whole by deck.gl-geotiff.
 FTW/fiboa collections are queried with **duckdb bbox pushdown** over GeoParquet
 and **clipped to the AOI before ingest** into PostGIS, mirroring
 `scripts/ingest_eurocrops.py` (a script / `ingest`-group dependency, not a
-request-path dependency). Rules:
+request-path dependency). Spike-confirmed: range reads cost ~4.5 s / 11 GETs /
+3.4 MB for 371 declared fields, but **only with the GeoParquet `bbox` covering
+predicate** (FTW without it reads ~8× more). Rules:
 
+- **Declared (harmonized) data is ground truth** — boundary _and_ training
+  label. **FTW predicted polygons are coarse blocks** (they under-segment:
+  ~12–15% 1:1 IoU>0.5 matches, label purity 57–70%): use them as field
+  _extents_ where no declarations exist, **never as crop-label units**.
+  Crop/regime inference is per pixel or per sub-polygon cluster inside them.
+- **DuckDB ≥ 1.5** (older returns BLOB geometry); **explicitly enable server
+  cert verification** (defaults false in 1.5.6). Read the CRS per file
+  (EPSG:31287, but 2015 is EPSG:3035; FTW has none → CRS84).
 - **License is recorded per collection** at ingest (column or source table);
   **non-commercial (NC) collections are excluded by default** and require an
   explicit opt-in flag.
@@ -309,26 +334,30 @@ fail-closed rules in `apps/ui/CLAUDE.md`. Add a per-endpoint
 
 ## Risks & open questions
 
-- **Cold latency from us-west-2.** First read of a zone/chunk set over the
-  public internet may dominate request time. Mitigate: async jobs for >1 field,
-  artifact cache (D3), chunk-aligned windows. Numbers: `TBD (spike)`.
-- **UTM zone seams.** Fields straddling a zone boundary have no single-zone
-  window; need per-zone reads + merge, or documented exclusion. `TBD (spike)`
-  on how common this is for target regions.
+- **Read latency.** Measured from a non-us-west-2 sandbox: ~1.2–1.7 s and
+  ~34 MB per year for a 10 km² AOI (~8 MB per chunk-year), no cache on repeat.
+  Mitigate: run in us-west-2, parallelise years, chunk cache, async jobs for
+  >1 field, artifact cache (D3). Throughput/memory at county scale: open.
+- **UTM zone seams.** Zone overlap is ≤ 1 tile, so reading from the nominal
+  zone is safe, but a bbox crossing a boundary must be split per zone (D2).
+  Austria's 12°E boundary cuts Tyrol/Salzburg; the fraction of affected fields
+  is not quantified (open).
 - **FTW "alpha" paths** can move or change schema; pin and snapshot (D5).
-- **"Year" window is undefined.** The annual embedding's temporal window is not
-  calendar-aligned for all hemispheres/crops (southern hemisphere, winter
-  crops spanning New Year). Must be confirmed from the TESSERA docs/spike
-  before season-regime claims are made; surface the assumed window in every
-  artifact `summary`.
+- **"Year" = calendar year (confirmed).** Winter crops straddle two embeddings:
+  autumn-sown cereals (sown Y-1) appear partly in the Y-1 and partly in the Y
+  embedding, and declared labels are keyed by harvest year. In the **southern
+  hemisphere** the calendar year splits the main season. Season-regime claims
+  must account for this; surface the assumed window in every artifact `summary`.
 - **v2 Matryoshka dims.** Make the embedding dimension a configurable,
   recorded-in-`recipe` parameter (D3) so truncated/larger variants don't
   invalidate the cache or schema.
 - **Interpretability.** An embedding distance is not an explanation. Always pair
   with S2 index curves or labelled neighbours (prompt rule, D6).
 - **License (CC-BY-SA vs CC0).** If SA applies, derived rasters/exports may need
-  share-alike and attribution; resolve with upstream before shipping any export
-  or public layer. Until resolved: private, per-user artifacts only.
+  share-alike and attribution. No license is stated in the store, mirror,
+  registry README, or APIs (dClimate Apache-2.0 and geotessera MIT cover code
+  only), so it must be asked of Cambridge/dClimate. Until resolved: private,
+  per-user artifacts only.
 - **FTW per-collection licenses** (some NC): enforced by D5 default-exclude;
   verify license propagates to anything we display or export.
 - **Cost/abuse.** Region-scale embedding jobs are expensive; enforce AOI /
@@ -355,26 +384,31 @@ fail-closed rules in `apps/ui/CLAUDE.md`. Add a per-endpoint
 
 ## Spike results
 
-> **TODO (orchestrator):** fill from the parallel P0 spikes. Keep to measured
-> facts; every `TBD (spike)` elsewhere in this ADR should resolve here or be
-> struck.
+Full write-up, tables, and run commands:
+[`apps/backend/spikes/tessera_embeddings/DECISION.md`](../../apps/backend/spikes/tessera_embeddings/DECISION.md)
+(`poc_tessera_read.py`, `poc_field_sources.py`; Marchfeld, Austria AOI, 10.4 km²).
+Latencies were measured from a sandbox via proxy, **not** us-west-2. Headline:
+the read path works; declared data is cheap and rich; FTW polygons are coarse.
 
-| Question                                                         | Result            |
-| ---------------------------------------------------------------- | ----------------- |
-| Cold read latency, single field (~10 ha), us-west-2 → backend    | TBD (spike)       |
-| Warm read latency / bytes transferred per field                  | TBD (spike)       |
-| Throughput: fields/min for a county-scale job (N workers)        | TBD (spike)       |
-| Peak memory for a 1,000-field reduction                          | TBD (spike)       |
-| Effective "year" window (calendar vs. other) per TESSERA docs    | TBD (spike)       |
-| Fraction of target-region fields straddling UTM zone seams       | TBD (spike)       |
-| Label-transfer accuracy: EuroCrops-trained, held-out year        | TBD (spike)       |
-| Label-transfer accuracy: cross-border (e.g. DE → PL/CZ) FTW      | TBD (spike)       |
-| Season-regime separability (silhouette / kNN purity)             | TBD (spike)       |
-| Brute-force cosine search latency @ 10k / 100k / 1M fields      | TBD (spike)       |
-| pgvector needed? (threshold from the row above)                  | TBD (spike)       |
-| PCA(3) layer render check on a Brandenburg viewport              | TBD (spike)       |
-| License: CC-BY-SA vs CC0 — upstream answer / link                | TBD (spike)       |
-| `geotessera` vs direct `icechunk`+`xarray`: dep weight, fragility | TBD (spike)       |
+
+| Question                                                         | Result |
+| ---------------------------------------------------------------- | ------ |
+| Cold read latency, single field, us-west-2 → backend             | Not measured from us-west-2; sandbox: ~0.3–0.4 s/chunk, 1.2–1.7 s/year, +~2.4 s repo/group open |
+| Warm read latency / bytes per field                              | No cache: repeat ~0.9 s (re-download); ~8 MB per chunk-year (~34 MB for 10 km²); QC arrays +0.7 MB/yr but 1.4–2 s |
+| Throughput (fields/min, county scale); peak memory @ 1,000 fields | Open (5 years threaded: 2.4 s cold) |
+| Effective "year" window                                          | **Calendar year** (Jan 1 → Jan 1), confirmed |
+| Fraction of fields straddling UTM zone seams                     | Open; overlap ≤ 1 tile, nominal zone safe; 12°E cuts Tyrol/Salzburg |
+| Label-transfer accuracy (held-out year; cross-border FTW); season-regime separability | Pending join experiment |
+| Brute-force cosine latency @ 10k / 100k / 1M; pgvector needed?   | Open |
+| PCA(3) layer render check on a Brandenburg viewport              | `pca_2024.tif` produced for Marchfeld; UI render check open |
+| License: CC-BY-SA vs CC0                                         | **Unresolved**; none in store/registry/API; bucket not requester-pays; ask Cambridge/dClimate |
+| `geotessera` vs direct `icechunk`+`xarray`                       | Direct path works cleanly (D2); `geotessera` not benchmarked |
+
+### Join experiment — TODO (orchestrator)
+
+> Placeholder: per-field embeddings → crop/regime classification, rotation
+> detection, FTW block splitting (`poc_field_embeddings.py`). Fill from
+> `DECISION.md`; resolve the "Pending" row above; revisit D3/D5 and P3.
 
 ## References
 
