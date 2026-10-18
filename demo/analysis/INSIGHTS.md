@@ -167,3 +167,21 @@ The embedding beats the hand-made NDVI green-up date (AUC 0.883) at separating c
 **Caveats:**
 - "Cover/catch" here means green over winter followed by a spring crop. Volunteer cereals or weedy stubble would land in the same class.
 - The labels depend on 2025 declarations, so they reflect what was declared, not what was observed.
+
+## 8. Cross-year transfer of the practice detectors (2023 ↔ 2024)
+
+Script: `xyear.py`. Labels are rebuilt from scratch for each year from that year's Sentinel-2 NDVI: 46 dates in 2023, 45 in 2024. The classifier is logistic regression on year-centred embeddings with balanced class weights, trained on one year and applied unchanged to the other.
+
+| Task | Train → test | AUC | Balanced accuracy | Precision | Recall |
+|---|---|---|---|---|---|
+| winter green after harvest | 2023 → 2024 | **0.995** | 0.951 | 0.802 | 0.995 |
+| winter green after harvest | 2024 → 2023 | **0.952** | 0.850 | 0.932 | 0.745 |
+| double crop (2 complete cycles) | 2023 → 2024 | 0.860 | 0.752 | 0.256 | 0.680 |
+| double crop (2 complete cycles) | 2024 → 2023 | 0.880 | 0.801 | 0.455 | 0.735 |
+
+- **Winter cover transfers almost losslessly.** The ranking holds across years, so it is deployable as a screening layer for any TESSERA year.
+- **Double cropping transfers with a drop:** AUC goes from 0.91 within-year to 0.86–0.88. Precision at the default threshold is poor because prevalence shifts between years.
+- **The prevalence shift itself:**
+  - Double crop: 13.1% in 2023 vs 8.2% in 2024.
+  - Winter green: 45% vs 28%.
+  - The shift could reflect real year differences (autumn moisture, sowing windows) or be an artefact of cloud-limited Nov–Dec observations in the NDVI labels. Not resolved here. For deployment, calibrate the threshold per year, e.g. on a small NDVI-labelled sample, or report a ranked probability rather than a yes/no.
